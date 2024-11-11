@@ -2,8 +2,10 @@
 // src/components/Capture.astro
 ---
 
-<video id="video" width="640" height="480" autoplay></video>
-    <canvas id="canvas" width="640" height="480"></canvas>
+<video id="video" width="640" height="480" autoplay style="display: none;"></video>
+<canvas id="canvas" width="640" height="480"></canvas>
+<button id="startButton" class="relative p-4 m-4 overflow-hidden rounded-md border border-indigo-600 text-indigo-600 shadow-2xl transition-all duration-200 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-indigo-600 before:duration-300 before:ease-out hover:text-white hover:shadow-indigo-600 hover:before:h-40 hover:before:w-40 hover:before:opacity-80">Start</button>
+<button id="stopButton" class="relative p-4 m-4 overflow-hidden rounded-md border border-indigo-600 text-indigo-600 shadow-2xl transition-all duration-200 before:absolute before:bottom-0 before:left-0 before:right-0 before:top-0 before:m-auto before:h-0 before:w-0 before:rounded-sm before:bg-indigo-600 before:duration-300 before:ease-out hover:text-white hover:shadow-indigo-600 hover:before:h-40 hover:before:w-40 hover:before:opacity-80">Stop</button>
 
     <!-- Include the compiled JavaScript -->
-    <script src="/src/scripts/eye-tracking.ts"></script>
+<script src="/src/scripts/eye-tracking.ts"></script>
