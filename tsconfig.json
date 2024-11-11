@@ -2,6 +2,12 @@
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     "jsx": "preserve",
-    "jsxImportSource": "solid-js"
-  }
+    "jsxImportSource": "solid-js",
+    "skipLibCheck": true,  // Keep this option to avoid type checking issues with external libs
+    "noImplicitAny": false  // Make sure implicit 'any' is allowed for our global cv object
+  },
+  "include": [
+    "src/**/*.ts",          // Include all TypeScript files in the 'src' folder
+    "src/opencv.d.ts"       // Include the opencv.d.ts file for the global cv variable declaration
+  ]
 }
