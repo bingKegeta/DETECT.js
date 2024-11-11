@@ -1,3 +1,8 @@
+// Extend the Window interface to include cvLoaded
+interface Window {
+  cvLoaded: boolean;
+}
+
 // Wait for OpenCV to be loaded before accessing `cv`
 if (window.cvLoaded) {
   let video = document.getElementById('video') as HTMLVideoElement;
@@ -14,7 +19,9 @@ if (window.cvLoaded) {
 
   function processVideo() {
     // Capture a frame from the video stream
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    if (context) {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
     let src = cv.imread(canvas);  // Read the current frame into OpenCV Mat
     let gray = new cv.Mat();
     cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY, 0); // Convert to grayscale for detection
