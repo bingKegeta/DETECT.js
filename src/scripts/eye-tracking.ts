@@ -10,6 +10,12 @@ const stopButton = document.getElementById('stopButton') as HTMLButtonElement;
 
 let camera: Camera | null = null;
 
+const LEFT_IRIS_CENTER = 468
+const LEFT_EYE_CORNER = 33
+const RIGHT_EYE_CORNER = 263
+const RIGHT_IRIS_CENTER = 473
+const NOSE_TIP = 4
+
 const faceMesh = new FaceMesh({
   locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
 });
@@ -20,6 +26,11 @@ faceMesh.setOptions({
   minDetectionConfidence: 0.5,
   minTrackingConfidence: 0.5,
 });
+
+// Function to get specific landmarks by indices
+function getLandmarks(landmarks: any[], indices: number[]): any[] {
+  return indices.map(index => landmarks[index]);
+}
 
 faceMesh.onResults((results) => {
   canvasCtx.save();
@@ -34,7 +45,15 @@ faceMesh.onResults((results) => {
       // drawConnectors(canvasCtx, landmarks, FaceMesh.FACEMESH_LEFT_EYEBROW, { color: '#30FF30' });
       // drawConnectors(canvasCtx, landmarks, FaceMesh.FACEMESH_FACE_OVAL, { color: '#E0E0E0' });
       // drawConnectors(canvasCtx, landmarks, FaceMesh.FACEMESH_LIPS, { color: '#E0E0E0' });
-      drawLandmarks(canvasCtx, landmarks, { color: '#FF0000', lineWidth: 1 });
+
+      // Get only the iris center landmarks using the getLandmarks function
+      const irisCenterLandmarks = getLandmarks(landmarks, [LEFT_IRIS_CENTER,RIGHT_IRIS_CENTER]);
+      drawLandmarks(canvasCtx, irisCenterLandmarks, { color: '#FF0000', lineWidth: 1 });
+      const eyeCornerLandmarks = getLandmarks(landmarks, [LEFT_EYE_CORNER,RIGHT_EYE_CORNER]);
+      drawLandmarks(canvasCtx, eyeCornerLandmarks, { color: '#FF0000', lineWidth: 1 });
+      const noseLandmarks = getLandmarks(landmarks, [NOSE_TIP]);
+      drawLandmarks(canvasCtx, noseLandmarks, { color: '#FF0000', lineWidth: 1 });
+
     }
   }
   canvasCtx.restore();
