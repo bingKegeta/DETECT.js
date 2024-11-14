@@ -33,9 +33,9 @@ function getLandmarks(landmarks: any[], indices: number[]): any[] {
 }
 
 faceMesh.onResults((results) => {
-  canvasCtx.save();
-  canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-  canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+  canvasCtx!.save();
+  canvasCtx!.clearRect(0, 0, canvasElement.width, canvasElement.height);
+  canvasCtx!.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
   if (results.multiFaceLandmarks) {
     for (const landmarks of results.multiFaceLandmarks) {
       // drawConnectors(canvasCtx, landmarks, FaceMesh.FACEMESH_TESSELATION, { color: '#C0C0C070', lineWidth: 1 });
@@ -56,7 +56,7 @@ faceMesh.onResults((results) => {
 
     }
   }
-  canvasCtx.restore();
+  canvasCtx!.restore();
 });
 
 startButton.addEventListener('click', () => {
@@ -76,6 +76,6 @@ stopButton.addEventListener('click', () => {
   if (camera) {
     camera.stop();
     camera = null;
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx!.clearRect(0, 0, canvasElement.width, canvasElement.height);
   }
 });
