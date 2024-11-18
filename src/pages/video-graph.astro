@@ -1,0 +1,110 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Capture from '../components/Capture.astro';
+---
+
+<Layout title="Video and Graph">
+  <div class="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center">
+    <!-- Page Title -->
+    <div class="text-center my-8">
+      <h1 class="text-4xl font-bold text-purple-400">Video Analysis and Real-Time Graphs</h1>
+      <p class="text-gray-400 mt-2 text-lg">
+        Analyze eye movements with live tracking or imported videos.
+      </p>
+    </div>
+
+    <!-- Content Section -->
+    <div class="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 w-full max-w-6xl px-4">
+      <!-- Video Section -->
+      <div class="flex-1 bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col items-center h-[500px]">
+        <h2 class="text-xl font-semibold text-purple-300 mb-4 text-center">Live Video Feed</h2>
+        <div class="w-full h-full flex items-center justify-center overflow-hidden">
+          <!-- Capture Component -->
+          <Capture />
+        </div>
+      </div>
+
+      <!-- Graph Section -->
+      <div class="flex-1 bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col items-center h-[500px]">
+        <h2 class="text-xl font-semibold text-purple-300 mb-4 text-center">Real-Time Graph</h2>
+        <div class="w-full h-full rounded-lg bg-gray-700 flex items-center justify-center">
+          <p class="text-gray-400">Graph will appear here</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls Section (Bottom Bar) -->
+    <div class="w-full max-w-6xl bg-gray-800 rounded-lg shadow-lg p-6 mt-8">
+      <h2 class="text-xl font-semibold text-purple-300 mb-4 text-center">Controls</h2>
+      <div class="flex flex-wrap justify-center gap-4">
+        <button id="startButton" class="bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700">
+          Start Tracking
+        </button>
+        <button id="stopButton" class="bg-gray-700 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+          Stop Tracking
+        </button>
+        <label for="video-upload" class="cursor-pointer bg-gray-700 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+          Import Video
+          <input id="video-upload" type="file" accept="video/*" class="hidden" />
+        </label>
+        <button class="bg-gray-700 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+          Export Graph
+        </button>
+        <button class="bg-gray-700 text-white py-2 px-4 rounded-md hover:bg-gray-600">
+          Export CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Automatically Start the Video -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const video = document.getElementById("video");
+      const startButton = document.getElementById("startButton");
+      const stopButton = document.getElementById("stopButton");
+      const videoUpload = document.getElementById("video-upload");
+
+      let stream = null;
+
+      // Function to start the webcam
+      const startVideo = () => {
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((videoStream) => {
+            stream = videoStream;
+            video.style.display = "block";
+            video.srcObject = stream;
+            video.play();
+          })
+          .catch((err) => console.error("Error accessing webcam: ", err));
+      };
+
+      // Function to stop the webcam
+      const stopVideo = () => {
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          stream = null;
+        }
+        video.style.display = "none";
+      };
+
+      // Function to import video
+      const importVideo = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          video.style.display = "block";
+          video.srcObject = null; // Stop any active stream
+          video.src = URL.createObjectURL(file);
+          video.load();
+          video.play();
+        }
+      };
+
+      // Attach event listeners to control buttons
+      startButton.addEventListener("click", startVideo);
+      stopButton.addEventListener("click", stopVideo);
+      videoUpload.addEventListener("change", importVideo);
+    });
+  </script>
+</Layout>
