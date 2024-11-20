@@ -1,22 +1,4 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Capture from '../components/Capture.astro';
+import DynamicChooser from '../components/DynamicChooser';
 ---
-
-<Layout title="Welcome to Astro.">
-	<main class="m-auto p-[1rem] w-[800px] max-w-full text-white">
-		<Capture />
-	</main>
-</Layout>
-
-<style>
-	main {
-		margin: auto;
-		padding: 1rem;
-		width: 800px;
-		max-width: calc(100% - 2rem);
-		color: white;
-		font-size: 20px;
-		line-height: 1.6;
-	}
-</style>
+<DynamicChooser client:load/>
