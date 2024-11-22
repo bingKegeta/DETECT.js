@@ -118,8 +118,8 @@ const WebcamCap: React.FC = () => {
   };
 
   return (
-    <div className="border-ctp-pink rounded-lg border-2 opacity-85">
-      <div className="border-b-2 border-ctp-pink">
+    <div className="border-secondary rounded-lg border-2 opacity-90 shadow-lg size-fit">
+      <div className="border-b-2 border-accent-magenta">
         <video
           ref={videoRef}
           width="640"
@@ -130,22 +130,26 @@ const WebcamCap: React.FC = () => {
         <canvas
           ref={canvasRef}
           width="640"
-          height="480"
-          className="m-2 rounded"
+          height="460"
+          className="m-2 rounded shadow-lg bg-base-300 border-2 border-accent"
         ></canvas>
       </div>
-      <div className="flex w-full font-semibold text-lg">
+      <div className="flex w-full font-semibold text-lg text-white dark:text-gray-300">
         <button
           onClick={startCapture}
-          className="bg-ctp-sapphire m-2 ml-3 my-2 py-4 rounded-md w-full h-full text-ctp-base/60 
-          hover:bg-ctp-green hover:scale-105 hover:text-ctp-base/80"
+          className="bg-neutral m-2 ml-3 py-2 rounded-md w-full transition-transform transform-gpu
+                 border-4 border-success text-neutral-content
+                 hover:bg-success hover:scale-105 hover:shadow-lg hover:text-success-content
+                 hover:border-4 hover:border-neutral duration-500"
         >
           Start
         </button>
         <button
           onClick={stopCapture}
-          className="bg-ctp-peach m-2 mr-3 py-4 rounded-md w-full h-full text-ctp-base/60 
-          hover:bg-ctp-red hover:scale-105 hover:text-ctp-base/80"
+          className="bg-neutral m-2 mr-3 py-2 rounded-md w-full transition-transform transform-gpu
+                 border-4 border-error text-neutral-content
+                 hover:bg-error hover:scale-105 hover:shadow-lg hover:text-error-content
+                 hover:border-4 hover:border-neutral duration-500"
         >
           Stop
         </button>

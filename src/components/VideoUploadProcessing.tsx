@@ -141,14 +141,14 @@ const VideoUploadProcessing: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center border-ctp-pink rounded-lg border-2 opacity-85 shadow-lg">
+    <div className="flex flex-col items-center justify-center border-accent-magenta rounded-lg border-2 opacity-90 shadow-glow bg-base-light dark:bg-base">
       <input
         type="file"
         accept="video/*"
         onChange={handleVideoUpload}
-        className="flex text-ctp-base/50 p-2 bg-gradient-to-b from-ctp-pink to-ctp-maroon rounded-md size-fit my-2"
+        className="flex text-white dark:text-gray-300 p-2 bg-gradient-to-b from-accent-magenta to-accent-green rounded-md w-fit my-2 shadow-glow hover:scale-105 transition-transform"
       />
-      <div className="border-b-2 border-ctp-pink">
+      <div className="border-b-2 border-accent-magenta">
         <video
           key={key}
           ref={videoRef}
@@ -160,32 +160,38 @@ const VideoUploadProcessing: React.FC = () => {
           ref={canvasRef}
           width="640"
           height="480"
-          className="m-2 rounded"
+          className="m-2 rounded bg-gradient-to-r from-accent-cyan via-accent-magenta to-accent-green shadow-glow"
         ></canvas>
       </div>
       {videoLoaded && (
-        <div className="flex w-full font-semibold text-lg">
+        <div className="flex w-full font-semibold text-lg text-white dark:text-gray-300">
           <button
             onClick={handlePlay}
             disabled={isPlaying}
-            className="bg-ctp-teal m-2 ml-3 my-2 py-4 rounded-md w-full h-full text-ctp-base/60 
-          hover:bg-ctp-green hover:scale-105 hover:text-ctp-base/80"
+            className={`bg-accent-cyan m-2 ml-3 my-2 py-4 rounded-md w-full h-full text-black dark:text-white 
+                    hover:bg-accent-green hover:scale-105 hover:shadow-glow transition-transform ${
+                      isPlaying ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
           >
             Play
           </button>
           <button
             onClick={handlePause}
             disabled={!isPlaying}
-            className="bg-ctp-peach m-2 py-4 rounded-md w-full h-full text-ctp-base/60 
-          hover:bg-ctp-yellow hover:scale-105 hover:text-ctp-base/80"
+            className={`bg-accent-yellow m-2 py-4 rounded-md w-full h-full text-black dark:text-white 
+                    hover:bg-accent-orange hover:scale-105 hover:shadow-glow transition-transform ${
+                      !isPlaying ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
           >
             Pause
           </button>
           <button
             onClick={handleStop}
             disabled={isPlaying}
-            className="bg-ctp-maroon m-2 mr-3 py-4 rounded-md w-full h-full text-ctp-base/60 
-          hover:bg-ctp-red hover:scale-105 hover:text-ctp-base/80"
+            className={`bg-accent-magenta m-2 mr-3 py-4 rounded-md w-full h-full text-black dark:text-white 
+                    hover:bg-accent-red hover:scale-105 hover:shadow-glow-magenta transition-transform ${
+                      isPlaying ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
           >
             Stop
           </button>
