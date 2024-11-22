@@ -1,0 +1,47 @@
+---
+import ThemeSwitcher from "./ThemeSwitcher";
+---
+
+<header
+  class="flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg"
+>
+  <!-- Logo -->
+  <div class="bg-primary rounded-full p-4 shadow-lg">
+    <h1 class="text-primary-content font-bold text-2xl">DETECT</h1>
+  </div>
+
+  <!-- Navigation -->
+  <div class="rounded-full p-4 bg-base-300 shadow-lg border-4 border-primary">
+    <nav>
+      <ul class="list-none flex gap-10">
+        <li>
+          <a href="#" class="hover:text-primary transition-colors duration-200"
+            >Home</a
+          >
+        </li>
+        <li>
+          <a href="#" class="hover:text-primary transition-colors duration-200"
+            >About</a
+          >
+        </li>
+        <li>
+          <a href="#" class="hover:text-primary transition-colors duration-200"
+            >Services</a
+          >
+        </li>
+        <li>
+          <a href="#" class="hover:text-primary transition-colors duration-200"
+            >Contact</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Theme Switcher -->
+  <div
+    class="rounded-full p-4 shadow-lg backdrop-blur-md bg-base-300 border-4 border-primary"
+  >
+    <ThemeSwitcher client:load />
+  </div>
+</header>
