@@ -10,8 +10,28 @@ export interface IrisPosition {
   timestamp: number;
 }
 
-export const getLandmarks = (landmarks: any[], indices: number[]): any[] => {
-  return indices.map((index) => landmarks[index]);
+// export const getLandmarks = (landmarks: any[], indices: number[]): any[] => {
+//   return indices.map((index) => landmarks[index]);
+// };
+
+export const getLandmarks = (landmarks: any[], indices: number[]): any[] | any => {
+  if (indices.length === 1) {
+    const result = landmarks[indices[0]];
+    if (!result) {
+      console.error(`Landmark ${indices[0]} is not defined.`);
+      return { x: 0, y: 0 }; // Default fallback for undefined landmarks
+    }
+    return result; // Return single landmark object
+  }
+
+  return indices.map((index) => {
+    const result = landmarks[index];
+    if (!result) {
+      console.error(`Landmark ${index} is not defined.`);
+      return { x: 0, y: 0 }; // Default fallback for undefined landmarks
+    }
+    return result;
+  });
 };
 
 export const getNormalizedIrisPosition = (

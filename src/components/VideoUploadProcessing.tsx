@@ -10,6 +10,7 @@ import {
   getNormalizedIrisPosition,
   getLandmarks,
 } from "../scripts/utils";
+import { transform, translate, scale, applyToPoint } from "transformation-matrix";
 
 const VideoUploadProcessing: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -18,6 +19,55 @@ const VideoUploadProcessing: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [key, setKey] = useState(0);
+
+  const alignFace = (landmarks: any[], canvasWidth: number, canvasHeight: number) => {
+    const leftIris = getLandmarks(landmarks, [LEFT_IRIS_CENTER]);
+    const rightIris = getLandmarks(landmarks, [RIGHT_IRIS_CENTER]);
+    const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
+
+    if (!leftIris || !rightIris || !noseTip) {
+      console.error("One or more landmarks are undefined.");
+      return null;
+    }
+
+    const leftEyeCenter = { x: leftIris.x * canvasWidth, y: leftIris.y * canvasHeight };
+    const rightEyeCenter = { x: rightIris.x * canvasWidth, y: rightIris.y * canvasHeight };
+
+    const deltaX = rightEyeCenter.x - leftEyeCenter.x;
+    const deltaY = rightEyeCenter.y - leftEyeCenter.y;
+    const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+
+    const desiredDist = 100; // Desired distance between eyes in pixels
+    const currentDist = Math.sqrt(deltaX ** 2 + deltaY ** 2) || 1e-6;
+    const scaleFactor = desiredDist / currentDist;
+
+    const eyesCenter = {
+      x: (leftEyeCenter.x + rightEyeCenter.x) / 2,
+      y: (leftEyeCenter.y + rightEyeCenter.y) / 2,
+    };
+
+    const scaleMatrix = scale(scaleFactor, scaleFactor);
+    const translationMatrix = translate(
+      canvasWidth / 2 - eyesCenter.x,
+      canvasHeight / 2 - eyesCenter.y
+    );
+
+    const combinedMatrix = transform(scaleMatrix, translationMatrix);
+
+    const transformedLandmarks = landmarks.map((lm: any) => {
+      const transformedPoint = applyToPoint(combinedMatrix, {
+        x: lm.x * canvasWidth,
+        y: lm.y * canvasHeight,
+      });
+
+      return {
+        x: transformedPoint.x / canvasWidth,
+        y: transformedPoint.y / canvasHeight,
+      };
+    });
+
+    return transformedLandmarks;
+  };
 
   useEffect(() => {
     const canvasElement = canvasRef.current;
@@ -49,30 +99,59 @@ const VideoUploadProcessing: React.FC = () => {
         );
         if (results.multiFaceLandmarks) {
           for (const landmarks of results.multiFaceLandmarks) {
-            const irisCenterLandmarks = getLandmarks(landmarks, [
-              LEFT_IRIS_CENTER,
-              RIGHT_IRIS_CENTER,
-            ]);
-            drawLandmarks(canvasCtx, irisCenterLandmarks, {
-              color: "#FF0000",
-              lineWidth: 1,
-            });
-            const eyeCornerLandmarks = getLandmarks(landmarks, [
-              LEFT_EYE_CORNER,
-              RIGHT_EYE_CORNER,
-            ]);
-            drawLandmarks(canvasCtx, eyeCornerLandmarks, {
-              color: "#FF0000",
-              lineWidth: 1,
-            });
-            const noseLandmarks = getLandmarks(landmarks, [NOSE_TIP]);
-            drawLandmarks(canvasCtx, noseLandmarks, {
-              color: "#FF0000",
-              lineWidth: 1,
-            });
-
-            const { normX, normY, timestamp } = getNormalizedIrisPosition(
+            // const irisCenterLandmarks = getLandmarks(landmarks, [
+            //   LEFT_IRIS_CENTER,
+            //   RIGHT_IRIS_CENTER,
+            // ]);
+            // drawLandmarks(canvasCtx, irisCenterLandmarks, {
+            //   color: "#FF0000",
+            //   lineWidth: 1,
+            // });
+            // const eyeCornerLandmarks = getLandmarks(landmarks, [
+            //   LEFT_EYE_CORNER,
+            //   RIGHT_EYE_CORNER,
+            // ]);
+            // drawLandmarks(canvasCtx, eyeCornerLandmarks, {
+            //   color: "#FF0000",
+            //   lineWidth: 1,
+            // });
+            // const noseLandmarks = getLandmarks(landmarks, [NOSE_TIP]);
+            // drawLandmarks(canvasCtx, noseLandmarks, {
+            //   color: "#FF0000",
+            //   lineWidth: 1,
+            // });
+            
+            console.log("Original Landmarks:", landmarks);
+            const transformedLandmarks = alignFace(
               landmarks,
+              canvasElement.width,
+              canvasElement.height
+            );
+            if (!transformedLandmarks) {
+              console.error("Failed to transform landmarks.");
+              continue;
+            }
+            
+            // Extract only the specific five landmarks
+            const specificLandmarks = [
+              transformedLandmarks[LEFT_EYE_CORNER],
+              transformedLandmarks[RIGHT_EYE_CORNER],
+              transformedLandmarks[LEFT_IRIS_CENTER],
+              transformedLandmarks[RIGHT_IRIS_CENTER],
+              transformedLandmarks[NOSE_TIP],
+            ];
+            console.log("Transformed Specific Landmarks:", specificLandmarks);
+            // Draw transformed landmarks
+            specificLandmarks.forEach((point) => {
+              drawLandmarks(canvasCtx, [point], {
+                color: "#FF0000",
+                lineWidth: 1,
+              });
+            });           
+
+            // Log normalized coordinates for debugging
+            const { normX, normY, timestamp } = getNormalizedIrisPosition(
+              transformedLandmarks,
               canvasElement.width,
               canvasElement.height
             );
