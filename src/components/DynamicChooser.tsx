@@ -6,7 +6,7 @@ const WebcamVideoSelector: React.FC = () => {
   const [selectedComponent, setSelectedComponent] = useState<string>("");
 
   return (
-    <div className="bg-base-200 text-base-content rounded-lg p-4 shadow-lg h-[66vh] border-4 border-primary">
+    <div>
       {!selectedComponent && (
         <div className="flex font-semibold justify-center space-x-4">
           <button
