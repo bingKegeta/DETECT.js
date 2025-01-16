@@ -1,6 +1,10 @@
 <div
   class="max-w-xl m-auto p-6 bg-base-200 rounded-lg shadow-lg border-4 border-primary"
 >
+  <p class="text-center text-base-content text-2xl font-medium mb-5">
+    Register
+  </p>
+
   <form>
     <!-- Email Input Group -->
     <label class="block mb-2 text-sm font-medium text-base-content">
@@ -34,36 +38,6 @@
     </div>
     <div class="email-error text-error text-xs mb-5 mt-1"></div>
 
-    <!-- Username Input Group -->
-    <label class="block mb-2 text-sm font-medium text-base-content">
-      Username
-    </label>
-    <div class="flex">
-      <span
-        class="inline-flex items-center px-2 text-sm text-base-content bg-base-200 border border-r-0 border-base-300 rounded-l-md"
-      >
-        <svg
-          class="w-5 h-5 text-neutral-content"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M10 2a4 4 0 100 8 4 4 0 000-8zM2 18a8 8 0 0116 0H2z"
-            clip-rule="evenodd"></path>
-        </svg>
-      </span>
-      <input
-        type="text"
-        name="name"
-        class="rounded-none rounded-r-lg bg-base-100 border text-base-content focus:ring-primary focus:border-primary block flex-1 min-w-0 w-full text-sm border-base-300 p-2.5"
-        placeholder="Man"
-        required
-      />
-    </div>
-    <div class="user-error text-error text-xs mb-5 mt-1"></div>
-
     <!-- Password Input Group -->
     <label class="block mb-2 text-sm font-medium text-base-content">
       Password
@@ -93,12 +67,33 @@
       </div>
       <input
         type="password"
+        id="register-password"
         name="password"
         class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
         placeholder="••••••••"
         required
       />
     </div>
+    <div class="flex items-center mt-2">
+      <input
+        type="checkbox"
+        id="show-password-register"
+        class="mr-2"
+        onclick="togglePasswordVisibility('register-password', 'show-password-register')"
+      />
+      <label for="show-password-register" class="text-sm text-base-content"
+        >Show Password</label
+      >
+    </div>
+    <script is:inline>
+      function togglePasswordVisibility(passwordFieldId, checkboxId) {
+        const passwordField = document.getElementById(passwordFieldId);
+        const checkbox = document.getElementById(checkboxId);
+        if (passwordField && checkbox) {
+          passwordField.type = checkbox.checked ? "text" : "password";
+        }
+      }
+    </script>
     <div class="pw-error text-error text-xs mb-5 mt-1"></div>
 
     <!-- Submit Button -->
@@ -108,7 +103,52 @@
     >
       Submit
     </button>
+    <p class="text-center text-base-content pt-4">
+      Already have an account?
+      <a
+        href="/login"
+        class="text-info font-medium inline-flex space-x-1 items-center hover:underline"
+      >
+        <span>Login now</span>
+        <span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+            >
+            </path>
+          </svg>
+        </span>
+      </a>
+    </p>
   </form>
+  <div class="p-2 m-4 relative">
+    <div
+      class="absolute inset-0 bg-gradient-to-r from-transparent via-base-300 to-transparent h-px"
+    >
+    </div>
+  </div>
+  <div class="my-5">
+    <button
+      onclick="window.location.href='http://localhost:8080/auth/google'"
+      class="w-full text-center py-3 my-3 border flex space-x-2 items-center justify-center bg-neutral rounded-lg text-neutral-content hover:border-info hover:shadow transition duration-150"
+    >
+      <img
+        src="https://www.svgrepo.com/show/355037/google.svg"
+        class="w-6 h-6"
+        alt=""
+      />
+      <span>Login with Google</span>
+    </button>
+  </div>
 </div>
 
 <script>
@@ -121,20 +161,22 @@
     const formData = new FormData(form);
     const { error, data } = await actions.register(formData);
     if (!isInputError(error)) {
-      // console.log("Registered successfully!");
-      // console.log("Form Details:", Object.fromEntries(formData.entries()));
-      if (data?.success) console.log(data.data);
-      const emailErrorElement = document.querySelector(".email-error");
-      if (emailErrorElement) {
-        emailErrorElement.textContent = "";
-      }
-      const nameErrorElement = document.querySelector(".user-error");
-      if (nameErrorElement) {
-        nameErrorElement.textContent = "";
-      }
-      const passwordErrorElement = document.querySelector(".pw-error");
-      if (passwordErrorElement) {
-        passwordErrorElement.textContent = "";
+      if (data?.success) {
+        console.log(data.data);
+        const emailErrorElement = document.querySelector(".email-error");
+        if (emailErrorElement) {
+          emailErrorElement.textContent = "";
+        }
+        const passwordErrorElement = document.querySelector(".pw-error");
+        if (passwordErrorElement) {
+          passwordErrorElement.textContent = "";
+        }
+        window.location.href = "/dashboard";
+      } else {
+        const emailErrorElement = document.querySelector(".email-error");
+        if (emailErrorElement) {
+          emailErrorElement.textContent = data?.message || "";
+        }
       }
     } else {
       if (error.fields?.email) {
@@ -149,33 +191,11 @@
         }
       }
 
-      if (error.fields?.name) {
-        let nameErrorElement = document.querySelector(".user-error");
-        if (!nameErrorElement) {
-          nameErrorElement = document.createElement("p");
-          const userErrorDiv = document.querySelector(".user-error");
-          if (userErrorDiv) {
-            userErrorDiv.appendChild(nameErrorElement);
-          }
-        }
-        nameErrorElement.textContent = error.fields.name.join(", ");
-      } else {
-        const nameErrorElement = document.querySelector(".user-error");
-        if (nameErrorElement) {
-          nameErrorElement.textContent = "";
-        }
-      }
-
       if (error.fields?.password) {
-        let passwordErrorElement = document.querySelector(".pw-error");
-        if (!passwordErrorElement) {
-          passwordErrorElement = document.createElement("p");
-          const passwordErrorDiv = document.querySelector(".pw-error");
-          if (passwordErrorDiv) {
-            passwordErrorDiv.appendChild(passwordErrorElement);
-          }
+        const passwordErrorElement = document.querySelector(".pw-error");
+        if (passwordErrorElement) {
+          passwordErrorElement.textContent = error.fields.password.join(", ");
         }
-        passwordErrorElement.textContent = error.fields.password.join(", ");
       } else {
         const passwordErrorElement = document.querySelector(".pw-error");
         if (passwordErrorElement) {
