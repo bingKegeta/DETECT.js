@@ -18,6 +18,31 @@ const WebcamCap: React.FC = () => {
   const cameraRef = useRef<Camera | null>(null);
   const faceMeshRef = useRef<FaceMesh | null>(null);
 
+  // WebSocket connection
+  const websocketRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    // Initialize WebSocket connection
+    websocketRef.current = new WebSocket("ws://localhost:8080"); // Replace with actual WebSocket server URL
+
+    websocketRef.current.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    websocketRef.current.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    websocketRef.current.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      // Cleanup WebSocket connection on unmount
+      websocketRef.current?.close();
+    };
+  }, []);
+
   useEffect(() => {
     const videoElement = videoRef.current;
     const canvasElement = canvasRef.current;
@@ -76,9 +101,19 @@ const WebcamCap: React.FC = () => {
               canvasElement.width,
               canvasElement.height
             );
-            console.log(
-              `Normalized Iris Position: X: ${normX}, Y: ${normY}, Timestamp: ${timestamp}`
-            );
+
+            // Send eye-tracking data via WebSocket
+            const data = {
+              x: normX.toFixed(4),
+              y: normY.toFixed(4),
+              second: timestamp.toFixed(3),
+            };
+
+            if (websocketRef.current?.readyState === WebSocket.OPEN) {
+              websocketRef.current.send(JSON.stringify(data));
+            }
+
+            console.log(`Data sent: ${JSON.stringify(data)}`);
           }
         }
         canvasCtx.restore();
@@ -159,3 +194,4 @@ const WebcamCap: React.FC = () => {
 };
 
 export default WebcamCap;
+
