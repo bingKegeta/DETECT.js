@@ -15,9 +15,32 @@ const VideoUploadProcessing: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const faceMeshRef = useRef<FaceMesh | null>(null);
+  const websocketRef = useRef<WebSocket | null>(null); // WebSocket reference
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [key, setKey] = useState(0);
+
+  useEffect(() => {
+    // Initialize WebSocket connection
+    websocketRef.current = new WebSocket("ws://localhost:8080"); // Replace with your WebSocket server URL
+
+    websocketRef.current.onopen = () => {
+      console.log("WebSocket connection established");
+    };
+
+    websocketRef.current.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
+
+    websocketRef.current.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    return () => {
+      // Clean up WebSocket connection on unmount
+      websocketRef.current?.close();
+    };
+  }, []);
 
   useEffect(() => {
     const canvasElement = canvasRef.current;
@@ -76,9 +99,19 @@ const VideoUploadProcessing: React.FC = () => {
               canvasElement.width,
               canvasElement.height
             );
-            console.log(
-              `Normalized Iris Position: X: ${normX}, Y: ${normY}, Timestamp: ${timestamp}`
-            );
+
+            // Send eye-tracking data to WebSocket
+            const data = {
+              x: normX.toFixed(4),
+              y: normY.toFixed(4),
+              second: timestamp.toFixed(3),
+            };
+
+            if (websocketRef.current?.readyState === WebSocket.OPEN) {
+              websocketRef.current.send(JSON.stringify(data));
+            }
+
+            console.log(`Data sent: ${JSON.stringify(data)}`);
           }
         }
         canvasCtx.restore();
