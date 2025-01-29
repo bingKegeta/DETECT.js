@@ -1,91 +1,155 @@
-<div class="max-w-xl m-auto p-6 bg-base-200 rounded-lg shadow-lg border-4 border-primary">
+<div
+  class="max-w-xl m-auto p-6 bg-base-200 rounded-lg shadow-lg border-4 border-primary"
+>
   <p class="text-center text-base-content text-2xl font-medium mb-5">Login</p>
-  <form onsubmit="handleLogin(event)">
-    <label class="block mb-2 text-sm font-medium text-base-content">Email</label>
+  <form>
+    <!-- Email Input Group -->
+    <label class="block mb-2 text-sm font-medium text-base-content">
+      Email
+    </label>
     <div class="flex">
-      <span class="inline-flex items-center px-2 text-sm text-base-content bg-base-200 border border-r-0 border-base-300 rounded-l-md">
-        <svg class="w-5 h-5 text-neutral-content" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+      <span
+        class="inline-flex items-center px-2 text-sm text-base-content bg-base-200 border border-r-0 border-base-300 rounded-l-md"
+      >
+        <svg
+          class="w-5 h-5 text-neutral-content"
+          fill="currentColor"
+          viewBox="0 0 20 20"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
+          ></path>
+          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"
+          ></path>
         </svg>
       </span>
-      <input type="email" name="email" class="rounded-none rounded-r-lg bg-base-100 border text-base-content focus:ring-primary focus:border-primary block flex-1 min-w-0 w-full text-sm border-base-300 p-2.5" placeholder="man@human.com" required />
+      <input
+        type="email"
+        name="email"
+        class="rounded-none rounded-r-lg bg-base-100 border text-base-content
+        focus:ring-primary focus:border-primary
+        block flex-1 min-w-0 w-full text-sm border-base-300 p-2.5"
+        placeholder="man@human.com"
+        required
+      />
     </div>
     <div class="email-error text-error text-xs mb-5 mt-1"></div>
 
-    <label class="block mb-2 text-sm font-medium text-base-content">Password</label>
+    <!-- Password Input Group -->
+    <label class="block mb-2 text-sm font-medium text-base-content">
+      Password
+    </label>
     <div class="relative">
-      <input type="password" id="login-password" name="password" class="rounded-none rounded-r-lg bg-base-100 border text-base-content focus:ring-primary focus:border-primary block flex-1 min-w-0 w-full text-sm border-base-300 p-2.5" required />
+      <div
+        class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5 text-neutral-content"
+        >
+          <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+          <g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M5.25 10.0546V8C5.25 4.27208 8.27208 1.25 12 1.25C15.7279 1.25 18.75 4.27208 18.75 8V10.0546C19.8648 10.1379 20.5907 10.348 21.1213 10.8787C22 11.7574 22 13.1716 22 16C22 18.8284 22 20.2426 21.1213 21.1213C20.2426 22 18.8284 22 16 22H8C5.17157 22 3.75736 22 2.87868 21.1213C2 20.2426 2 18.8284 2 16C2 13.1716 2 11.7574 2.87868 10.8787C3.40931 10.348 4.13525 10.1379 5.25 10.0546ZM6.75 8C6.75 5.10051 9.10051 2.75 12 2.75C14.8995 2.75 17.25 5.10051 17.25 8V10.0036C16.867 10 16.4515 10 16 10H8C7.54849 10 7.13301 10 6.75 10.0036V8ZM8 17C8.55228 17 9 16.5523 9 16C9 15.4477 8.55228 15 8 15C7.44772 15 7 15.4477 7 16C7 16.5523 7.44772 17 8 17ZM12 17C12.5523 17 13 16.5523 13 16C13 15.4477 12.5523 15 12 15C11.4477 15 11 15.4477 11 16C11 16.5523 11.4477 17 12 17ZM17 16C17 16.5523 16.5523 17 16 17C15.4477 17 15 16.5523 15 16C15 15.4477 15.4477 15 16 15C16.5523 15 17 15.4477 17 16Z"
+            ></path>
+          </g>
+        </svg>
+      </div>
+      <input
+        type="password"
+        id="login-password"
+        name="password"
+        class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
+        placeholder="••••••••"
+        required
+      />
     </div>
     <div class="flex items-center mt-2">
-      <input type="checkbox" id="show-password-login" class="mr-2" onclick="togglePasswordVisibility('login-password', 'show-password-login')" />
-      <label for="show-password-login" class="text-sm text-base-content">Show Password</label>
+      <input
+        type="checkbox"
+        id="show-password-login"
+        class="mr-2"
+        onclick="togglePasswordVisibility('login-password', 'show-password-login')"
+      />
+      <label for="show-password-login" class="text-sm text-base-content"
+        >Show Password</label
+      >
     </div>
+    <script is:inline>
+      function togglePasswordVisibility(passwordFieldId, checkboxId) {
+        const passwordField = document.getElementById(passwordFieldId);
+        const checkbox = document.getElementById(checkboxId);
+        if (passwordField && checkbox) {
+          passwordField.type = checkbox.checked ? "text" : "password";
+        }
+      }
+    </script>
     <div class="pw-error text-error text-xs mb-5 mt-1"></div>
 
-    <button type="submit" class="mt-4 w-full bg-primary text-base-100 py-2 rounded-lg">Login</button>
-    <p class="text-center text-base-content pt-4">Not registered yet? <a href="#" class="text-info font-medium inline-flex space-x-1 items-center hover:underline"><span>Register now</span></a></p>
+    <!-- Submit Button -->
+    <button
+      type="submit"
+      class="bg-primary text-primary-content rounded-md px-4 py-2 w-full"
+    >
+      Login
+    </button>
+    <p class="text-center text-base-content pt-4">
+      Not registered yet?
+      <!--! Add link to registration page -->
+      <a
+        href="#"
+        class="text-info font-medium inline-flex space-x-1 items-center hover:underline"
+      >
+        <span>Register now </span>
+        <span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+            >
+            </path>
+          </svg>
+        </span>
+      </a>
+    </p>
   </form>
   <div class="p-2 m-4 relative">
-    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-base-300 to-transparent h-px"></div>
+    <div
+      class="absolute inset-0 bg-gradient-to-r from-transparent via-base-300 to-transparent h-px"
+    >
+    </div>
   </div>
   <div class="my-5">
-    <button onclick="window.location.href='http://localhost:8080/auth/google'" class="w-full text-center py-3 my-3 border flex space-x-2 items-center justify-center bg-neutral rounded-lg text-neutral-content hover:border-info hover:shadow transition duration-150">
-      <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-6 h-6" alt="" />
+    <button
+      onclick="window.location.href='http://localhost:8080/auth/google'"
+      class="w-full text-center py-3 my-3 border flex space-x-2 items-center justify-center bg-neutral rounded-lg text-neutral-content
+      hover:border-info hover:shadow transition duration-150"
+    >
+      <img
+        src="https://www.svgrepo.com/show/355037/google.svg"
+        class="w-6 h-6"
+        alt=""
+      />
       <span>Login with Google</span>
     </button>
   </div>
 </div>
-
-<script is:inline>
-function handleLogin(event) {
-  event.preventDefault();
-  const form = event.target;
-  const email = form.email.value;
-  const password = form.password.value;
-
-  fetch("http://localhost:8080/login", {  // <-- Change this URL
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  })
-    .then(async (response) => {
-      const contentType = response.headers.get("content-type");
-
-      if (!response.ok) {
-        if (contentType && contentType.includes("application/json")) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Login failed");
-        } else {
-          throw new Error("Unexpected server response. Check the backend logs.");
-        }
-      }
-
-      return response.json();
-    })
-    .then((data) => {
-      localStorage.setItem("token", data.token);
-      alert("Login successful");
-      window.location.href = "/dashboard";
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
-}
-
-
-  function togglePasswordVisibility(passwordFieldId, checkboxId) {
-    const passwordField = document.getElementById(passwordFieldId);
-    const checkbox = document.getElementById(checkboxId);
-    if (passwordField && checkbox) {
-      passwordField.type = checkbox.checked ? "text" : "password";
-    }
-  }
-</script>
-
-
 
 <script>
   import { actions, isInputError } from "astro:actions";
