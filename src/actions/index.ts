@@ -1,8 +1,9 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
+import { parseSetCookie } from "../scripts/utils";
 
 export const server = {
-  register: defineAction({
+  login: defineAction({
     accept: "form",
     input: z.object({
       email: z.string().email("Invalid email address"),
@@ -16,38 +17,54 @@ export const server = {
         )
         .max(100, "Password must be less than 100 characters long"),
     }),
-    handler: async (input) => {
-      // Perform registration logic here
+    handler: async (input, event) => {
       const { email, password } = input;
-      const url = import.meta.env.SERVER_ADDRESS + "/register";
-      // Send to server here
-      const response = await fetch(url, {
+      const url = `${import.meta.env.SERVER_ADDRESS}/login`;
+
+      const backendResponse = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(input),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      const responseData = await response.text();
-      if (!response.ok) {
+      // Parse the JSON from your Go server
+      const data = await backendResponse.json();
+
+      if (!backendResponse.ok) {
         return {
           success: false,
-          message: responseData || "Failed to register",
-          status: response.status,
-          data: responseData,
-        };
-      } else {
-        return {
-          success: true,
-          message: responseData || "Registration successful",
-          status: response.status,
-          data: responseData,
+          message: data.error || "Failed to login",
+          status: backendResponse.status,
+          data,
         };
       }
+
+      // Extract the raw "Set-Cookie" header
+      const setCookieHeader = backendResponse.headers.get("set-cookie");
+      if (setCookieHeader) {
+        // Parse out name, value, path, expires, secure, httpOnly, sameSite, etc.
+        const parsed = parseSetCookie(setCookieHeader);
+        if (parsed) {
+          event.cookies.set(parsed.name, parsed.value, {
+            path: parsed.path,
+            httpOnly: parsed.httpOnly,
+            // secure: parsed.secure,
+            expires: parsed.expires,
+            // sameSite: parsed.sameSite,
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: data.message || "Login successful",
+        status: backendResponse.status,
+        data,
+      };
     },
   }),
-  login: defineAction({
+
+  register: defineAction({
     accept: "form",
     input: z.object({
       email: z.string().email("Invalid email address"),
@@ -60,34 +77,90 @@ export const server = {
         )
         .max(100, "Password must be less than 100 characters long"),
     }),
-    handler: async (input) => {
-      const { email, password } = input;
-      const url = import.meta.env.SERVER_ADDRESS + "/login";
+    handler: async (input, event) => {
+      const url = `${import.meta.env.SERVER_ADDRESS}/register`;
 
-      const response = await fetch(url, {
+      const backendResponse = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),
       });
 
-      const responseData = await response.text();
-      if (!response.ok) {
+      const data = await backendResponse.json();
+
+      if (!backendResponse.ok) {
         return {
           success: false,
-          message: responseData || "Failed to register",
-          status: response.status,
-          data: responseData,
-        };
-      } else {
-        return {
-          success: true,
-          message: responseData || "Registration successful",
-          status: response.status,
-          data: responseData,
+          message: data.error || "Failed to register",
+          status: backendResponse.status,
+          data,
         };
       }
+
+      const setCookieHeader = backendResponse.headers.get("set-cookie");
+      if (setCookieHeader) {
+        const parsed = parseSetCookie(setCookieHeader);
+        if (parsed) {
+          event.cookies.set(parsed.name, parsed.value, {
+            path: parsed.path,
+            httpOnly: parsed.httpOnly,
+            // secure: parsed.secure,
+            expires: parsed.expires,
+            // sameSite: parsed.sameSite,
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: data.message || "Registration successful",
+        status: backendResponse.status,
+        data,
+      };
+    },
+  }),
+
+  logout: defineAction({
+    accept: "form",
+    handler: async (_, event) => {
+      const url = `${import.meta.env.SERVER_ADDRESS}/logout`;
+
+      const backendResponse = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+
+      const data = await backendResponse.json();
+      if (!backendResponse.ok) {
+        return {
+          success: false,
+          message: data.error || "Failed to logout",
+          status: backendResponse.status,
+          data,
+        };
+      }
+
+      const setCookieHeader = backendResponse.headers.get("set-cookie");
+      if (setCookieHeader) {
+        const parsed = parseSetCookie(setCookieHeader);
+        if (parsed) {
+          event.cookies.set(parsed.name, parsed.value, {
+            path: parsed.path,
+            httpOnly: parsed.httpOnly,
+            // secure: parsed.secure,
+            expires: parsed.expires,
+            // sameSite: parsed.sameSite,
+          });
+        }
+      }
+
+      return {
+        success: true,
+        message: data.message || "Logged out successfully",
+        status: backendResponse.status,
+        data,
+      };
     },
   }),
 };
