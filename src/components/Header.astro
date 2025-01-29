@@ -7,7 +7,6 @@ import ThemeSwitcher from "./ThemeSwitcher";
 >
     <!-- Logo -->
     <div class="bg-primary rounded-full p-4 shadow-lg">
-        <!-- ! Add whatever logo you need here and remove the text below -->
         <h1 class="text-primary-content font-bold text-2xl">DETECT</h1>
     </div>
 
@@ -17,7 +16,7 @@ import ThemeSwitcher from "./ThemeSwitcher";
             <ul class="list-none flex gap-10">
                 <li>
                     <a
-                        href="#"
+                        href="/dashboard"
                         class="hover:text-primary transition-colors duration-200"
                         >Home</a
                     >
@@ -33,20 +32,22 @@ import ThemeSwitcher from "./ThemeSwitcher";
                     <a
                         href="#"
                         class="hover:text-primary transition-colors duration-200"
-                        >Services</a
-                    >
-                </li>
-                <li>
-                    <a
-                        href="#"
-                        class="hover:text-primary transition-colors duration-200"
-                        >Contact</a
+                        >Video Upload</a
                     >
                 </li>
             </ul>
         </nav>
     </div>
-    <div class="p-4 shadow-lg bg-base-300 border-4 border-primary rounded-full">
+
+    <!-- Settings & Theme Switcher (Now Side-by-Side) -->
+    <div class="p-4 shadow-lg bg-base-300 border-4 border-primary rounded-full flex items-center gap-4">
+        <a
+          href="/settings"
+          class="hover:text-primary transition-colors duration-200"
+        >
+          Settings
+        </a>
+
         <ThemeSwitcher client:load />
     </div>
 </header>

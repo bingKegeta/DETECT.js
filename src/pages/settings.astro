@@ -1,0 +1,77 @@
+---
+import Minimal from "../layouts/Minimal.astro";
+---
+
+<Minimal>
+  <main class="w-full max-w-3xl mx-auto p-8 bg-base-200 rounded-lg shadow-lg mt-32 mb-32 flex flex-col">
+    <h1 class="text-3xl font-bold text-primary-content text-center mb-6">Settings</h1>
+
+    <section class="space-y-6 w-full">
+      <!-- General Settings -->
+      <div>
+        <h2 class="text-2xl font-semibold text-white mb-2">General</h2>
+        <div class="flex flex-col gap-4">
+          <label class="flex items-center justify-between bg-base-300 p-4 rounded-lg shadow-md w-full">
+            Language:
+            <select class="bg-neutral text-neutral-content p-2 rounded-lg">
+              <option>English</option>
+              <option>Other</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- Tracking & Analysis Settings -->
+      <div>
+        <h2 class="text-2xl font-semibold text-white mb-2">Tracking & Analysis</h2>
+        <div class="flex flex-col gap-4">
+          <label class="flex items-center justify-between bg-base-300 p-4 rounded-lg shadow-md w-full">
+            Enable Face Normalization (Affine)
+            <input type="checkbox" class="form-checkbox bg-primary border-none">
+          </label>
+          
+          <label class="flex items-center justify-between bg-base-300 p-4 rounded-lg shadow-md w-full">
+            Enable Real-Time Graphing
+            <input type="checkbox" class="form-checkbox bg-primary border-none">
+          </label>
+
+          <label class="flex items-center justify-between bg-base-300 p-4 rounded-lg shadow-md w-full">
+            Show Dot Display
+            <input type="checkbox" class="form-checkbox bg-primary border-none">
+          </label>
+        </div>
+      </div>
+
+      <!-- Export Settings -->
+      <div>
+        <h2 class="text-2xl font-semibold text-white mb-2">Export</h2>
+        <div class="flex flex-col gap-4">
+          <label class="flex items-center justify-between bg-base-300 p-4 rounded-lg shadow-md w-full">
+            Enable CSV Export
+            <input type="checkbox" class="form-checkbox bg-primary border-none">
+          </label>
+
+          <label class="flex items-center justify-between bg-base-300 p-4 rounded-lg shadow-md w-full">
+            CSV Export Interval (Seconds)
+            <input type="number" class="bg-neutral text-neutral-content p-2 rounded-lg" placeholder="e.g., 5">
+          </label>
+        </div>
+      </div>
+
+      <!-- Privacy & Data Control -->
+      <div>
+        <h2 class="text-2xl font-semibold text-white mb-2">Privacy & Data Control</h2>
+        <div class="flex flex-col gap-4">
+          <label class="flex items-center justify-between bg-base-300 p-4 rounded-lg shadow-md w-full">
+            Enable Data Logging
+            <input type="checkbox" class="form-checkbox bg-primary border-none">
+          </label>
+
+          <button class="bg-red-600 text-white p-4 rounded-lg shadow-md hover:bg-red-700 transition w-full">
+            Clear Collected Data
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+</Minimal>

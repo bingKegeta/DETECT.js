@@ -129,8 +129,8 @@ const WebcamCap: React.FC = () => {
         ></video>
         <canvas
           ref={canvasRef}
-          width="640"
-          height="460"
+          width="600"
+          height="250"
           className="m-2 rounded shadow-lg bg-base-300 border-2 border-accent"
         ></canvas>
       </div>
