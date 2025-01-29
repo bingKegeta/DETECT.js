@@ -44,3 +44,62 @@ export const getNormalizedIrisPosition = (
 
   return { normX, normY, timestamp };
 };
+
+/**
+ * parseSetCookie will:
+ *   1. Split the Set-Cookie string on semicolons (e.g., "token=VALUE; Expires=...; Path=/; HttpOnly; ...")
+ *   2. Extract the cookie "Name=Value" plus any attributes (Expires, Path, HttpOnly, Secure, SameSite, etc.).
+ *   3. Return an object describing the cookie so we can replicate it in Astro with the same settings.
+ */
+export function parseSetCookie(setCookieHeader: string) {
+  if (!setCookieHeader) return null;
+
+  // Break out the parts on semicolons. The first part is always "name=value"
+  const parts = setCookieHeader.split(";");
+  const cookiePart = parts.shift(); // e.g. "token=abc123..."
+  if (!cookiePart) return null;
+
+  // Extract the name and value (e.g. "token" and "abc123...")
+  const [rawName, rawVal] = cookiePart.split("=");
+  if (!rawName || !rawVal) return null;
+
+  const name = rawName.trim();
+  let value = decodeURIComponent(rawVal.trim());
+
+  // If it was quoted/encoded, remove surrounding quotes
+  if (value.startsWith('"') && value.endsWith('"')) {
+    value = value.slice(1, -1);
+  }
+
+  // Default cookie settings
+  let path = "/";
+  let httpOnly = false;
+  // let secure = false;
+  let expires: Date | undefined;
+  // let sameSite: "none" | "lax" | "strict" | undefined;
+
+  // Now parse the remaining attributes
+  for (const attr of parts) {
+    const trimmed = attr.trim().toLowerCase();
+    if (trimmed === "httponly") {
+      httpOnly = true;
+      // secure = false; //! Change to true when prod
+    } else if (trimmed.startsWith("expires=")) {
+      const dateStr = trimmed.substring("expires=".length).trim();
+      const parsedDate = new Date(dateStr);
+      if (!isNaN(parsedDate.getTime())) {
+        expires = parsedDate;
+      }
+    } else if (trimmed.startsWith("path=")) {
+      path = attr.split("=")[1]?.trim() || "/";
+    } else if (trimmed.startsWith("samesite=")) {
+      const samesiteVal = attr.split("=")[1]?.trim().toLowerCase();
+      // if (samesiteVal === "none") sameSite = "none";
+      // else if (samesiteVal === "lax") sameSite = "lax";
+      // else if (samesiteVal === "strict") sameSite = "strict";
+      // sameSite = "lax";
+    }
+  }
+
+  return { name, value, path, httpOnly, expires };
+}
