@@ -1,8 +1,9 @@
 ---
-import DynamicChooser from "../components/DynamicChooser";
+import ColorSchemeShowcase from "../components/ColorSchemeShowcase.astro";
+import Webcam from "../components/Webcam.svelte";
 import Main from "../layouts/Main.astro";
 ---
 
 <Main>
-  <DynamicChooser client:load />
+  <Webcam client:visible />
 </Main>
