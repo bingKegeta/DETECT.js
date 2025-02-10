@@ -1,56 +1,35 @@
 ---
-import Minimal from "../layouts/Minimal.astro";
+import Modal from "../components/Modal";
 ---
 
-<Minimal>
-  <main class="max-w-4xl mx-auto p-8 bg-base-200 rounded-lg shadow-lg border-4 border-primary my-10">
-    <h1 class="text-3xl font-bold text-primary-content text-center mb-6">Privacy Policy</h1>
+<footer class="bg-base-200 text-base-content p-4 text-center border-t border-primary">
+    <p>© 2024 DETECT. All rights reserved.</p>
 
-    <p class="text-lg text-gray-300 text-center mb-10">
-      Your privacy is important to us. We are committed to protecting your personal data and being transparent about how we use it.
-    </p>
+    <!-- Privacy Policy Modal Trigger -->
+    <Modal buttonText="Privacy Policy">
+        <h2 id="modal-heading" class="text-2xl font-semibold text-primary mb-4">
+            Privacy Policy
+        </h2>
 
-    <section class="space-y-6">
-      <div>
-        <h2 class="text-2xl font-semibold text-primary-content mb-2">Information We Collect</h2>
-        <p class="text-base text-gray-400">
-          We only ask for personal information when it’s essential to provide you with our services. 
-          We collect data fairly and lawfully, with your knowledge and consent.
+        <p id="modal-content" class="mb-4">
+            Your privacy is important to us. It is our policy to respect your privacy regarding
+            any information we may collect from you across our website and services.
         </p>
-      </div>
 
-      <div>
-        <h2 class="text-2xl font-semibold text-primary-content mb-2">How We Use Information</h2>
-        <p class="text-base text-gray-400">
-          We retain collected information only for as long as necessary. We safeguard your data 
-          using industry-standard security measures to prevent unauthorized access or misuse.
+        <p class="mb-4">
+            We only ask for personal information when we truly need it to provide a service to you. 
+            We collect it by fair and lawful means, with your knowledge and consent. 
         </p>
-      </div>
 
-      <div>
-        <h2 class="text-2xl font-semibold text-primary-content mb-2">Sharing Information</h2>
-        <p class="text-base text-gray-400">
-          Your personal data is never shared publicly or with third parties, except when required by law.
+        <p class="mb-4">
+            We only retain collected information for as long as necessary to provide you with your 
+            requested service. What data we store, we’ll protect within commercially acceptable means 
+            to prevent loss and theft, as well as unauthorized access.
         </p>
-      </div>
 
-      <div>
-        <h2 class="text-2xl font-semibold text-primary-content mb-2">Your Rights</h2>
-        <p class="text-base text-gray-400">
-          You have the right to refuse providing personal information, though this may affect service availability.
+        <p>
+            If you have any questions about how we handle user data and personal information, 
+            feel free to contact us.
         </p>
-      </div>
-
-      <div>
-        <h2 class="text-2xl font-semibold text-primary-content mb-2">Contact Us</h2>
-        <p class="text-base text-gray-400">
-          If you have any questions about how we handle user data, please reach out to us.
-        </p>
-      </div>
-    </section>
-
-    <p class="text-center text-sm text-gray-500 mt-10">
-      This policy is effective as of <span class="text-primary">[Date]</span>.
-    </p>
-  </main>
-</Minimal>
+    </Modal>
+</footer>

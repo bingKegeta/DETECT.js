@@ -1,23 +1,30 @@
-<footer
-  class="p-5 bg-base-200 text-base-content text-center relative border-4 border-primary mx-4 rounded-lg"
->
+---
+import Modal from "../components/Modal";
+import PrivacyPolicy from "../components/PrivacyPolicy.astro";
+import TermsOfService from "../components/termsOfService.astro";
+---
+
+<footer class="p-5 bg-base-200 text-base-content text-center relative border-4 border-primary mx-4 rounded-lg">
   <p>&copy; 2024 DETECT. All rights reserved.</p>
   <nav>
     <ul class="list-none flex justify-center gap-5 p-0">
       <li>
-        <a href="/privacy" class="text-primary hover:text-secondary transition-colors"
-          >Privacy Policy</a
-        >
+        <!-- Privacy Policy Modal (Uses Astro Component) -->
+        <Modal client:visible buttonText="Privacy Policy" closeButtonClassName="text-2xl text-primary" overlayClassName="bg-white" >
+          <PrivacyPolicy />
+        </Modal>
       </li>
+
       <li>
-        <a href="/tos" class="text-primary hover:text-secondary transition-colors"
-          >Terms of Service</a
-        >
+          <Modal client:visible buttonText="Terms of service" closeButtonClassName="text-2xl text-primary" overlayClassName="bg-white" >
+            <TermsOfService />
+          </Modal>
       </li>
+
       <li>
-        <a href="#" class="text-primary hover:text-secondary transition-colors"
-          >Support</a
-        >
+        <a href="#" class="text-primary hover:text-secondary transition-colors">
+          Support
+        </a>
       </li>
     </ul>
   </nav>
