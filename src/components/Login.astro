@@ -1,13 +1,11 @@
 <div
   class="max-w-xl m-auto p-6 bg-base-200 rounded-lg shadow-lg border-4 border-primary"
 >
+  <p class="text-center text-base-content text-2xl font-medium mb-5">Login</p>
   <form>
-    <p class="text-center text-base-content text-lg font-medium mb-5">
-      Login with Username
-    </p>
-    <!-- Username Input Group -->
+    <!-- Email Input Group -->
     <label class="block mb-2 text-sm font-medium text-base-content">
-      Username
+      Email
     </label>
     <div class="flex">
       <span
@@ -20,22 +18,23 @@
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            fill-rule="evenodd"
-            d="M10 2a4 4 0 100 8 4 4 0 000-8zM2 18a8 8 0 0116 0H2z"
-            clip-rule="evenodd"></path>
+            d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
+          ></path>
+          <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"
+          ></path>
         </svg>
       </span>
       <input
-        type="text"
-        name="name"
+        type="email"
+        name="email"
         class="rounded-none rounded-r-lg bg-base-100 border text-base-content
         focus:ring-primary focus:border-primary
         block flex-1 min-w-0 w-full text-sm border-base-300 p-2.5"
-        placeholder="Man"
+        placeholder="man@human.com"
         required
       />
     </div>
-    <div class="user-error text-error text-xs mb-5 mt-1"></div>
+    <div class="email-error text-error text-xs mb-5 mt-1"></div>
 
     <!-- Password Input Group -->
     <label class="block mb-2 text-sm font-medium text-base-content">
@@ -66,12 +65,33 @@
       </div>
       <input
         type="password"
+        id="login-password"
         name="password"
         class="bg-base-100 border border-base-300 text-base-content text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
         placeholder="••••••••"
         required
       />
     </div>
+    <div class="flex items-center mt-2">
+      <input
+        type="checkbox"
+        id="show-password-login"
+        class="mr-2"
+        onclick="togglePasswordVisibility('login-password', 'show-password-login')"
+      />
+      <label for="show-password-login" class="text-sm text-base-content"
+        >Show Password</label
+      >
+    </div>
+    <script is:inline>
+      function togglePasswordVisibility(passwordFieldId, checkboxId) {
+        const passwordField = document.getElementById(passwordFieldId);
+        const checkbox = document.getElementById(checkboxId);
+        if (passwordField && checkbox) {
+          passwordField.type = checkbox.checked ? "text" : "password";
+        }
+      }
+    </script>
     <div class="pw-error text-error text-xs mb-5 mt-1"></div>
 
     <!-- Submit Button -->
@@ -117,7 +137,7 @@
   </div>
   <div class="my-5">
     <button
-    onclick="window.location.href='http://localhost:8080/auth/google'"
+      onclick="window.location.href='http://localhost:8080/auth/google'"
       class="w-full text-center py-3 my-3 border flex space-x-2 items-center justify-center bg-neutral rounded-lg text-neutral-content
       hover:border-info hover:shadow transition duration-150"
     >
@@ -130,3 +150,57 @@
     </button>
   </div>
 </div>
+
+<script>
+  import { actions, isInputError } from "astro:actions";
+
+  const form = document.querySelector("form");
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const { error, data } = await actions.login(formData);
+    if (!isInputError(error)) {
+      if (data?.success) {
+        console.log("Logged in successfully", data.data);
+        const emailErrorElement = document.querySelector(".email-error");
+        if (emailErrorElement) {
+          emailErrorElement.textContent = "";
+        }
+        const passwordErrorElement = document.querySelector(".pw-error");
+        if (passwordErrorElement) {
+          passwordErrorElement.textContent = "";
+        }
+        // window.location.href = "/dashboard";
+      } else {
+        const emailErrorElement = document.querySelector(".email-error");
+        if (emailErrorElement) {
+          emailErrorElement.textContent = data?.message || "";
+        }
+      }
+    } else {
+      if (error.fields?.email) {
+        const emailErrorElement = document.querySelector(".email-error");
+        if (emailErrorElement) {
+          emailErrorElement.textContent = error.fields.email.join(", ");
+        }
+      } else {
+        const emailErrorElement = document.querySelector(".email-error");
+        if (emailErrorElement) {
+          emailErrorElement.textContent = "";
+        }
+      }
+
+      if (error.fields?.password) {
+        const passwordErrorElement = document.querySelector(".pw-error");
+        if (passwordErrorElement) {
+          passwordErrorElement.textContent = error.fields.password.join(", ");
+        }
+      } else {
+        const passwordErrorElement = document.querySelector(".pw-error");
+        if (passwordErrorElement) {
+          passwordErrorElement.textContent = "";
+        }
+      }
+    }
+  });
+</script>
