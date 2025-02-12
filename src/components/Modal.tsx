@@ -91,7 +91,7 @@ const Modal: React.FC<ModalProps> = ({
           <div
             ref={modalRef}
             tabIndex={-1}
-            className={`bg-base-200 text-base-content border-4 border-primary rounded-lg shadow-lg w-11/12 max-w-md p-6 relative ${modalClassName}`}
+            className={`bg-base-200 text-base-content border-4 border-primary rounded-lg shadow-lg w-11/12 max-w-full p-6 relative ${modalClassName}`}
             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal.
           >
             {/* Close Button */}

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 const ThemeSwitcher = () => {
   // Add more themes here
   const themes = ["cyberpunk", "Yin and Yang", "Yang and Yin", "pastel"];
-  const [theme, setTheme] = useState<string>("Yang and Yin");
+  const [theme, setTheme] = useState<string>("cyberpunk");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
