@@ -1,5 +1,6 @@
 ---
 import ThemeSwitcher from "./ThemeSwitcher";
+import Settings from "./Settings.astro";
 ---
 
 <header
@@ -95,128 +96,40 @@ import ThemeSwitcher from "./ThemeSwitcher";
 >
 </div>
 
-<!-- Settings Menu (Improved Readability) -->
-<div
-  id="settings-menu"
-  class="fixed top-0 right-0 h-full w-64 bg-base-300 border-l-4 border-primary shadow-lg transform translate-x-full transition-transform duration-300 z-50 text-primary-content"
->
-  <div class="p-5 flex flex-col gap-4">
-    <h2 class="text-2xl font-semibold text-white">Settings</h2>
-
-    <!-- Theme Switcher (More Visible) -->
-    <div
-      class="flex justify-between items-center bg-base-400 p-4 rounded-lg shadow-md text-white"
-    >
-      <span>Theme</span>
-      <ThemeSwitcher client:load />
-    </div>
-
-    <!-- Tracking & Analysis Settings (Background Lightened) -->
-    <div class="flex flex-col gap-4">
-      <label
-        class="flex items-center justify-between bg-base-400 p-4 rounded-lg shadow-md text-white"
-      >
-        Face Normalization
-        <input type="checkbox" class="toggle-switch" />
-      </label>
-
-      <label
-        class="flex items-center justify-between bg-base-400 p-4 rounded-lg shadow-md text-white"
-      >
-        Real-Time Graphing
-        <input type="checkbox" class="toggle-switch" />
-      </label>
-
-      <label
-        class="flex items-center justify-between bg-base-400 p-4 rounded-lg shadow-md text-white"
-      >
-        Griddy
-        <input type="checkbox" class="toggle-switch" />
-      </label>
-
-      <label
-        class="flex items-center justify-between bg-base-400 p-4 rounded-lg shadow-md text-white"
-      >
-        Some stuff
-        <input type="checkbox" class="toggle-switch" />
-      </label>
-    </div>
-
-    <!-- Close Button -->
-    <button
-      id="settings-close-btn"
-      class="mt-4 p-3 text-red-400 transition-transform transform-gpu hover:scale-105 hover:text-red-600 cursor-pointer"
-    >
-      Close
-    </button>
+<!-- Settings Menu -->
+<div id="settings-menu" class="fixed top-5 right-0 h-[95vh] w-80 bg-base-300 border-4 border-primary rounded-xl shadow-2xl backdrop-blur-md transform-gpu translate-x-full transition-transform duration-300 z-50 overflow-hidden">
+  <Settings />
   </div>
-</div>
 
 <!-- JavaScript for Menu and Backdrop -->
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     const menu = document.getElementById("settings-menu");
     const openBtn = document.getElementById("settings-toggle-btn");
     const closeBtn = document.getElementById("settings-close-btn");
     const backdrop = document.getElementById("backdrop");
 
     function openMenu() {
-      if (menu) menu.classList.remove("translate-x-full");
-      if (backdrop) {
-        backdrop.classList.add("pointer-events-auto");
-        backdrop.classList.remove("bg-opacity-0");
-        backdrop.classList.add("bg-opacity-30");
-      }
+        if (menu) menu.classList.remove("translate-x-full"); // Slides panel into view
+        if (backdrop) {
+            backdrop.classList.add("pointer-events-auto");
+            backdrop.classList.remove("bg-opacity-0");
+            backdrop.classList.add("bg-opacity-30");
+        }
     }
 
     function closeMenu() {
-      if (menu) menu.classList.add("translate-x-full");
-      if (backdrop) {
-        backdrop.classList.remove("bg-opacity-30");
-        backdrop.classList.add("bg-opacity-0");
-        setTimeout(() => backdrop.classList.remove("pointer-events-auto"), 300);
-      }
+        if (menu) menu.classList.add("translate-x-full"); // Slides panel out of view
+        if (backdrop) {
+            backdrop.classList.remove("bg-opacity-30");
+            backdrop.classList.add("bg-opacity-0");
+            setTimeout(() => backdrop.classList.remove("pointer-events-auto"), 300);
+        }
     }
 
     if (openBtn) openBtn.addEventListener("click", openMenu);
     if (closeBtn) closeBtn.addEventListener("click", closeMenu);
-
-    // Close menu if user clicks outside of it
     if (backdrop) backdrop.addEventListener("click", closeMenu);
-  });
+});
 </script>
 
-<!-- iPhone-Style Toggle Switch Styling -->
-<style>
-  .toggle-switch {
-    appearance: none;
-    width: 50px;
-    height: 26px;
-    background-color: var(--color-neutral);
-    border-radius: 20px;
-    position: relative;
-    transition: background 0.3s ease-in-out;
-    cursor: pointer;
-    outline: none;
-  }
-
-  .toggle-switch::before {
-    content: "";
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    background-color: white;
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: transform 0.3s ease-in-out;
-  }
-
-  .toggle-switch:checked {
-    background-color: var(--color-primary);
-  }
-
-  .toggle-switch:checked::before {
-    transform: translateX(24px);
-  }
-</style>
