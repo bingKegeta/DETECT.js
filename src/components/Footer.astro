@@ -2,6 +2,7 @@
 import Modal from "../components/Modal";
 import PrivacyPolicy from "../components/PrivacyPolicy.astro";
 import TermsOfService from "../components/termsOfService.astro";
+import Support from "../components/support.astro";
 ---
 
 <footer class="p-5 bg-base-200 text-base-content text-center relative border-4 border-primary mx-4 rounded-lg">
@@ -22,9 +23,9 @@ import TermsOfService from "../components/termsOfService.astro";
       </li>
 
       <li>
-        <a href="#" class="text-primary hover:text-secondary transition-colors">
-          Support
-        </a>
+        <Modal client:visible buttonText="Terms of service" closeButtonClassName="text-2xl text-primary" overlayClassName="bg-white" >
+          <Support />
+        </Modal>
       </li>
     </ul>
   </nav>
