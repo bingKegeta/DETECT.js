@@ -18,6 +18,18 @@
 
   let camera: Camera | null = null;
   let faceMesh: FaceMesh | null = null;
+  let ws: WebSocket | null = null;
+
+  const WEBSOCKET_URL = "ws://localhost:9090/ws";
+
+  // Initialize WebSocket connection
+  function startWebSocket() {
+    ws = new WebSocket(WEBSOCKET_URL);
+    ws.onopen = () => console.log("WebSocket connected");
+    ws.onclose = () => console.log("WebSocket disconnected");
+    ws.onerror = (error) => console.error("WebSocket error:", error);
+    ws.onmessage = (event) => console.log("WebSocket message:", event.data);
+  }
 
   // Start capture from the webcam
   function startCapture() {
@@ -47,7 +59,10 @@
     }
   }
 
+  // Handle FaceMesh results
   onMount(() => {
+    startWebSocket();
+
     const canvasCtx = canvasEl.getContext("2d");
     if (!canvasCtx) return;
 
@@ -64,53 +79,62 @@
       minTrackingConfidence: 0.5,
     });
 
-    faceMesh.onResults((results: Results) => {
-      canvasCtx.save();
-      canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-      canvasCtx.drawImage(
-        results.image,
-        0,
-        0,
-        canvasEl.width,
-        canvasEl.height
-      );
+      faceMesh.onResults((results: Results) => {
+    canvasCtx.save();
+    canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    canvasCtx.drawImage(
+      results.image,
+      0,
+      0,
+      canvasEl.width,
+      canvasEl.height
+    );
 
-      if (results.multiFaceLandmarks) {
-        for (const landmarks of results.multiFaceLandmarks) {
-          const irisCenters = getLandmarks(landmarks, [
-            LEFT_IRIS_CENTER,
-            RIGHT_IRIS_CENTER,
-          ]);
-          drawLandmarks(canvasCtx, irisCenters, {
-            color: "#FF0000",
-            lineWidth: 1,
-          });
-          const eyeCorners = getLandmarks(landmarks, [
-            LEFT_EYE_CORNER,
-            RIGHT_EYE_CORNER,
-          ]);
-          drawLandmarks(canvasCtx, eyeCorners, {
-            color: "#FF0000",
-            lineWidth: 1,
-          });
-          const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
-          drawLandmarks(canvasCtx, noseTip, {
-            color: "#FF0000",
-            lineWidth: 1,
-          });
+    if (results.multiFaceLandmarks) {
+      for (const landmarks of results.multiFaceLandmarks) {
+        const irisCenters = getLandmarks(landmarks, [
+          LEFT_IRIS_CENTER,
+          RIGHT_IRIS_CENTER,
+        ]);
+        drawLandmarks(canvasCtx, irisCenters, {
+          color: "#FF0000",
+          lineWidth: 1,
+        });
+        const eyeCorners = getLandmarks(landmarks, [
+          LEFT_EYE_CORNER,
+          RIGHT_EYE_CORNER,
+        ]);
+        drawLandmarks(canvasCtx, eyeCorners, {
+          color: "#FF0000",
+          lineWidth: 1,
+        });
+        const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
+        drawLandmarks(canvasCtx, noseTip, {
+          color: "#FF0000",
+          lineWidth: 1,
+        });
 
-          const { normX, normY, timestamp } = getNormalizedIrisPosition(
-            landmarks,
-            canvasEl.width,
-            canvasEl.height
-          );
-          console.log(
-            `Normalized Iris Position: X: ${normX}, Y: ${normY}, Timestamp: ${timestamp}`
-          );
+        const { normX, normY, timestamp } = getNormalizedIrisPosition(
+          landmarks,
+          canvasEl.width,
+          canvasEl.height
+        );
+
+        // Send metrics via WebSocket (mapped to expected Go format)
+        const metrics = JSON.stringify({
+          x: normX,    // map normX to x
+          y: normY,    // map normY to y
+          time: timestamp,  // map timestamp to time
+        });
+
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(metrics);
+          console.log("WebSocket Sent:", metrics);
         }
       }
-      canvasCtx.restore();
-    });
+    }
+    canvasCtx.restore();
+  });
 
     // Set the internal resolution to match the displayed size.
     if (canvasEl) {
@@ -119,12 +143,16 @@
     }
   });
 
+  // Clean up on destroy
   onDestroy(() => {
     if (faceMesh) {
       faceMesh.close();
     }
     if (camera) {
       camera.stop();
+    }
+    if (ws) {
+      ws.close();
     }
   });
 </script>
