@@ -4,11 +4,11 @@ import Settings from "./Settings.astro";
 ---
 
 <header
-  class="flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg relative"
+  class="flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg relative h-[10svh]"
 >
   <!-- Logo -->
   <div class="bg-primary rounded-full p-4 shadow-lg">
-    <h1 class="text-primary-content font-bold text-2xl">DETECT</h1>
+    <h1 class="text-base-100 font-bold text-2xl">DETECT</h1>
   </div>
 
   <!-- Right-Side Navigation & Settings -->
@@ -42,7 +42,7 @@ import Settings from "./Settings.astro";
         </svg>
       </a>
       <a
-        href="#"
+        href="/upload"
         class="p-3 transition-transform transform-gpu hover:scale-110"
       >
         <!-- Upload Icon -->
@@ -97,39 +97,41 @@ import Settings from "./Settings.astro";
 </div>
 
 <!-- Settings Menu -->
-<div id="settings-menu" class="fixed top-5 right-0 h-[95vh] w-80 bg-base-300 border-4 border-primary rounded-xl shadow-2xl backdrop-blur-md transform-gpu translate-x-full transition-transform duration-300 z-50 overflow-hidden">
+<div
+  id="settings-menu"
+  class="fixed top-5 right-0 h-[95vh] w-80 bg-base-300 border-4 border-primary rounded-xl shadow-2xl backdrop-blur-md transform-gpu translate-x-full transition-transform duration-300 z-50 overflow-hidden"
+>
   <Settings />
-  </div>
+</div>
 
 <!-- JavaScript for Menu and Backdrop -->
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function () {
     const menu = document.getElementById("settings-menu");
     const openBtn = document.getElementById("settings-toggle-btn");
     const closeBtn = document.getElementById("settings-close-btn");
     const backdrop = document.getElementById("backdrop");
 
     function openMenu() {
-        if (menu) menu.classList.remove("translate-x-full"); // Slides panel into view
-        if (backdrop) {
-            backdrop.classList.add("pointer-events-auto");
-            backdrop.classList.remove("bg-opacity-0");
-            backdrop.classList.add("bg-opacity-30");
-        }
+      if (menu) menu.classList.remove("translate-x-full"); // Slides panel into view
+      if (backdrop) {
+        backdrop.classList.add("pointer-events-auto");
+        backdrop.classList.remove("bg-opacity-0");
+        backdrop.classList.add("bg-opacity-30");
+      }
     }
 
     function closeMenu() {
-        if (menu) menu.classList.add("translate-x-full"); // Slides panel out of view
-        if (backdrop) {
-            backdrop.classList.remove("bg-opacity-30");
-            backdrop.classList.add("bg-opacity-0");
-            setTimeout(() => backdrop.classList.remove("pointer-events-auto"), 300);
-        }
+      if (menu) menu.classList.add("translate-x-full"); // Slides panel out of view
+      if (backdrop) {
+        backdrop.classList.remove("bg-opacity-30");
+        backdrop.classList.add("bg-opacity-0");
+        setTimeout(() => backdrop.classList.remove("pointer-events-auto"), 300);
+      }
     }
 
     if (openBtn) openBtn.addEventListener("click", openMenu);
     if (closeBtn) closeBtn.addEventListener("click", closeMenu);
     if (backdrop) backdrop.addEventListener("click", closeMenu);
-});
+  });
 </script>
-
