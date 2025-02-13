@@ -1,6 +1,16 @@
 html {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Open Sans",
+    "Helvetica Neue",
+    sans-serif;
 }
 :root {
   /* Default Theme (Optional) */
@@ -21,13 +31,13 @@ html {
 
 [data-theme="cyberpunk"] {
   --color-primary: #00ffff; /* Electric Blue */
-  --color-primary-content: #0d0d0d; /* Deep Black for good contrast */
+  --color-primary-content: #f8f8f8; /* Deep Black for good contrast */
 
   --color-secondary: #8a2be2; /* Electric Purple */
   --color-secondary-content: #ffffff; /* White for contrast */
 
   --color-accent: #ff6ec7; /* Neon Pink */
-  --color-accent-content: #0d0d0d; /* Deep Black for good contrast */
+  --color-accent-content: #f8f8f8; /* Deep Black for good contrast */
 
   --color-neutral: #4d4d4d; /* Muted Gray */
   --color-neutral-content: #ffffff; /* White for contrast */
@@ -35,16 +45,16 @@ html {
   --color-base-100: #0d0d0d; /* Deep Black */
   --color-base-200: #1a1a1a; /* Slightly lighter black for layering */
   --color-base-300: #262626; /* Lighter black for further layering */
-  --color-base-content: #ffffff; /* White for contrast */
+  --color-base-content: #f8f8f8; /* White for contrast */
 
   --color-info: #1e90ff; /* Neon Blue */
-  --color-info-content: #0d0d0d; /* Deep Black for good contrast */
+  --color-info-content: #f8f8f8; /* Deep Black for good contrast */
 
   --color-success: #39ff14; /* Neon Green */
   --color-success-content: #0d0d0d; /* Deep Black for good contrast */
 
   --color-warning: #ff4500; /* Bright Orange */
-  --color-warning-content: #0d0d0d; /* Deep Black for good contrast */
+  --color-warning-content: #ffffff; /* Deep Black for good contrast */
 
   --color-error: #ff073a; /* Bright Red */
   --color-error-content: #ffffff; /* White for contrast */
@@ -144,11 +154,11 @@ html {
   --color-info-content: #000000; /* Jet Black for contrast */
 
   --color-success: #32cd32; /* Bright Green */
-  --color-success-content: #000000; /* Jet Black for contrast */
+  --color-success-content: #ffffff; /* Jet Black for contrast */
 
   --color-warning: #ffa500; /* Bright Orange */
-  --color-warning-content: #000000; /* Jet Black for contrast */
+  --color-warning-content: #ffffff; /* Jet Black for contrast */
 
   --color-error: #ff0000; /* Bright Red */
-  --color-error-content: #000000; /* Jet Black for contrast */
+  --color-error-content: #ffffff; /* Jet Black for contrast */
 }
