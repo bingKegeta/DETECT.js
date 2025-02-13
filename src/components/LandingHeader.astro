@@ -1,0 +1,31 @@
+---
+import ThemeSwitcher from "./ThemeSwitcher";
+---
+<header class="sticky top-0 z-50 flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg relative">
+  <!-- Logo Section -->
+  <div class="flex flex-col flex-shrink-0">
+    <h1 class="font-bold text-6xl">DETECT</h1>
+    <span class="text-1xl">AAI Solution</span>
+  </div>
+  <!-- Navigation Section -->
+  <div class="flex items-center gap-6 flex-shrink-0">
+    <ThemeSwitcher client:load />
+    <a href="/login" class="starfunk btn btn-primary btn-wide rounded-full">Login</a>
+    <a href="/login" class="starfunk btn btn-primary btn-wide rounded-full hidden md:inline-block">Sign Up</a>
+  </div>
+</header>
+<style>
+  .starfunk {
+    background: linear-gradient(90deg, var(--btn-bg-start, #000), var(--btn-bg-end, #00f));
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+  }
+  .starfunk:hover {
+    opacity: 0.9;
+  }
+</style>

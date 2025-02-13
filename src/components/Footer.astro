@@ -1,0 +1,58 @@
+---
+import Modal from "../components/Modal";
+import PrivacyPolicy from "../components/PrivacyPolicy.astro";
+import TermsOfService from "../components/termsOfService.astro";
+import Support from "../components/support.astro";
+import Section from "./Section.astro";
+---
+
+<footer
+  class="p-5 bg-base-200 text-base-content text-center relative border-4 border-primary m-4 rounded-lg h-[10svh]"
+>
+  <p>&copy; 2024 DETECT. All rights reserved.</p>
+  <nav>
+    <ul class="list-none flex justify-center gap-5 p-0">
+      <li>
+        <!-- Privacy Policy Modal -->
+        <Modal
+          client:visible
+          buttonText="Privacy Policy"
+          closeButtonClassName="text-2xl text-primary"
+          overlayClassName="bg-white"
+          buttonClassName="link"
+          modalClassName="w-[40vw] max-w-md p-5"
+        >
+          <PrivacyPolicy />
+        </Modal>
+      </li>
+
+      <li>
+        <!-- Terms of Service Modal -->
+        <Modal
+          client:visible
+          buttonText="Terms of service"
+          closeButtonClassName="text-2xl text-primary"
+          overlayClassName="bg-white"
+          buttonClassName="link"
+          modalClassName="w-[40vw] max-w-md p-5"
+        >
+          <TermsOfService />
+        </Modal>
+      </li>
+
+      <li>
+        <!-- FAQ Modal -->
+        <Modal
+          client:visible
+          buttonText="Frequently Asked Questions (FAQ)"
+          closeButtonClassName="text-2xl text-primary"
+          overlayClassName="bg-white"
+          buttonClassName="link"
+          modalClassName="w-[40vw] max-w-md p-5"
+        >
+          <Support />
+        </Modal>
+      </li>
+    </ul>
+  </nav>
+</footer>

@@ -1,0 +1,70 @@
+---
+// Section.astro
+/**
+ * Cool looking boxes
+ *
+ * **Props:**
+ *
+ **- **size** (string, *required*): A token representing the container’s square size.
+ *   - If passed as a bare token (e.g., `"64"` or `"1/2"` or `"full"`), the component will generate
+ *     `w-{size}` and `h-{size}` (e.g., `"64"` becomes `w-64 h-64`).
+ *   - Alternatively, you can pass a full Tailwind width class (like `"w-64"` or `"h-48"`). In that case,
+ *     the component will derive the other dimension by replacing the prefix (`w-` → `h-` or vice-versa).
+ *     *Why this complexity? To allow for both square and rectangular containers, i.e. ultimate customizability
+ *
+ **- **padding** (string, default: `"p-5"`): Tailwind padding classes.
+ **- **margin** (string, default: `"m-4"`): Tailwind margin classes.
+ **- **bg** (string, default: `"bg-base-200"`): Tailwind background classes.
+ **- **border** (string, default: `"border-4 border-primary"`): Tailwind border classes.
+ **- **rounded** (string, default: `"rounded-lg"`): Tailwind border-radius classes.
+ **- **shadow** (string, default: `"shadow-lg"`): Tailwind shadow classes.
+ **- **class** (string, default: `"justify-center"`): Additional classes to merge with the above.
+ *
+ * ? Any extra props will be forwarded to the underlying `<section>` element.
+ */
+interface SectionProps {
+  size: string;
+  padding?: string;
+  margin?: string;
+  bg?: string;
+  border?: string;
+  rounded?: string;
+  shadow?: string;
+  class?: string;
+}
+
+const {
+  size,
+  padding = "p-5",
+  margin = "m-4",
+  bg = "bg-base-200",
+  border = "border-4 border-primary",
+  rounded = "rounded-lg",
+  shadow = "shadow-lg",
+  class: extraClasses = "justify-center",
+  ...restProps
+} = Astro.props as SectionProps;
+
+// Compute the width and height classes based on the provided `size` prop.
+// If the size already begins with "w-" or "h-", we assume it’s a full class and derive the counterpart.
+let widthClass: string;
+let heightClass: string;
+if (size.startsWith("w-")) {
+  widthClass = size;
+  heightClass = `h-${size.slice(2)}`;
+} else if (size.startsWith("h-")) {
+  heightClass = size;
+  widthClass = `w-${size.slice(2)}`;
+} else {
+  // Otherwise, assume a bare token was provided.
+  widthClass = `w-${size}`;
+  heightClass = `h-${size}`;
+}
+---
+
+<section
+  {...restProps}
+  class={`${widthClass} ${heightClass} ${padding} ${margin} ${bg} ${border} ${rounded} ${shadow} ${extraClasses}`.trim()}
+>
+  <slot />
+</section>

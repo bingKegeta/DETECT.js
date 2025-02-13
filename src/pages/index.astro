@@ -1,22 +1,76 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Capture from '../components/Capture.astro';
+import LandingLayout from "../layouts/LandingLayout.astro";
+import LandingHeader from "../components/LandingHeader.astro";
 ---
-
-<Layout title="Welcome to Astro.">
-	<main class="m-auto p-[1rem] w-[800px] max-w-full text-white">
-		<Capture />
-	</main>
-</Layout>
-
-<style>
-	main {
-		margin: auto;
-		padding: 1rem;
-		width: 800px;
-		max-width: calc(100% - 2rem);
-		color: white;
-		font-size: 20px;
-		line-height: 1.6;
-	}
-</style>
+<LandingLayout>
+  <LandingHeader />
+  <main class="w-full max-w-screen-xl mx-auto px-4 md:px-8 text-base-content py-8 space-y-12">
+    <!-- Hero Section -->
+    <section class="text-center fadeOnScroll" style="animation-delay: 0s;">
+      <h1 class="text-7xl font-bold text-primary mb-4">Welcome to DETECT</h1>
+      <h2 class="text-4xl font-semibold text-secondary mb-6">
+        AI-Powered Lie Detection Through Eye Movement Analysis
+      </h2>
+      <p class="text-lg leading-relaxed">
+        Experience a cutting-edge approach to deception detection that uses advanced eye movement analysis as a non-intrusive alternative to traditional polygraphs.
+      </p>
+    </section>
+    <!-- Purpose Section -->
+    <section class="fadeOnScroll" style="animation-delay: 0s;">
+      <h2 class="text-4xl font-semibold mb-4">What is the Purpose of DETECT?</h2>
+      <p class="text-lg leading-relaxed">
+        Unlike traditional polygraph tests—which are intrusive and stressful—DETECT offers a non-intrusive, advanced method for assessing truthfulness. By analyzing subtle eye movement patterns, DETECT provides a reliable alternative that preserves user comfort.
+      </p>
+    </section>
+    <!-- Features Section -->
+    <section class="fadeOnScroll" style="animation-delay: 0s;">
+      <h2 class="text-4xl font-semibold mb-4">Project Features</h2>
+      <ul class="list-disc list-inside text-lg leading-relaxed">
+        <li><strong>Real-Time Analysis</strong> – Immediate feedback powered by advanced statistical modeling.</li>
+        <li><strong>Multiple Analysis Methods</strong> – Choose between video upload, live webcam analysis, or reviewing historical data.</li>
+        <li><strong>Secure Authentication</strong> – Streamlined, robust login procedures ensure your data stays protected.</li>
+        <li><strong>Intuitive Dashboard</strong> – A user-friendly interface for monitoring results and insights.</li>
+      </ul>
+    </section>
+    <!-- Privacy Section -->
+    <section class="fadeOnScroll" style="animation-delay: 0s;">
+      <h2 class="text-4xl font-semibold mb-4">Privacy &amp; Security</h2>
+      <p class="text-lg leading-relaxed">
+        Your privacy is paramount. DETECT never stores any personally identifiable data, such as video recordings. All processing occurs in real time and only with your explicit consent.
+      </p>
+    </section>
+    <!-- Images Section -->
+    <section class="flex w-full gap-4 mt-8 fadeOnScroll" style="animation-delay: 0s;">
+      <img src="/images/001.jpg" alt="Corporate Cartoon 1" class="w-1/2 object-cover" />
+      <img src="/images/002.jpg" alt="Corporate Cartoon 2" class="w-1/2 object-cover" />
+    </section>
+  </main>
+  <style>
+    .fadeOnScroll {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 2s ease-out, transform 2s ease-out;
+    }
+    .fadeIn {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+  <script is:inline>
+    document.addEventListener("DOMContentLoaded", function () {
+      const faders = document.querySelectorAll('.fadeOnScroll');
+      const options = { threshold: 0.1 };
+      const appearOnScroll = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('fadeIn');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, options);
+      faders.forEach(fader => {
+        appearOnScroll.observe(fader);
+      });
+    });
+  </script>
+</LandingLayout>

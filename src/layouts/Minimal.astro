@@ -1,0 +1,25 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<html data-theme="default">
+  <head>
+    <title>New Session</title>
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body class="bg-base-100 text-base-content">
+    <Header />
+    
+    <div
+      class="flex-grow p-8 bg-base-200 text-base-content rounded-lg
+      shadow-lg h-[85vh] w-full border-4 border-primary mx-4 my-4 
+      flex items-center justify-center"
+    >
+      <!-- Slot for content -->
+      <slot />
+    </div>
+
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,26 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Sidebar from "../components/Sidebar.astro";
+---
+
+<html data-theme="default">
+  <head>
+    <title>WebApp Layout</title>
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body class="bg-base-100 text-base-content">
+    <Header />
+    <div class="h-[72svh] flex">
+      <Sidebar />
+      <div
+        class="flex-grow p-5 bg-base-200 text-base-content rounded-lg
+        shadow-lg h-full border-4 border-primary mr-4"
+      >
+        <!-- Slot for client-side components -->
+        <slot />
+      </div>
+    </div>
+    <Footer />
+  </body>
+</html>
