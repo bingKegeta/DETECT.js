@@ -4,70 +4,73 @@ import LandingHeader from "../components/LandingHeader.astro";
 ---
 <LandingLayout>
   <LandingHeader />
-  <section class="w-full max-w-screen-xl mx-auto px-4 md:px-8 flex flex-col items-center justify-center flex-1 text-base-content py-8">
-    <article class="leading-relaxed">
-      <h1 class="text-6xl font-bold">Welcome to DETECT</h1>
-      <h2 class="text-4xl font-semibold mt-4">AI-Powered Lie Detection Through Eye Movement Analysis</h2>
-      <p class="mt-6">
-        DETECT is an advanced deception detection system that leverages <strong>statistical deterministic modeling</strong> to analyze <strong>eye movement patterns</strong>. By examining gaze shifts, fixation points, and pupil motion, DETECT identifies behavioral inconsistencies that may indicate deception.
+  <main class="w-full max-w-screen-xl mx-auto px-4 md:px-8 text-base-content py-8 space-y-12">
+    <!-- Hero Section -->
+    <section class="text-center fadeOnScroll" style="animation-delay: 0s;">
+      <h1 class="text-7xl font-bold text-primary mb-4">Welcome to DETECT</h1>
+      <h2 class="text-4xl font-semibold text-secondary mb-6">
+        AI-Powered Lie Detection Through Eye Movement Analysis
+      </h2>
+      <p class="text-lg leading-relaxed">
+        Experience a cutting-edge approach to deception detection that uses advanced eye movement analysis as a non-intrusive alternative to traditional polygraphs.
       </p>
-      <hr class="my-6 border-t border-base-content"/>
-      <h2 class="text-4xl font-semibold mt-6">How DETECT Works</h2>
-      <h3 class="text-2xl font-semibold mt-4">1️⃣ Start on the Landing Page</h3>
-      <ul class="mt-2 list-disc list-inside">
-        <li>New users can <strong>sign up</strong> for an account.</li>
-        <li>Registered users can <strong>log in</strong> to access DETECT's dashboard.</li>
-      </ul>
-      <h3 class="text-2xl font-semibold mt-4">2️⃣ Secure User Authentication</h3>
-      <ul class="mt-2 list-disc list-inside">
-        <li>If a user forgets their password, they can <strong>reset it</strong> through the recovery system.</li>
-        <li>The system <strong>authenticates credentials</strong> before granting access.</li>
-      </ul>
-      <h3 class="text-2xl font-semibold mt-4">3️⃣ Access the User Dashboard</h3>
-      <ul class="mt-2 list-disc list-inside">
-        <li>Once logged in, users land on the <strong>dashboard</strong>, where they can choose how to proceed.</li>
-      </ul>
-      <h3 class="text-2xl font-semibold mt-4">4️⃣ Choose an Analysis Method</h3>
-      <p class="mt-2">Users have <strong>three main options</strong> for lie detection:</p>
-      <ol class="mt-2 list-decimal list-inside">
-        <li><strong>Upload a Video</strong> – Analyze deception indicators in a pre-recorded video.</li>
-        <li><strong>Live Webcam Analysis</strong> – Run real-time deception detection using the user’s webcam.</li>
-        <li><strong>View Prior Metrics</strong> – Review past analysis results for comparative study.</li>
-      </ol>
-      <h3 class="text-2xl font-semibold mt-4">5️⃣ Processing &amp; Results</h3>
-      <ul class="mt-2 list-disc list-inside">
-        <li>For <strong>videos</strong> and <strong>live sessions</strong>, DETECT processes <strong>eye movement patterns</strong> to detect inconsistencies.</li>
-        <li>Results are displayed in the <strong>metrics panel</strong>, allowing users to assess deception likelihood.</li>
-      </ul>
-      <p class="mt-6">
-        🔒 <strong>Privacy &amp; Security</strong> – All analysis is performed in real time without storing personal data.
+    </section>
+    <!-- Purpose Section -->
+    <section class="fadeOnScroll" style="animation-delay: 0s;">
+      <h2 class="text-4xl font-semibold mb-4">What is the Purpose of DETECT?</h2>
+      <p class="text-lg leading-relaxed">
+        Unlike traditional polygraph tests—which are intrusive and stressful—DETECT offers a non-intrusive, advanced method for assessing truthfulness. By analyzing subtle eye movement patterns, DETECT provides a reliable alternative that preserves user comfort.
       </p>
-      <hr class="my-6 border-t border-base-content"/>
-      <h2 class="text-4xl font-semibold mt-6">Who Can Use DETECT?</h2>
-      <ul class="mt-2 list-disc list-inside">
-        <li>✔ <strong>Law Enforcement &amp; Investigators</strong> – Assess potential deception during interrogations or screenings.</li>
-        <li>✔ <strong>Corporate Security &amp; Hiring</strong> – Enhance background checks and fraud detection.</li>
-        <li>✔ <strong>Academic &amp; Psychological Research</strong> – Study cognitive load and deception patterns through eye-tracking data.</li>
-        <li>✔ <strong>Media &amp; Journalism</strong> – Evaluate interviewee behavior for signs of misinformation.</li>
-        <li>✔ <strong>Personal Use &amp; Curiosity</strong> – Explore how deception correlates with gaze behavior.</li>
+    </section>
+    <!-- Features Section -->
+    <section class="fadeOnScroll" style="animation-delay: 0s;">
+      <h2 class="text-4xl font-semibold mb-4">Project Features</h2>
+      <ul class="list-disc list-inside text-lg leading-relaxed">
+        <li><strong>Real-Time Analysis</strong> – Immediate feedback powered by advanced statistical modeling.</li>
+        <li><strong>Multiple Analysis Methods</strong> – Choose between video upload, live webcam analysis, or reviewing historical data.</li>
+        <li><strong>Secure Authentication</strong> – Streamlined, robust login procedures ensure your data stays protected.</li>
+        <li><strong>Intuitive Dashboard</strong> – A user-friendly interface for monitoring results and insights.</li>
       </ul>
-      <hr class="my-6 border-t border-base-content"/>
-      <h3 class="text-2xl font-semibold mt-6">Start Using DETECT Today!</h3>
-      <p class="mt-2">
-        Ready to explore the future of AI-powered deception detection? <strong>Sign up now and experience DETECT firsthand.</strong>
+    </section>
+    <!-- Privacy Section -->
+    <section class="fadeOnScroll" style="animation-delay: 0s;">
+      <h2 class="text-4xl font-semibold mb-4">Privacy &amp; Security</h2>
+      <p class="text-lg leading-relaxed">
+        Your privacy is paramount. DETECT never stores any personally identifiable data, such as video recordings. All processing occurs in real time and only with your explicit consent.
       </p>
-      <p class="mt-4">
-        <a href="/login" class="btn btn-outline starfunk">Login</a>
-        <a href="/login" class="btn btn-outline starfunk hidden md:inline-block">Sign Up</a>
-      </p>
-      <p class="mt-6">
-        🔬 <strong>Developed by AAI Solution</strong> | A Senior Design Project at UCF
-      </p>
-      <!-- Images container: Side padding removed -->
-      <div class="flex w-full gap-4 mt-8">
-        <img src="/images/001.jpg" alt="Image 001" class="w-1/2 object-cover" />
-        <img src="/images/002.jpg" alt="Image 002" class="w-1/2 object-cover" />
-      </div>
-    </article>
-  </section>
+    </section>
+    <!-- Images Section -->
+    <section class="flex w-full gap-4 mt-8 fadeOnScroll" style="animation-delay: 0s;">
+      <img src="/images/001.jpg" alt="Corporate Cartoon 1" class="w-1/2 object-cover" />
+      <img src="/images/002.jpg" alt="Corporate Cartoon 2" class="w-1/2 object-cover" />
+    </section>
+  </main>
+  <style>
+    .fadeOnScroll {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 2s ease-out, transform 2s ease-out;
+    }
+    .fadeIn {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+  <script is:inline>
+    document.addEventListener("DOMContentLoaded", function () {
+      const faders = document.querySelectorAll('.fadeOnScroll');
+      const options = { threshold: 0.1 };
+      const appearOnScroll = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('fadeIn');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, options);
+      faders.forEach(fader => {
+        appearOnScroll.observe(fader);
+      });
+    });
+  </script>
 </LandingLayout>

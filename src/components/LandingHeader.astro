@@ -1,23 +1,21 @@
 ---
 import ThemeSwitcher from "./ThemeSwitcher";
 ---
-<header class="sticky top-0 z-50 flex flex-wrap items-center justify-between p-6 border-4 border-primary rounded-lg bg-base-200 text-base-content">
+<header class="sticky top-0 z-50 flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg relative">
+  <!-- Logo Section -->
   <div class="flex flex-col flex-shrink-0">
-    <span class="text-6xl font-bold">DETECT</span>
-    <span class="text-xl">AAI Solution</span>
+    <span class="text-2xl font-bold text-primary-content bg-primary rounded-full p-4 shadow-lg">DETECT</span>
   </div>
-  <div class="flex items-center space-x-4 flex-shrink-0">
-    <!-- Use the provided React ThemeSwitcher component -->
+  <!-- Navigation Section -->
+  <div class="flex items-center gap-6 flex-shrink-0">
     <ThemeSwitcher client:load />
-    <!-- Custom-styled Login and Sign Up buttons (Sign Up hidden on mobile) -->
     <a href="/login" class="starfunk btn btn-primary btn-wide rounded-full">Login</a>
     <a href="/login" class="starfunk btn btn-primary btn-wide rounded-full hidden md:inline-block">Sign Up</a>
   </div>
 </header>
 <style>
-  /* Custom styling for "Starfunk" buttons with a cyberpunk look */
   .starfunk {
-    background: linear-gradient(90deg, #000, #00f);
+    background: linear-gradient(90deg, var(--btn-bg-start, #000), var(--btn-bg-end, #00f));
     color: white;
     padding: 0.75rem 2rem;
     font-size: 1rem;
