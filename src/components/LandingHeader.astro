@@ -1,8 +1,5 @@
 ---
-/* LandingHeader.astro
-   Renders the landing page header with the logo, team name, a theme toggle dropdown,
-   and custom Login/Sign Up buttons. The header is sticky and adjusts responsively.
-*/
+import ThemeSwitcher from "./ThemeSwitcher";
 ---
 <header class="sticky top-0 z-50 flex flex-wrap items-center justify-between p-6 border-4 border-primary rounded-lg bg-base-200 text-base-content">
   <div class="flex flex-col flex-shrink-0">
@@ -10,27 +7,15 @@
     <span class="text-xl">AAI Solution</span>
   </div>
   <div class="flex items-center space-x-4 flex-shrink-0">
-    <!-- Theme Toggle Dropdown -->
-    <div class="relative">
-      <select id="theme-select" class="select select-bordered bg-base-200 text-base-content">
-        <option value="cyberpunk" selected>Cyberpunk</option>
-        <option value="default">Default</option>
-        <!-- More themes if needed -->
-      </select>
-    </div>
+    <!-- Use the provided React ThemeSwitcher component -->
+    <ThemeSwitcher client:load />
     <!-- Custom-styled Login and Sign Up buttons (Sign Up hidden on mobile) -->
     <a href="/login" class="starfunk btn btn-primary btn-wide rounded-full">Login</a>
     <a href="/login" class="starfunk btn btn-primary btn-wide rounded-full hidden md:inline-block">Sign Up</a>
   </div>
 </header>
-<script is:inline>
-  const themeSelect = document.getElementById('theme-select');
-  themeSelect.addEventListener('change', (event) => {
-    document.documentElement.setAttribute('data-theme', event.target.value);
-  });
-</script>
 <style>
-  /* "Starfunk" button styling for a cyberpunk look */
+  /* Custom styling for "Starfunk" buttons with a cyberpunk look */
   .starfunk {
     background: linear-gradient(90deg, #000, #00f);
     color: white;
