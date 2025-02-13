@@ -18,31 +18,6 @@ const WebcamCap: React.FC = () => {
   const cameraRef = useRef<Camera | null>(null);
   const faceMeshRef = useRef<FaceMesh | null>(null);
 
-  // WebSocket connection
-  const websocketRef = useRef<WebSocket | null>(null);
-
-  useEffect(() => {
-    // Initialize WebSocket connection
-    websocketRef.current = new WebSocket("ws://localhost:8080"); // Replace with actual WebSocket server URL
-
-    websocketRef.current.onopen = () => {
-      console.log("WebSocket connection established");
-    };
-
-    websocketRef.current.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-
-    websocketRef.current.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    return () => {
-      // Cleanup WebSocket connection on unmount
-      websocketRef.current?.close();
-    };
-  }, []);
-
   useEffect(() => {
     const videoElement = videoRef.current;
     const canvasElement = canvasRef.current;
@@ -82,38 +57,15 @@ const WebcamCap: React.FC = () => {
               color: "#FF0000",
               lineWidth: 1,
             });
-            const eyeCornerLandmarks = getLandmarks(landmarks, [
-              LEFT_EYE_CORNER,
-              RIGHT_EYE_CORNER,
-            ]);
-            drawLandmarks(canvasCtx, eyeCornerLandmarks, {
-              color: "#FF0000",
-              lineWidth: 1,
-            });
-            const noseLandmarks = getLandmarks(landmarks, [NOSE_TIP]);
-            drawLandmarks(canvasCtx, noseLandmarks, {
-              color: "#FF0000",
-              lineWidth: 1,
-            });
 
             const { normX, normY, timestamp } = getNormalizedIrisPosition(
               landmarks,
               canvasElement.width,
               canvasElement.height
             );
-
-            // Send eye-tracking data via WebSocket
-            const data = {
-              x: normX.toFixed(4),
-              y: normY.toFixed(4),
-              second: timestamp.toFixed(3),
-            };
-
-            if (websocketRef.current?.readyState === WebSocket.OPEN) {
-              websocketRef.current.send(JSON.stringify(data));
-            }
-
-            console.log(`Data sent: ${JSON.stringify(data)}`);
+            console.log(
+              `Normalized Iris Position: X: ${normX}, Y: ${normY}, Timestamp: ${timestamp}`
+            );
           }
         }
         canvasCtx.restore();
@@ -164,8 +116,8 @@ const WebcamCap: React.FC = () => {
         ></video>
         <canvas
           ref={canvasRef}
-          width="640"
-          height="460"
+          width="600"
+          height="250"
           className="m-2 rounded shadow-lg bg-base-300 border-2 border-accent"
         ></canvas>
       </div>
@@ -194,4 +146,3 @@ const WebcamCap: React.FC = () => {
 };
 
 export default WebcamCap;
-
