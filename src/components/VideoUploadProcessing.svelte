@@ -1,207 +1,250 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import { FaceMesh, type Results } from "@mediapipe/face_mesh";
-    import { drawLandmarks } from "@mediapipe/drawing_utils";
-    import {
-      LEFT_IRIS_CENTER,
-      RIGHT_IRIS_CENTER,
-      LEFT_EYE_CORNER,
-      RIGHT_EYE_CORNER,
-      NOSE_TIP,
-      getNormalizedIrisPosition,
-      getLandmarks,
-    } from "../scripts/utils";
-  
-    let video: HTMLVideoElement;
-    let canvas: HTMLCanvasElement;
-    let faceMesh: FaceMesh | null = null;
-  
-    let isPlaying = false;
-    let videoLoaded = false;
-    let key = 0;
-  
-    // Initialize FaceMesh whenever key changes.
-    $: {
-      key;
-      if (canvas) {
-        initFaceMesh();
-      }
-    }
-  
-    function initFaceMesh() {
-      if (!canvas) return;
-      const canvasCtx = canvas.getContext("2d");
-      if (!canvasCtx) return;
-  
-      faceMesh = new FaceMesh({
-        locateFile: (file: string) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-      });
-  
-      faceMesh.setOptions({
-        maxNumFaces: 1,
-        refineLandmarks: true,
-        minDetectionConfidence: 0.43,
-        minTrackingConfidence: 0.5,
-      });
-  
-      faceMesh.onResults((results: Results) => {
-        if (!canvasCtx) return;
-        canvasCtx.save();
-        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-        // Draw the image using the canvas's internal resolution.
-        canvasCtx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-        if (results.multiFaceLandmarks) {
-          for (const landmarks of results.multiFaceLandmarks) {
-            const irisCenterLandmarks = getLandmarks(landmarks, [
-              LEFT_IRIS_CENTER,
-              RIGHT_IRIS_CENTER,
-            ]);
-            drawLandmarks(canvasCtx, irisCenterLandmarks, {
-              color: "#FF0000",
-              lineWidth: 1,
-            });
-            const eyeCornerLandmarks = getLandmarks(landmarks, [
-              LEFT_EYE_CORNER,
-              RIGHT_EYE_CORNER,
-            ]);
-            drawLandmarks(canvasCtx, eyeCornerLandmarks, {
-              color: "#FF0000",
-              lineWidth: 1,
-            });
-            const noseLandmarks = getLandmarks(landmarks, [NOSE_TIP]);
-            drawLandmarks(canvasCtx, noseLandmarks, {
-              color: "#FF0000",
-              lineWidth: 1,
-            });
-  
-            const { normX, normY, timestamp } = getNormalizedIrisPosition(
-              landmarks,
-              canvas.width,
-              canvas.height
-            );
-            console.log(
-              `Normalized Iris Position: X: ${normX}, Y: ${normY}, Timestamp: ${timestamp}`
-            );
-          }
+  import { onMount, onDestroy } from "svelte";
+  import { FaceMesh } from "@mediapipe/face_mesh";
+  import { drawLandmarks } from "@mediapipe/drawing_utils";
+  import {
+    LEFT_IRIS_CENTER,
+    RIGHT_IRIS_CENTER,
+    LEFT_EYE_CORNER,
+    RIGHT_EYE_CORNER,
+    NOSE_TIP,
+    getNormalizedIrisPosition,
+    getLandmarks,
+  } from "../scripts/utils";
+
+  // UI state variables
+  let isPlaying = false;
+  let videoLoaded = false;
+  let isProcessing = false;
+
+  // Offscreen processing variables
+  let videoElement: HTMLVideoElement;
+  let processingCanvas: HTMLCanvasElement;
+  let offscreenCtx: CanvasRenderingContext2D | null;
+  let faceMesh: FaceMesh;
+  let animationFrameId: number;
+
+  const canvasWidth = 640;
+  const canvasHeight = 480;
+
+  onMount(() => {
+    // Create a hidden video element for loading and playback
+    videoElement = document.createElement("video");
+    videoElement.style.display = "none";
+    // Ensure inline playback (especially for mobile)
+    videoElement.setAttribute("playsinline", "true");
+    document.body.appendChild(videoElement);
+
+    // Create a hidden canvas element for processing
+    processingCanvas = document.createElement("canvas");
+    processingCanvas.width = canvasWidth;
+    processingCanvas.height = canvasHeight;
+    processingCanvas.style.display = "none";
+    document.body.appendChild(processingCanvas);
+    offscreenCtx = processingCanvas.getContext("2d");
+
+    // Initialize MediaPipe FaceMesh
+    faceMesh = new FaceMesh({
+      locateFile: (file) =>
+        `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+    });
+    faceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.43,
+      minTrackingConfidence: 0.5,
+    });
+
+    // Process results – drawing to the offscreen canvas (not displayed)
+    faceMesh.onResults((results) => {
+      if (!offscreenCtx) return;
+      offscreenCtx.save();
+      offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+      offscreenCtx.drawImage(results.image, 0, 0, canvasWidth, canvasHeight);
+      if (results.multiFaceLandmarks) {
+        for (const landmarks of results.multiFaceLandmarks) {
+          // Draw iris centers
+          const irisCenterLandmarks = getLandmarks(landmarks, [
+            LEFT_IRIS_CENTER,
+            RIGHT_IRIS_CENTER,
+          ]);
+          drawLandmarks(offscreenCtx, irisCenterLandmarks, {
+            color: "#FF0000",
+            lineWidth: 1,
+          });
+          // Draw eye corners
+          const eyeCornerLandmarks = getLandmarks(landmarks, [
+            LEFT_EYE_CORNER,
+            RIGHT_EYE_CORNER,
+          ]);
+          drawLandmarks(offscreenCtx, eyeCornerLandmarks, {
+            color: "#FF0000",
+            lineWidth: 1,
+          });
+          // Draw the nose tip
+          const noseLandmarks = getLandmarks(landmarks, [NOSE_TIP]);
+          drawLandmarks(offscreenCtx, noseLandmarks, {
+            color: "#FF0000",
+            lineWidth: 1,
+          });
+
+          // Log normalized iris position
+          const { normX, normY, timestamp } = getNormalizedIrisPosition(
+            landmarks,
+            canvasWidth,
+            canvasHeight
+          );
+          console.log(
+            `Normalized Iris Position: X: ${normX}, Y: ${normY}, Timestamp: ${timestamp}`
+          );
         }
-        canvasCtx.restore();
-      });
-    }
-  
-    async function processVideo() {
-      if (video && canvas && faceMesh) {
-        async function onVideoFrame() {
-          if (video.paused || video.ended) return;
-          if (faceMesh) {
-            await faceMesh.send({ image: video });
-          }
-          requestAnimationFrame(onVideoFrame);
-        }
-        requestAnimationFrame(onVideoFrame);
       }
+      offscreenCtx.restore();
+    });
+
+    // === Pre-warm mediapipe: perform a dummy send on a blank frame ===
+    if (offscreenCtx) {
+      // Draw a blank frame (or any minimal dummy content)
+      offscreenCtx.fillStyle = "#000";
+      offscreenCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+      // Send the blank frame. This call will download and compile WASM, create a WebGL context, etc.
+      faceMesh.send({ image: processingCanvas }).catch((error) =>
+        console.error("Error during warm-up:", error)
+      );
     }
-  
-    function handleVideoUpload(event: Event) {
-      const target = event.target as HTMLInputElement;
-      const file = target.files?.[0];
-      if (file && video) {
-        video.src = URL.createObjectURL(file);
-        video.onloadeddata = () => {
-          videoLoaded = true;
-          isPlaying = true;
-          video.play();
-          processVideo();
-        };
-      }
+  });
+
+  onDestroy(() => {
+    if (videoElement) {
+      videoElement.pause();
+      videoElement.src = "";
+      videoElement.remove();
     }
-  
-    function handlePlay() {
-      if (video) {
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId);
+    }
+  });
+
+  // Process the video frame by frame:
+  async function processVideoFrame() {
+    // Check immediately: if paused or ended, stop processing.
+    if (videoElement.paused || videoElement.ended) {
+      isProcessing = false;
+      return;
+    }
+    if (offscreenCtx) {
+      offscreenCtx.drawImage(videoElement, 0, 0, canvasWidth, canvasHeight);
+    }
+    // Check again before processing the frame.
+    if (videoElement.paused || videoElement.ended) {
+      isProcessing = false;
+      return;
+    }
+    try {
+      await faceMesh.send({ image: processingCanvas });
+    } catch (error) {
+      console.error("Error processing frame:", error);
+    }
+    // If video got paused while processing, stop here.
+    if (videoElement.paused || videoElement.ended) {
+      isProcessing = false;
+      return;
+    }
+    animationFrameId = requestAnimationFrame(processVideoFrame);
+  }
+
+  // Triggered when a file is selected.
+  function handleVideoUpload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files ? input.files[0] : null;
+    if (file) {
+      const url = URL.createObjectURL(file);
+      videoElement.src = url;
+      videoElement.onloadeddata = () => {
+        videoLoaded = true;
         isPlaying = true;
-        video.play();
-        processVideo();
-      }
+        isProcessing = true;
+        videoElement.play();
+        processVideoFrame();
+      };
     }
-  
-    function handlePause() {
-      if (video) {
-        isPlaying = false;
-        video.pause();
-      }
+  }
+
+  // Control handlers
+  function handlePlay() {
+    if (videoLoaded && videoElement.paused) {
+      isPlaying = true;
+      isProcessing = true;
+      videoElement.play();
+      processVideoFrame();
     }
-  
-    function handleStop() {
+  }
+
+  function handlePause() {
+    if (videoLoaded && !videoElement.paused) {
+      isPlaying = false;
+      // Immediately stop processing and cancel the next frame.
+      isProcessing = false;
+      videoElement.pause();
+      cancelAnimationFrame(animationFrameId);
+    }
+  }
+
+  function handleStop() {
+    if (videoLoaded) {
       isPlaying = false;
       videoLoaded = false;
-      key = key + 1;
-      if (canvas) {
-        const ctx = canvas.getContext("2d");
-        if (ctx) {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+      videoElement.pause();
+      videoElement.currentTime = 0;
+      if (offscreenCtx) {
+        offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
       }
     }
-  
-    onMount(() => {
-      // Set the internal resolution to match the displayed size.
-      if (canvas) {
-        // Removing "px" when setting the canvas width/height attributes.
-        canvas.width = Math.floor(window.innerWidth * 0.9);
-        canvas.height = Math.floor(window.innerHeight * 0.9);
-      }
-    });
-  
-    onDestroy(() => {
-      if (faceMesh) {
-        faceMesh.close();
-      }
-    });
-  </script>
+  }
+</script>
 
-  <div class="bg-base-200 m-4 overflow-hidden flex flex-col items-center justify-center border-primary rounded-lg border-4 opacity-90 shadow-glow h-[84svh]">
-    <!-- Video file input -->
-    <input
-      type="file"
-      accept="video/*"
-      on:change={handleVideoUpload}
-      class="flex p-2 bg-secondary text-secondary-content rounded-md w-fit mb-2 shadow-glow hover:scale-105 transition-transform"
-    />
-  
-    <div class="border-2 border-accent rounded-lg">
-      {#key key}
-        <video bind:this={video} style="display: none;">
-          <track kind="captions" />
-        </video>
-      {/key}
-      <!-- The canvas is styled to use viewport units.
-           It will always be 75vw by 75vh, following the browser window’s aspect ratio. -->
-      <canvas
-        bind:this={canvas}
-        class="m-2 rounded bg-neutral shadow-glow"
-        style="width: 75vw; height: 63vh;"
-      ></canvas>
+<div class="flex flex-col items-center justify-center rounded-lg border-4 border-primary opacity-90 shadow-glow bg-base-200 m-4 p-4">
+  <!-- Processing indicator: Spinner while processing, Pause symbol when paused -->
+  {#if isProcessing}
+    <div class="spinner mt-4 flex justify-center">
+      <div class="loader"></div>
     </div>
-  
-    {#if videoLoaded}
-      <div class="flex w-full font-semibold text-lg text-primary-content">
-        <button
-          on:click={handlePlay}
-          disabled={isPlaying}
-          class="bg-info m-2 ml-3 my-2 py-4 rounded-md w-full h-full text-info-content hover:bg-success hover:text-success-content hover:scale-105 hover:shadow-glow transition-transform"
-          class:opacity-50={isPlaying}
-          class:cursor-not-allowed={isPlaying}
-        >
-          Play
-        </button>
+  {:else if videoLoaded && !isPlaying}
+    <div class="pause-icon mt-4 flex justify-center">
+      <div class="pause-symbol">&#10074;&#10074;</div>
+    </div>
+  {/if}
+  <!-- Visible file input with original styling -->
+  <input
+    type="file"
+    accept="video/*"
+    on:change={handleVideoUpload}
+    id="fileInput"
+    class="flex p-2 bg-secondary hover:text-secondary-content rounded-md w-fit my-2 shadow-glow hover:scale-105 transition-transform"
+  />
+
+  <!-- When a video is loaded, display the controls -->
+  {#if videoLoaded}
+    <div class="flex w-full font-semibold text-lg border-2 border-neutral-content rounded-lg mb-4">
+      <button
+                on:click={handlePlay}
+                aria-label="Play video"
+                disabled={isPlaying}
+                class="bg-info m-2 ml-3 my-2 py-4 rounded-md w-full h-full text-info-content hover:bg-success hover:text-success-content hover:scale-105 hover:shadow-glow transition-transform"
+                class:opacity-50={isPlaying}
+                class:cursor-not-allowed={isPlaying}
+              >
+              Play
+              </button>
         <button
           on:click={handlePause}
+          aria-label="Pause video"
           disabled={!isPlaying}
-          class="bg-warning m-2 py-4 rounded-md w-full h-full text-warning-content hover:bg-secondary hover:text-secondary-content hover:scale-105 hover:shadow-glow transition-transform"
+          class="bg-secondary m-2 py-4 rounded-md w-full h-full text-secondary-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
           class:opacity-50={!isPlaying}
           class:cursor-not-allowed={!isPlaying}
         >
-          Pause
+        Pause
         </button>
         <button
           on:click={handleStop}
@@ -212,7 +255,34 @@
         >
           Stop
         </button>
-      </div>
-    {/if}
-  </div>
-  
+    </div>
+  {/if}
+</div>
+
+<style>
+  /* Spinner styling */
+  .loader {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #555;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Pause symbol styling */
+  .pause-symbol {
+    font-size: 40px;
+    font-weight: bold;
+    color: #555;
+  }
+</style>
