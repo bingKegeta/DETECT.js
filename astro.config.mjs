@@ -9,11 +9,11 @@ import svelte from '@astrojs/svelte';
 
 import node from '@astrojs/node';
 
+import vercel from '@astrojs/vercel';
+
 // https://astro.build/config
 export default defineConfig({
   integrations: [tailwind(), react(), svelte()],
 
-  adapter: node({
-    mode: 'standalone'
-  })
+  adapter: vercel()
 });
