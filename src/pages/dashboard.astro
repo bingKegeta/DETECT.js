@@ -53,19 +53,22 @@ const sessions = await getCollection("sessions");
           </li>
           <li>
             <Modal
-              buttonText="Upload Video"
-              buttonClassName="block w-full text-left px-4 py-4 hover:bg-primary hover:text-base-100 rounded"
-              overlayClassName="bg-white"
-              modalClassName="w-[40vw] max-w-md p-5"
-              client:visible
-            >
-              <div class="p-4">
-                <h3 class="text-xl font-semibold mb-4 text-primary">
-                  Upload a Video
-                </h3>
-                <VideoUploadProcessing client:visible />
+            buttonText="Upload Video"
+            buttonClassName="block w-full text-left px-4 py-4 hover:bg-primary hover:text-base-100 rounded"
+            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            modalClassName="w-[85vw] max-w-md h-auto p-6 flex flex-col items-center justify-start bg-base-200 border border-primary rounded-lg shadow-lg"
+            client:visible
+          >
+            <div class="w-full flex flex-col items-center">
+              <h3 class="text-xl font-semibold mb-3 text-primary text-center">
+                Upload a Video
+              </h3>
+          
+              <div class="w-full flex flex-col items-center justify-center">
+                <VideoUploadProcessing client:visible class="w-full max-w-sm" />
               </div>
-            </Modal>
+            </div>
+          </Modal>                
           </li>
         </ul>
       </div>

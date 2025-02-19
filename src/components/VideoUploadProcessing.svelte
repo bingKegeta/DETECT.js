@@ -21,6 +21,7 @@
   let variance: number | null = null;
   let acceleration: number | null = null;
   let probability: number | null = null;
+  let isVideoUploaded = false;
 
   function startWebSocket() {
     if (ws) ws.close(); // Ensure no duplicate connections
@@ -125,7 +126,7 @@
   });
 </script>
 
-<div class="bg-base-200 m-4 overflow-hidden flex flex-col items-center justify-center border-primary rounded-lg border-4 opacity-90 shadow-glow h-[84svh]">
+<div class="bg-base-200 m-4 overflow-hidden flex flex-col items-center justify-center border-primary rounded-lg border-1 opacity-90 shadow-glow h-[8svh]">
   <div class="border-2 border-accent rounded-lg">
     <input type="file" accept="video/*" on:change={(e) => {
       const file = (e.target as HTMLInputElement)?.files?.[0];
@@ -133,10 +134,13 @@
         const url = URL.createObjectURL(file);
         videoEl.src = url;
         videoEl.play();
+        isVideoUploaded = true;
       }
     }} class="m-2 p-2 bg-secondary text-secondary-content rounded cursor-pointer" />
     <video bind:this={videoEl} class="hidden" on:play={onVideoPlay} on:pause={onVideoStop} on:ended={onVideoStop} />
-    <canvas bind:this={canvasEl} class="m-2 rounded bg-neutral shadow-glow" style="width: 75vw; height: 63vh;"></canvas>
+    {#if isVideoUploaded}
+      <canvas bind:this={canvasEl} class="m-2 rounded bg-neutral shadow-glow" style="width: 75vw; height: 63vh;"></canvas>
+    {/if}
   </div>
 
   {#if variance !== null && acceleration !== null && probability !== null}
