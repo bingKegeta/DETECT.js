@@ -11,6 +11,8 @@
     getNormalizedIrisPosition,
     getLandmarks,
   } from "../scripts/utils";
+  import { WebSocketConnection } from "../scripts/websocket";
+  import { ProbabilityGraph } from "../scripts/graph";  // Import the ProbabilityGraph class
 
   // UI state variables
   let isPlaying = false;
@@ -30,59 +32,31 @@
   const WEBSOCKET_URL = "ws://localhost:9090/ws";
 
   let variance: number | null = null;
-
   let acceleration: number | null = null;
-
   let probability: number | null = null;
 
-  let ws: WebSocket | null = null;
+  let ws: WebSocketConnection | null = null;
+  let probabilityGraph: ProbabilityGraph;  // Declare a ProbabilityGraph instance
+
+  function handleWebSocketMessage(data: any) {
+    if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
+      variance = data.variance;
+      acceleration = data.acceleration;
+      probability = data.probability;
+      console.log("Received Metrics - Variance:", variance, "Acceleration:", acceleration, "Probability:", probability);
+
+      // Update the probability graph with the new probability value
+      if (probability !== null) {
+        probabilityGraph.updateProbability(probability);
+      }
+    }
+  }
 
   function startWebSocket() {
     if (ws) ws.close(); // Ensure no duplicate connections
 
-    ws = new WebSocket(WEBSOCKET_URL);
-
-    ws.onopen = () => console.log("✅ WebSocket connected");
-
-    ws.onclose = (event) => {
-      console.log("❌ WebSocket disconnected", event);
-
-      setTimeout(() => startWebSocket(), 3000); // Attempt reconnection
-    };
-
-    ws.onerror = (error) => {
-      console.error("⚠️ WebSocket error:", error);
-
-      ws?.close();
-    };
-
-    ws.onmessage = (event) => {
-      console.log("WebSocket message received:", event.data);
-
-      try {
-        const data = JSON.parse(event.data);
-
-        if (
-          data.variance !== undefined &&
-          data.acceleration !== undefined &&
-          data.probability !== undefined
-        ) {
-          variance = data.variance;
-
-          acceleration = data.acceleration;
-
-          probability = data.probability;
-
-          console.log("Received Metrics:", {
-            variance,
-            acceleration,
-            probability,
-          });
-        }
-      } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
-      }
-    };
+    ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+    ws.start();
   }
 
   function processFrame() {
@@ -103,15 +77,17 @@
     const canvasCtx = processingCanvas.getContext("2d");
 
     if (canvasCtx)
-      canvasCtx.clearRect(
-        0,
-        0,
-        processingCanvas.width,
-        processingCanvas.height
-      );
+      canvasCtx.clearRect(0, 0, processingCanvas.width, processingCanvas.height);
   }
 
   onMount(() => {
+    // Initialize the probability graph
+    const graphCanvas = document.createElement("canvas");
+    graphCanvas.width = canvasWidth;
+    graphCanvas.height = 200; // Set a fixed height for the graph
+    document.body.appendChild(graphCanvas);
+    probabilityGraph = new ProbabilityGraph(graphCanvas);
+
     // Create a hidden video element for loading and playback
     videoElement = document.createElement("video");
     videoElement.style.display = "none";
@@ -181,6 +157,18 @@
           console.log(
             `Normalized Iris Position: X: ${normX}, Y: ${normY}, Timestamp: ${timestamp}`
           );
+
+          // Send metrics via WebSocket
+          const metrics = {
+            x: normX,
+            y: normY,
+            time: timestamp / 1000,
+          };
+
+          if (ws) {
+            ws.sendMessage(metrics);
+            console.log("WebSocket Sent:", metrics);
+          }
         }
       }
       offscreenCtx.restore();
@@ -196,6 +184,9 @@
         .send({ image: processingCanvas })
         .catch((error) => console.error("Error during warm-up:", error));
     }
+
+    // Start WebSocket connection
+    startWebSocket();
   });
 
   onDestroy(() => {
@@ -206,6 +197,9 @@
     }
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId);
+    }
+    if (ws) {
+      ws.close();
     }
   });
 
@@ -336,41 +330,12 @@
       </button>
       <button
         on:click={handleStop}
-        disabled={isPlaying}
-        class="bg-accent m-2 mr-3 py-4 rounded-md w-full h-full text-accent-content hover:bg-error hover:text-error-content hover:scale-105 hover:shadow-glow-magenta transition-transform"
-        class:opacity-50={isPlaying}
-        class:cursor-not-allowed={isPlaying}
+        aria-label="Stop video"
+        class="bg-error m-2 mr-3 py-4 rounded-md w-full h-full text-error-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
       >
         Stop
       </button>
     </div>
   {/if}
+
 </div>
-
-<style>
-  /* Spinner styling */
-  .loader {
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #555;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-  /* Pause symbol styling */
-  .pause-symbol {
-    font-size: 40px;
-    font-weight: bold;
-    color: #555;
-  }
-</style>
