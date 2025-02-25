@@ -13,98 +13,36 @@
     getLandmarks,
   } from "../scripts/utils";
 
+  import { ProbabilityGraph } from "../scripts/graph";
+  import { WebSocketConnection } from "../scripts/websocket";
+
   let videoEl: HTMLVideoElement;
   let canvasEl: HTMLCanvasElement;
   let graphCanvasEl: HTMLCanvasElement;
 
   let camera: Camera | null = null;
   let faceMesh: FaceMesh | null = null;
-  let ws: WebSocket | null = null;
+  let ws: WebSocketConnection | null = null;
 
   const WEBSOCKET_URL = "ws://localhost:9090/ws";
   let variance: number | null = null;
   let acceleration: number | null = null;
   let probability: number | null = null;
-  let probabilityData: number[] = [];
 
-  // Initialize WebSocket connection with reconnection logic
-  function startWebSocket() {
-    if (ws) {
-      ws.close(); // Ensure no duplicate connections
-    }
+  let probabilityGraph: ProbabilityGraph | null = null;
 
-    ws = new WebSocket(WEBSOCKET_URL);
+  // WebSocket message handler
+  function handleWebSocketMessage(data: any) {
+    if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
+      variance = data.variance;
+      acceleration = data.acceleration;
+      probability = data.probability;
+      console.log("Received Metrics - Variance:", variance, "Acceleration:", acceleration, "Probability:", probability);
 
-    ws.onopen = () => {
-      console.log("✅ WebSocket connected");
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        console.log("WebSocket is open and ready to send/receive messages");
+      // Update graph data
+      if (probabilityGraph) {
+        probabilityGraph.updateProbability(probability);
       }
-    };
-
-    ws.onclose = (event) => {
-      console.log("❌ WebSocket disconnected", event);
-      // Attempt to reconnect after a short delay
-      setTimeout(() => {
-        console.log("🔄 Reconnecting WebSocket...");
-        startWebSocket();
-      }, 3000);
-    };
-
-    ws.onerror = (error) => {
-      console.error("⚠️ WebSocket error:", error);
-      ws?.close(); // Reset connection on error
-    };
-
-    ws.onmessage = (event) => {
-      console.log("WebSocket message received:", event.data);
-      try {
-        const data = JSON.parse(event.data);
-        if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
-          variance = data.variance;
-          acceleration = data.acceleration;
-          probability = data.probability;
-          console.log("Received Metrics - Variance:", variance, "Acceleration:", acceleration, "Probability:", probability);
-
-          // Update graph data
-          if (probabilityData.length >= 100) {
-            probabilityData.shift(); // Keep the array size fixed
-          }
-          probabilityData.push(probability);
-          drawGraph();
-        }
-      } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
-      }
-    };
-  }
-
-  // Function to draw the probability graph
-  function drawGraph() {
-    const ctx = graphCanvasEl.getContext("2d");
-    if (ctx) {
-      const width = graphCanvasEl.width;
-      const height = graphCanvasEl.height;
-
-      // Clear previous graph
-      ctx.clearRect(0, 0, width, height);
-
-      // Draw the new graph
-      ctx.beginPath();
-      ctx.strokeStyle = "#FF5733"; // Graph color
-      ctx.lineWidth = 2;
-
-      const step = width / probabilityData.length;
-      for (let i = 0; i < probabilityData.length; i++) {
-        const x = i * step;
-        const y = height - (probabilityData[i] * height); // Scale the probability to fit the graph height
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      }
-      ctx.stroke();
     }
   }
 
@@ -138,7 +76,8 @@
 
   // Handle FaceMesh results
   onMount(() => {
-    startWebSocket();
+    ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+    ws.start();
 
     const canvasCtx = canvasEl.getContext("2d");
     if (!canvasCtx) return;
@@ -197,15 +136,17 @@
             canvasEl.height
           );
 
+          const timestampInSeconds = timestamp / 1000;
+
           // Send metrics via WebSocket
-          const metrics = JSON.stringify({
+          const metrics = {
             x: normX,
             y: normY,
-            time: timestamp,
-          });
+            time: timestampInSeconds,
+          };
 
-          if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(metrics);
+          if (ws) {
+            ws.sendMessage(metrics);
             console.log("WebSocket Sent:", metrics);
           }
         }
@@ -217,6 +158,11 @@
     if (canvasEl) {
       canvasEl.width = Math.floor(window.innerWidth * 0.9);
       canvasEl.height = Math.floor(window.innerHeight * 0.9);
+    }
+
+    // Initialize the probability graph
+    if (graphCanvasEl) {
+      probabilityGraph = new ProbabilityGraph(graphCanvasEl);
     }
   });
 
@@ -252,7 +198,7 @@
     <canvas
       bind:this={graphCanvasEl}
       class="absolute bottom-4 right-4 border-2 border-accent rounded-lg"
-      style="width: 300px; height: 200px; background: rgba(0, 0, 0, 0.5);"
+      style="width: 600px; height: 400px; background: rgba(0, 0, 0, 0.5);"
     ></canvas>
   </div>
 
@@ -270,12 +216,4 @@
       Stop
     </button>
   </div>
-
-  {#if variance !== null && acceleration !== null && probability !== null}
-    <div class="mt-4 text-lg text-center text-success">
-      <p>Variance: {variance}</p>
-      <p>Acceleration: {acceleration}</p>
-      <p>Probability: {probability}</p>
-    </div>
-  {/if}
 </div>
