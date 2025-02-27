@@ -1,40 +1,36 @@
 ---
 import { getCollection } from "astro:content";
 import Main from "../layouts/Main.astro";
+import Modal from "../components/Modal.tsx"; // Import your Modal component
+import VideoUploadProcessing from "../components/VideoUploadProcessing.svelte";
 
-// Fetch session data
 const sessions = await getCollection("sessions");
 ---
 
 <Main>
   <div class="flex flex-col items-center justify-center h-full relative">
-    <!-- Title -->
     <h2 class="text-2xl font-semibold text-white mb-6">
       {sessions.length === 0 ? "Welcome!" : "Your Sessions"}
     </h2>
 
-    <!-- Session List -->
     <ul class="list-none p-0 text-center">
-      {sessions.length === 0 ? (
-        <p class="text-gray-400">No sessions yet. Start a new one!</p>
-      ) : (
-        sessions.map((session: any) => (
-          <li
-            class="mb-2 rounded-full p-2 bg-primary text-primary-content
-            transition-transform transform-gpu hover:scale-105
-            hover:shadow-md hover:border-b-4 hover:border-b-success cursor-pointer"
-          >
-            <a href={`/session/${session.slug}`} class="justify-center flex">
-              {session.title}
-            </a>
-          </li>
-        ))
-      )}
+      {
+        sessions.length === 0 ? (
+          <p class="text-gray-400">No sessions yet. Start a new one!</p>
+        ) : (
+          sessions.map((session: any) => (
+            <li class="mb-2 rounded-full p-2 bg-primary text-primary-content transition-transform transform-gpu hover:scale-105 hover:shadow-md hover:border-b-4 hover:border-b-success cursor-pointer">
+              <a href={`/session/${session.slug}`} class="justify-center flex">
+                {session.title}
+              </a>
+            </li>
+          ))
+        )
+      }
     </ul>
 
-    <!-- New Session Button with Dropdown (In Original Position) -->
+    <!-- New Session Button with Dropdown -->
     <div class="absolute bottom-4 right-4">
-      <!-- Button -->
       <button
         id="new-session-btn"
         class="rounded-full p-3 bg-primary text-base-100 hover:shadow-md hover:bg-secondary transition-colors duration-300"
@@ -42,21 +38,37 @@ const sessions = await getCollection("sessions");
         + New Session
       </button>
 
-      <!-- Dropdown Menu (Drops Up) -->
       <div
         id="session-dropdown"
         class="hidden absolute bottom-14 right-0 bg-base-200 border-2 border-primary rounded-lg shadow-lg w-48"
       >
         <ul class="flex flex-col p-2 text-white">
           <li>
-            <a href="/live" class="block px-4 py-2 hover:bg-primary hover:text-base-100 rounded">
+            <a
+              href="/live"
+              class="block px-4 py-2 hover:bg-primary hover:text-base-100 rounded"
+            >
               Live Video
             </a>
           </li>
           <li>
-            <a href="/upload" class="block px-4 py-2 hover:bg-primary hover:text-base-100 rounded">
-              Upload Video
-            </a>
+            <Modal
+            buttonText="Upload Video"
+            buttonClassName="block w-full text-left px-4 py-4 hover:bg-primary hover:text-base-100 rounded"
+            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            modalClassName="w-[85vw] max-w-md h-auto p-6 flex flex-col items-center justify-start bg-base-200 border border-primary rounded-lg shadow-lg"
+            client:visible
+          >
+            <div class="w-full flex flex-col items-center">
+              <h3 class="text-xl font-semibold mb-3 text-primary text-center">
+                Upload a Video
+              </h3>
+          
+              <div class="w-full flex flex-col items-center justify-center">
+                <VideoUploadProcessing client:visible class="w-full max-w-sm" />
+              </div>
+            </div>
+          </Modal>                
           </li>
         </ul>
       </div>
@@ -64,7 +76,6 @@ const sessions = await getCollection("sessions");
   </div>
 </Main>
 
-<!-- JavaScript for Dropdown (Drops Up) -->
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const button = document.getElementById("new-session-btn");
@@ -76,7 +87,10 @@ const sessions = await getCollection("sessions");
       });
 
       document.addEventListener("click", (event) => {
-        if (!button.contains(event.target as Node) && !dropdown.contains(event.target as Node)) {
+        if (
+          !button.contains(event.target as Node) &&
+          !dropdown.contains(event.target as Node)
+        ) {
           dropdown.classList.add("hidden");
         }
       });

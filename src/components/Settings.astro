@@ -4,51 +4,60 @@ import Section from "./Section.astro";
 import ThemeSwitcher from "./ThemeSwitcher";
 ---
 
-<Section size="w-full h-auto flex flex-col" padding="p-5" bg="bg-base-300" border="border-none" rounded="rounded-xl" shadow="shadow-none">
-  <h2 class="text-2xl font-semibold text-white mb-4">Settings</h2>
+<Section
+  size="w-full h-auto flex flex-col"
+  padding="p-5"
+  margin="m-0"
+  bg="bg-base-300"
+>
+  <h2 class="text-2xl font-semibold text-base-content mb-4">Settings</h2>
 
   <!-- Theme Switcher -->
-  <div class="flex justify-between items-center bg-base-400 p-4 rounded-lg shadow-md text-white">
+  <div
+    class="flex justify-between items-center bg-base-300 py-4 rounded-lg shadow-md text-base-100"
+  >
     <span>Theme</span>
     <ThemeSwitcher client:load />
   </div>
 
   <!-- Tracking & Analysis Settings -->
-  <div class="flex flex-col gap-4">
-    <label class="flex items-center justify-between bg-base-400 p-4 rounded-lg shadow-md text-white">
+  <div class="flex flex-col gap-4 text-base-content">
+    <label
+      class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md"
+    >
       Normalization
-      <input type="checkbox" class="toggle-switch">
+      <input type="checkbox" class="toggle-switch" />
     </label>
 
-    <label class="flex items-center justify-between bg-base-400 p-4 rounded-lg shadow-md text-white">
+    <label
+      class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md"
+    >
       Graphing
-      <input type="checkbox" class="toggle-switch">
+      <input type="checkbox" class="toggle-switch" />
     </label>
 
-    <label class="flex items-center justify-between bg-base-400 p-4 rounded-lg shadow-md text-white">
-      Sensitivity
-      <div class="relative w-full ml-4">
-        <input
-          type="range"
-          class="w-full appearance-none h-2 bg-gray-300 rounded-lg slider-thumb"
-          min="0.75"
-          max="1.25"
-          step="0.01"
-          value="1"
-          id="sensitivity-slider"
-        />
-        <div class="flex justify-between text-xs text-gray-400 mt-1">
-          <span>0.75</span>
-          <span id="slider-value" class="text-white font-bold">1</span>
-          <span>1.25</span>
-        </div>
-      </div>
+    <label
+      class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md"
+    >
+      Griddy
+      <input type="checkbox" class="toggle-switch" />
     </label>
-    
+
+    <label
+      class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md"
+    >
+      Some Stuff
+      <input type="checkbox" class="toggle-switch" />
+    </label>
   </div>
 
   <!-- Close Button -->
-  <button id="settings-close-btn" class="mt-4 p-3 text-red-400 transition-transform transform-gpu hover:scale-105 hover:text-red-600 cursor-pointer text-primary">
+  <button
+    id="settings-close-btn"
+    class="mt-4 p-3 text-accent bg-base-100 rounded-lg border-2 border-accent
+    transition-transform transform-gpu cursor-pointer
+    hover:scale-105 hover:border-error hover:bg-error hover:text-error-content"
+  >
     Close
   </button>
   <Modal client:visible buttonText="Logout" buttonClassName="text-error-content bg-error w-full rounded-lg py-2">
@@ -60,49 +69,38 @@ import ThemeSwitcher from "./ThemeSwitcher";
   </Modal>
 
 
-<!-- iPhone-Style Toggle Switch Styling -->
-<style>
-  .toggle-switch {
-    appearance: none;
-    width: 50px;
-    height: 26px;
-    background-color: var(--color-neutral);
-    border-radius: 20px;
-    position: relative;
-    transition: background 0.3s ease-in-out;
-    cursor: pointer;
-    outline: none;
-  }
+  <!-- iPhone-Style Toggle Switch Styling -->
+  <style>
+    .toggle-switch {
+      appearance: none;
+      width: 50px;
+      height: 26px;
+      background-color: var(--color-primary);
+      border-radius: 20px;
+      position: relative;
+      transition: background 0.3s ease-in-out;
+      cursor: pointer;
+      outline: none;
+    }
 
-  .toggle-switch::before {
-    content: "";
-    position: absolute;
-    width: 22px;
-    height: 22px;
-    background-color: white;
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: transform 0.3s ease-in-out;
-  }
+    .toggle-switch::before {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background-color: var(--color-base-100);
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s ease-in-out;
+    }
 
-  .toggle-switch:checked {
-    background-color: var(--color-primary);
-  }
+    .toggle-switch:checked {
+      background-color: var(--color-success);
+    }
 
-  .toggle-switch:checked::before {
-    transform: translateX(24px);
-  }
-
-  .slider-thumb::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #2563eb;
-    border-radius: 50%;
-    cursor: pointer;
-  }
-</style>
-
+    .toggle-switch:checked::before {
+      transform: translateX(24px);
+    }
+  </style>
 </Section>

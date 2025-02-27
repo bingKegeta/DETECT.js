@@ -13,25 +13,40 @@
     getLandmarks,
   } from "../scripts/utils";
 
+  import { ProbabilityGraph } from "../scripts/graph";
+  import { WebSocketConnection } from "../scripts/websocket";
+
   let videoEl: HTMLVideoElement;
   let canvasEl: HTMLCanvasElement;
+  let graphCanvasEl: HTMLCanvasElement;
 
   let camera: Camera | null = null;
   let faceMesh: FaceMesh | null = null;
-  let ws: WebSocket | null = null;
+  let ws: WebSocketConnection | null = null;
 
   const WEBSOCKET_URL = "ws://localhost:9090/ws";
+  let variance: number | null = null;
+  let acceleration: number | null = null;
+  let probability: number | null = null;
 
-  // Initialize WebSocket connection
-  function startWebSocket() {
-    ws = new WebSocket(WEBSOCKET_URL);
-    ws.onopen = () => console.log("WebSocket connected");
-    ws.onclose = () => console.log("WebSocket disconnected");
-    ws.onerror = (error) => console.error("WebSocket error:", error);
-    ws.onmessage = (event) => console.log("WebSocket message:", event.data);
+  let probabilityGraph: ProbabilityGraph | null = null;
+
+  // WebSocket message handler
+  function handleWebSocketMessage(data: any) {
+    if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
+      variance = data.variance;
+      acceleration = data.acceleration;
+      probability = data.probability;
+      console.log("Received Metrics - Variance:", variance, "Acceleration:", acceleration, "Probability:", probability);
+
+      // Update graph data
+      if (probabilityGraph) {
+        probabilityGraph.updateProbability(probability);
+      }
+    }
   }
 
-  // Start capture from the webcam
+  // Start webcam capture
   function startCapture() {
     if (!camera && faceMesh && videoEl) {
       camera = new Camera(videoEl, {
@@ -61,7 +76,8 @@
 
   // Handle FaceMesh results
   onMount(() => {
-    startWebSocket();
+    ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+    ws.start();
 
     const canvasCtx = canvasEl.getContext("2d");
     if (!canvasCtx) return;
@@ -79,71 +95,78 @@
       minTrackingConfidence: 0.5,
     });
 
-      faceMesh.onResults((results: Results) => {
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-    canvasCtx.drawImage(
-      results.image,
-      0,
-      0,
-      canvasEl.width,
-      canvasEl.height
-    );
+    faceMesh.onResults((results: Results) => {
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      canvasCtx.drawImage(
+        results.image,
+        0,
+        0,
+        canvasEl.width,
+        canvasEl.height
+      );
 
-    if (results.multiFaceLandmarks) {
-      for (const landmarks of results.multiFaceLandmarks) {
-        const irisCenters = getLandmarks(landmarks, [
-          LEFT_IRIS_CENTER,
-          RIGHT_IRIS_CENTER,
-        ]);
-        drawLandmarks(canvasCtx, irisCenters, {
-          color: "#FF0000",
-          lineWidth: 1,
-        });
-        const eyeCorners = getLandmarks(landmarks, [
-          LEFT_EYE_CORNER,
-          RIGHT_EYE_CORNER,
-        ]);
-        drawLandmarks(canvasCtx, eyeCorners, {
-          color: "#FF0000",
-          lineWidth: 1,
-        });
-        const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
-        drawLandmarks(canvasCtx, noseTip, {
-          color: "#FF0000",
-          lineWidth: 1,
-        });
+      if (results.multiFaceLandmarks) {
+        for (const landmarks of results.multiFaceLandmarks) {
+          const irisCenters = getLandmarks(landmarks, [
+            LEFT_IRIS_CENTER,
+            RIGHT_IRIS_CENTER,
+          ]);
+          drawLandmarks(canvasCtx, irisCenters, {
+            color: "#FF0000",
+            lineWidth: 1,
+          });
+          const eyeCorners = getLandmarks(landmarks, [
+            LEFT_EYE_CORNER,
+            RIGHT_EYE_CORNER,
+          ]);
+          drawLandmarks(canvasCtx, eyeCorners, {
+            color: "#FF0000",
+            lineWidth: 1,
+          });
+          const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
+          drawLandmarks(canvasCtx, noseTip, {
+            color: "#FF0000",
+            lineWidth: 1,
+          });
 
-        const { normX, normY, timestamp } = getNormalizedIrisPosition(
-          landmarks,
-          canvasEl.width,
-          canvasEl.height
-        );
+          const { normX, normY, timestamp } = getNormalizedIrisPosition(
+            landmarks,
+            canvasEl.width,
+            canvasEl.height
+          );
 
-        // Send metrics via WebSocket (mapped to expected Go format)
-        const metrics = JSON.stringify({
-          x: normX,    // map normX to x
-          y: normY,    // map normY to y
-          time: timestamp,  // map timestamp to time
-        });
+          const timestampInSeconds = timestamp / 1000;
 
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          ws.send(metrics);
-          console.log("WebSocket Sent:", metrics);
+          // Send metrics via WebSocket
+          const metrics = {
+            x: normX,
+            y: normY,
+            time: timestampInSeconds,
+          };
+
+          if (ws) {
+            ws.sendMessage(metrics);
+            console.log("WebSocket Sent:", metrics);
+          }
         }
       }
-    }
-    canvasCtx.restore();
-  });
+      canvasCtx.restore();
+    });
 
     // Set the internal resolution to match the displayed size.
     if (canvasEl) {
       canvasEl.width = Math.floor(window.innerWidth * 0.9);
       canvasEl.height = Math.floor(window.innerHeight * 0.9);
     }
+
+    // Initialize the probability graph
+    if (graphCanvasEl) {
+      probabilityGraph = new ProbabilityGraph(graphCanvasEl);
+    }
   });
 
-  // Clean up on destroy
+  // Cleanup on destroy
   onDestroy(() => {
     if (faceMesh) {
       faceMesh.close();
@@ -157,9 +180,9 @@
   });
 </script>
 
-<!-- Outer container matches VideoUploadProcessing design -->
-<div class="bg-base-200 m-4 overflow-hidden flex flex-col items-center justify-center border-primary rounded-lg border-4 opacity-90 shadow-glow h-[84svh]">
-  <div class="border-2 border-accent rounded-lg">
+<!-- Outer container -->
+<div class="bg-base-200 m-4 overflow-hidden flex flex-col items-center justify-center border-primary rounded-lg border-4 opacity-90 shadow-glow h-[84svh] relative">
+  <div class="border-2 border-accent rounded-lg relative">
     <!-- Hidden video element for camera frames -->
     <video bind:this={videoEl} style="display: none;">
       <track kind="captions" />
@@ -169,6 +192,13 @@
       bind:this={canvasEl}
       class="m-2 rounded bg-neutral shadow-glow"
       style="width: 75vw; height: 63vh;"
+    ></canvas>
+
+    <!-- Graph Overlay (positioned at the bottom right of the screen) -->
+    <canvas
+      bind:this={graphCanvasEl}
+      class="absolute bottom-4 right-4 border-2 border-accent rounded-lg"
+      style="width: 600px; height: 400px; background: rgba(0, 0, 0, 0.5);"
     ></canvas>
   </div>
 

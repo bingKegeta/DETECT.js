@@ -11,6 +11,8 @@
     getNormalizedIrisPosition,
     getLandmarks,
   } from "../scripts/utils";
+  import { WebSocketConnection } from "../scripts/websocket";
+  import { ProbabilityGraph } from "../scripts/graph";  // Import the ProbabilityGraph class
 
   // UI state variables
   let isPlaying = false;
@@ -27,7 +29,65 @@
   const canvasWidth = 640;
   const canvasHeight = 480;
 
+  const WEBSOCKET_URL = "ws://localhost:9090/ws";
+
+  let variance: number | null = null;
+  let acceleration: number | null = null;
+  let probability: number | null = null;
+
+  let ws: WebSocketConnection | null = null;
+  let probabilityGraph: ProbabilityGraph;  // Declare a ProbabilityGraph instance
+
+  function handleWebSocketMessage(data: any) {
+    if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
+      variance = data.variance;
+      acceleration = data.acceleration;
+      probability = data.probability;
+      console.log("Received Metrics - Variance:", variance, "Acceleration:", acceleration, "Probability:", probability);
+
+      // Update the probability graph with the new probability value
+      if (probability !== null) {
+        probabilityGraph.updateProbability(probability);
+      }
+    }
+  }
+
+  function startWebSocket() {
+    if (ws) ws.close(); // Ensure no duplicate connections
+
+    ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+    ws.start();
+  }
+
+  function processFrame() {
+    if (faceMesh && videoElement) {
+      faceMesh.send({ image: videoElement });
+    }
+  }
+
+  function onVideoPlay() {
+    if (!faceMesh) return;
+
+    videoElement.addEventListener("timeupdate", processFrame);
+  }
+
+  function onVideoStop() {
+    videoElement.removeEventListener("timeupdate", processFrame);
+
+    const canvasCtx = processingCanvas.getContext("2d");
+
+    if (canvasCtx)
+      canvasCtx.clearRect(0, 0, processingCanvas.width, processingCanvas.height);
+  }
+
   onMount(() => {
+    // Initialize the probability graph
+    const graphCanvas = document.createElement("canvas");
+    graphCanvas.width = canvasWidth;
+    graphCanvas.height = 200; // Set a fixed height for the graph
+    document.body.appendChild(graphCanvas);
+    probabilityGraph = new ProbabilityGraph(graphCanvas);
+
     // Create a hidden video element for loading and playback
     videoElement = document.createElement("video");
     videoElement.style.display = "none";
@@ -97,6 +157,18 @@
           console.log(
             `Normalized Iris Position: X: ${normX}, Y: ${normY}, Timestamp: ${timestamp}`
           );
+
+          // Send metrics via WebSocket
+          const metrics = {
+            x: normX,
+            y: normY,
+            time: timestamp / 1000,
+          };
+
+          if (ws) {
+            ws.sendMessage(metrics);
+            console.log("WebSocket Sent:", metrics);
+          }
         }
       }
       offscreenCtx.restore();
@@ -108,10 +180,13 @@
       offscreenCtx.fillStyle = "#000";
       offscreenCtx.fillRect(0, 0, canvasWidth, canvasHeight);
       // Send the blank frame. This call will download and compile WASM, create a WebGL context, etc.
-      faceMesh.send({ image: processingCanvas }).catch((error) =>
-        console.error("Error during warm-up:", error)
-      );
+      faceMesh
+        .send({ image: processingCanvas })
+        .catch((error) => console.error("Error during warm-up:", error));
     }
+
+    // Start WebSocket connection
+    startWebSocket();
   });
 
   onDestroy(() => {
@@ -122,6 +197,9 @@
     }
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId);
+    }
+    if (ws) {
+      ws.close();
     }
   });
 
@@ -203,7 +281,9 @@
   }
 </script>
 
-<div class="flex flex-col items-center justify-center rounded-lg border-4 border-primary opacity-90 shadow-glow bg-base-200 m-4 p-4">
+<div
+  class="flex flex-col items-center justify-center rounded-lg border-4 border-primary opacity-90 shadow-glow bg-base-200 m-4 p-4"
+>
   <!-- Processing indicator: Spinner while processing, Pause symbol when paused -->
   {#if isProcessing}
     <div class="spinner mt-4 flex justify-center">
@@ -225,64 +305,37 @@
 
   <!-- When a video is loaded, display the controls -->
   {#if videoLoaded}
-    <div class="flex w-full font-semibold text-lg border-2 border-neutral-content rounded-lg mb-4">
+    <div
+      class="flex w-full font-semibold text-lg border-2 border-neutral-content rounded-lg mb-4"
+    >
       <button
-                on:click={handlePlay}
-                aria-label="Play video"
-                disabled={isPlaying}
-                class="bg-info m-2 ml-3 my-2 py-4 rounded-md w-full h-full text-info-content hover:bg-success hover:text-success-content hover:scale-105 hover:shadow-glow transition-transform"
-                class:opacity-50={isPlaying}
-                class:cursor-not-allowed={isPlaying}
-              >
-              Play
-              </button>
-        <button
-          on:click={handlePause}
-          aria-label="Pause video"
-          disabled={!isPlaying}
-          class="bg-secondary m-2 py-4 rounded-md w-full h-full text-secondary-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
-          class:opacity-50={!isPlaying}
-          class:cursor-not-allowed={!isPlaying}
-        >
+        on:click={handlePlay}
+        aria-label="Play video"
+        disabled={isPlaying}
+        class="bg-info m-2 ml-3 my-2 py-4 rounded-md w-full h-full text-info-content hover:bg-success hover:text-success-content hover:scale-105 hover:shadow-glow transition-transform"
+        class:opacity-50={isPlaying}
+        class:cursor-not-allowed={isPlaying}
+      >
+        Play
+      </button>
+      <button
+        on:click={handlePause}
+        aria-label="Pause video"
+        disabled={!isPlaying}
+        class="bg-secondary m-2 py-4 rounded-md w-full h-full text-secondary-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
+        class:opacity-50={!isPlaying}
+        class:cursor-not-allowed={!isPlaying}
+      >
         Pause
-        </button>
-        <button
-          on:click={handleStop}
-          disabled={isPlaying}
-          class="bg-accent m-2 mr-3 py-4 rounded-md w-full h-full text-accent-content hover:bg-error hover:text-error-content hover:scale-105 hover:shadow-glow-magenta transition-transform"
-          class:opacity-50={isPlaying}
-          class:cursor-not-allowed={isPlaying}
-        >
-          Stop
-        </button>
+      </button>
+      <button
+        on:click={handleStop}
+        aria-label="Stop video"
+        class="bg-error m-2 mr-3 py-4 rounded-md w-full h-full text-error-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
+      >
+        Stop
+      </button>
     </div>
   {/if}
+
 </div>
-
-<style>
-  /* Spinner styling */
-  .loader {
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #555;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-  /* Pause symbol styling */
-  .pause-symbol {
-    font-size: 40px;
-    font-weight: bold;
-    color: #555;
-  }
-</style>
