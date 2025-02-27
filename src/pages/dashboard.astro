@@ -3,32 +3,10 @@ import { getCollection } from "astro:content";
 import Main from "../layouts/Main.astro";
 import Modal from "../components/Modal.tsx"; // Import your Modal component
 import VideoUploadProcessing from "../components/VideoUploadProcessing.svelte";
-
-const sessions = await getCollection("sessions");
 ---
 
 <Main>
   <div class="flex flex-col items-center justify-center h-full relative">
-    <h2 class="text-2xl font-semibold text-white mb-6">
-      {sessions.length === 0 ? "Welcome!" : "Your Sessions"}
-    </h2>
-
-    <ul class="list-none p-0 text-center">
-      {
-        sessions.length === 0 ? (
-          <p class="text-gray-400">No sessions yet. Start a new one!</p>
-        ) : (
-          sessions.map((session: any) => (
-            <li class="mb-2 rounded-full p-2 bg-primary text-primary-content transition-transform transform-gpu hover:scale-105 hover:shadow-md hover:border-b-4 hover:border-b-success cursor-pointer">
-              <a href={`/session/${session.slug}`} class="justify-center flex">
-                {session.title}
-              </a>
-            </li>
-          ))
-        )
-      }
-    </ul>
-
     <!-- New Session Button with Dropdown -->
     <div class="absolute bottom-4 right-4">
       <button
@@ -42,7 +20,7 @@ const sessions = await getCollection("sessions");
         id="session-dropdown"
         class="hidden absolute bottom-14 right-0 bg-base-200 border-2 border-primary rounded-lg shadow-lg w-48"
       >
-        <ul class="flex flex-col p-2 text-white">
+        <ul class="flex flex-col p-2 text-base-content">
           <li>
             <a
               href="/live"
@@ -53,22 +31,25 @@ const sessions = await getCollection("sessions");
           </li>
           <li>
             <Modal
-            buttonText="Upload Video"
-            buttonClassName="block w-full text-left px-4 py-4 hover:bg-primary hover:text-base-100 rounded"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
-            modalClassName="w-[85vw] max-w-md h-auto p-6 flex flex-col items-center justify-start bg-base-200 border border-primary rounded-lg shadow-lg"
-            client:visible
-          >
-            <div class="w-full flex flex-col items-center">
-              <h3 class="text-xl font-semibold mb-3 text-primary text-center">
-                Upload a Video
-              </h3>
-          
-              <div class="w-full flex flex-col items-center justify-center">
-                <VideoUploadProcessing client:visible class="w-full max-w-sm" />
+              buttonText="Upload Video"
+              buttonClassName="block w-full text-left px-4 py-4 hover:bg-primary hover:text-base-100 rounded"
+              overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+              modalClassName="w-[85vw] max-w-md h-auto p-6 flex flex-col items-center justify-start bg-base-200 border border-primary rounded-lg shadow-lg"
+              client:visible
+            >
+              <div class="w-full flex flex-col items-center">
+                <h3 class="text-xl font-semibold mb-3 text-primary text-center">
+                  Upload a Video
+                </h3>
+
+                <div class="w-full flex flex-col items-center justify-center">
+                  <VideoUploadProcessing
+                    client:visible
+                    class="w-full max-w-sm"
+                  />
+                </div>
               </div>
-            </div>
-          </Modal>                
+            </Modal>
           </li>
         </ul>
       </div>

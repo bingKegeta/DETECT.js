@@ -10,6 +10,19 @@ export interface IrisPosition {
   timestamp: number;
 }
 
+export interface SessionRequestData {
+  id: number;
+  userId: number;
+  name: string;
+  startTime: string;
+  endTime: string;
+  varMin: number;
+  varMax: number;
+  accMin: number;
+  accMax: number;
+  createdAt: string;
+}
+
 export const getLandmarks = (landmarks: any[], indices: number[]): any[] => {
   return indices.map((index) => landmarks[index]);
 };
