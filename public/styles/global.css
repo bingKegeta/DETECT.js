@@ -29,7 +29,7 @@ html {
   --color-base-content: #ffffff;
 }
 
-[data-theme="cyberpunk"] {
+[data-theme="Cyberpunk"] {
   --color-primary: #00ffff; /* Electric Blue */
   --color-primary-content: #f8f8f8; /* Deep Black for good contrast */
 
@@ -107,7 +107,7 @@ html {
   --color-base-content: #000000;
 }
 
-[data-theme="pastel"] {
+[data-theme="Pastel"] {
   --color-primary: #3c00ff;
   --color-secondary: #0086ff;
   --color-accent: #0054ff;
@@ -161,4 +161,35 @@ html {
 
   --color-error: #ff0000; /* Bright Red */
   --color-error-content: #ffffff; /* Jet Black for contrast */
+}
+
+[data-theme="Hacker"] {
+  --color-primary: #00ff00; /* Neon Green */
+  --color-primary-content: #000000; /* Jet Black for contrast */
+
+  --color-secondary: #ff0000; /* Bright Red */
+  --color-secondary-content: #ffffff; /* Pure White */
+
+  --color-accent: #00ffff; /* Electric Cyan */
+  --color-accent-content: #000000; /* Jet Black for contrast */
+
+  --color-neutral: #000000; /* Jet Black */
+  --color-neutral-content: #ffffff; /* Pure White */
+
+  --color-base-100: #000000; /* Jet Black */
+  --color-base-200: #1a1a1a; /* Darker Black for differentiation */
+  --color-base-300: #333333; /* Lighter Black for additional layers */
+  --color-base-content: #ffffff; /* Pure White */
+
+  --color-info: #ff00ff; /* Electric Pink */
+  --color-info-content: #000000; /* Jet Black for contrast */
+
+  --color-success: #ffff00; /* Bright Yellow */
+  --color-success-content: #000000; /* Jet Black for contrast */
+
+  --color-warning: #ffa500; /* Bright Orange */
+  --color-warning-content: #000000; /* Jet Black for contrast */
+
+  --color-error: #ff0000; /* Bright Red */
+  --color-error-content: #ffffff; /* Pure White */
 }
