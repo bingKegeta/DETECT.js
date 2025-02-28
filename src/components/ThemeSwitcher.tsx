@@ -1,16 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "preact/hooks";
+import { h } from "preact";
+import ChangeEvent from "preact/compat";
 
 const ThemeSwitcher = () => {
   // Add more themes here
-  const themes = ["cyberpunk", "Yin and Yang", "Yang and Yin", "pastel"];
-  const [theme, setTheme] = useState<string>("cyberpunk");
+  const themes = ["Cyberpunk", "Yin and Yang", "Yang and Yin", "Pastel"];
+  const [theme, setTheme] = useState<string>("Cyberpunk");
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
-
-  const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setTheme(event.target.value);
+  const handleThemeChange = (event: Event) => {
+    const target = event.target as HTMLSelectElement;
+    setTheme(target.value);
+    // Trigger the custom event to update the theme
+    document.dispatchEvent(
+      new CustomEvent("set-theme", { detail: target.value })
+    );
   };
 
   return (
