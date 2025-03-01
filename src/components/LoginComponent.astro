@@ -97,7 +97,7 @@
     <!-- Submit Button -->
     <button
       type="submit"
-      class="bg-primary text-primary-content rounded-md px-4 py-2 w-full"
+      class="bg-primary text-base-100 rounded-md px-4 py-2 w-full"
     >
       Login
     </button>
@@ -137,7 +137,7 @@
   </div>
   <div class="my-5">
     <button
-      onclick="window.location.href='http://localhost:8080/auth/google'"
+      onclick="window.location.href=`${import.meta.env.SERVER_ADDRESS}/auth/google`"
       class="w-full text-center py-3 my-3 border flex space-x-2 items-center justify-center bg-neutral rounded-lg text-neutral-content
       hover:border-info hover:shadow transition duration-150"
     >
@@ -170,7 +170,7 @@
         if (passwordErrorElement) {
           passwordErrorElement.textContent = "";
         }
-        // window.location.href = "/dashboard";
+        window.location.href = "/dashboard";
       } else {
         const emailErrorElement = document.querySelector(".email-error");
         if (emailErrorElement) {

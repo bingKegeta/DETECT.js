@@ -5,6 +5,11 @@
   let sessions: SessionRequestData[] = [];
   let error: string = "";
 
+  function storeID(id: number) {
+    sessionStorage.setItem("clickedID", id.toString());
+    window.dispatchEvent(new StorageEvent("storage", { key: "clickedID" }));
+  }
+
   onMount(async () => {
     try {
       const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
@@ -60,6 +65,7 @@
       <button
         id={`Session-${session.id}`}
         class="group max-w-full w-full m-auto p-4 bg-base-200 rounded-lg shadow-lg border-2 border-secondary hover:border-primary mb-4 cursor-pointer hover:bg-base-300 transition duration-150"
+        on:click={() => storeID(session.id)}
       >
         <div class="flex justify-between items-center">
           <p class="text-base-content text-xl font-medium truncate">

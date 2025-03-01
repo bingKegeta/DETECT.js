@@ -1,7 +1,10 @@
 ---
 import ThemeSwitcher from "./ThemeSwitcher";
 ---
-<header class="sticky top-0 z-50 flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg relative">
+
+<header
+  class="sticky top-0 z-50 flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg"
+>
   <!-- Logo Section -->
   <div class="flex flex-col flex-shrink-0">
     <h1 class="font-bold text-6xl">DETECT</h1>
@@ -10,14 +13,24 @@ import ThemeSwitcher from "./ThemeSwitcher";
   <!-- Navigation Section -->
   <div class="flex items-center gap-6 flex-shrink-0">
     <ThemeSwitcher client:load />
-    <a href="/login" class="starfunk btn btn-primary btn-wide rounded-full">Login</a>
-    <a href="/register" class="starfunk btn btn-primary btn-wide rounded-full hidden md:inline-block">Sign Up</a>
+    <a href="/login" class="starfunk btn btn-primary btn-wide rounded-full"
+      >Login</a
+    >
+    <a
+      href="/register"
+      class="starfunk btn btn-primary btn-wide rounded-full hidden md:inline-block"
+      >Sign Up</a
+    >
   </div>
 </header>
 <style>
   .starfunk {
-    background: linear-gradient(90deg, var(--btn-bg-start, #000), var(--btn-bg-end, #00f));
-    color: white;
+    background: linear-gradient(
+      90deg,
+      var(--color-primary),
+      var(--color-secondary)
+    );
+    color: var(--color-primary-content);
     padding: 0.75rem 2rem;
     font-size: 1rem;
     font-weight: bold;
