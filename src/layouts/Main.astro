@@ -2,12 +2,16 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import Sidebar from "../components/Sidebar.astro";
+import Themes from "astro-themes";
 ---
 
-<html data-theme="default">
+<html data-theme="cyberpunk">
   <head>
-    <title>WebApp Layout</title>
+    <title>DETECT Dashboard</title>
     <link rel="stylesheet" href="/styles/global.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Themes />
   </head>
   <body class="bg-base-100 text-base-content">
     <Header />
@@ -24,3 +28,4 @@ import Sidebar from "../components/Sidebar.astro";
     <Footer />
   </body>
 </html>
+<script src="../scripts/theme_switch.ts"></script>
