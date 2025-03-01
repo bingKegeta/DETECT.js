@@ -108,28 +108,34 @@ html {
 }
 
 [data-theme="Pastel"] {
-  --color-primary: #3c00ff;
-  --color-secondary: #0086ff;
-  --color-accent: #0054ff;
-  --color-neutral: #020f19;
-  --color-base-100: #fff2e1;
-  --color-info: #00ffff;
-  --color-success: #8ed23c;
-  --color-warning: #ca4900;
-  --color-error: #ff3463;
+  --color-primary: #e0b0ff; /* Light Lavender */
+  --color-primary-content: #332940; /* Dark purple, good contrast */
 
-  /* Additional Subcolors */
-  --color-primary-content: #cedaff;
-  --color-secondary-content: #000616;
-  --color-accent-content: #cee1ff;
-  --color-neutral-content: #c5c9cc;
-  --color-base-content: #161412;
-  --color-base-200: #ded2c4;
-  --color-base-300: #beb4a7;
-  --color-info-content: #001616;
-  --color-success-content: #071001;
-  --color-warning-content: #f9dcd1;
-  --color-error-content: #160103;
+  --color-secondary: #c2a3ff; /* Soft Purple */
+  --color-secondary-content: #332940; /* Dark purple, good contrast */
+
+  --color-accent: #d8b4fe; /* Pale Purple */
+  --color-accent-content: #332940; /* Dark purple, good contrast */
+
+  --color-neutral: #f5eeff; /* Very light purple/lavender */
+  --color-neutral-content: #332940; /* Dark purple, good contrast */
+
+  --color-base-100: #fee5e5; /* White */
+  --color-base-200: #f0e6f6; /* Lightest purple tint */
+  --color-base-300: #e0d1e6; /* Slightly darker purple tint */
+  --color-base-content: #332940; /* Dark purple, good contrast */
+
+  --color-info: #b39ddb; /* Muted Purple */
+  --color-info-content: #332940; /* Dark purple, good contrast */
+
+  --color-success: #a7d1ab; /* Soft Green (complementary) */
+  --color-success-content: #332940; /* Dark purple, good contrast */
+
+  --color-warning: #ffcdd2; /* Light Red/Pink (accent) */
+  --color-warning-content: #332940; /* Dark purple, good contrast */
+
+  --color-error: #f48fb1; /* Dusty Rose (accent) */
+  --color-error-content: #332940; /* Dark purple, good contrast */
 }
 
 [data-theme="Yang and Yin"] {
@@ -192,4 +198,66 @@ html {
 
   --color-error: #ff0000; /* Bright Red */
   --color-error-content: #ffffff; /* Pure White */
+}
+
+[data-theme="Steampunk"] {
+  --color-primary: #a87900; /* Antique Gold */
+  --color-primary-content: #f5f5dc; /* Beige for contrast */
+
+  --color-secondary: #775639; /* Copper */
+  --color-secondary-content: #f5f5dc; /* Beige for contrast */
+
+  --color-accent: #c69314; /* Brass */
+  --color-accent-content: #f5f5dc; /* Beige for contrast */
+
+  --color-neutral: #54433a; /* Dark Brown */
+  --color-neutral-content: #f5f5dc; /* Beige for contrast */
+
+  --color-base-100: #2e2521; /* Very Dark Brown */
+  --color-base-200: #473b33; /* Darker Brown for layering */
+  --color-base-300: #605047; /* Medium Brown for additional layers */
+  --color-base-content: #f5f5dc; /* Beige for contrast */
+
+  --color-info: #8f9779; /* Muted Green (like aged metal) */
+  --color-info-content: #f5f5dc; /* Beige for contrast */
+
+  --color-success: #6b8e23; /* Olive Drab */
+  --color-success-content: #f5f5dc; /* Beige for contrast */
+
+  --color-warning: #d2691e; /* Chocolate */
+  --color-warning-content: #f5f5dc; /* Beige for contrast */
+
+  --color-error: #8b0000; /* Dark Red (like rust) */
+  --color-error-content: #f5f5dc; /* Beige for contrast */
+}
+
+[data-theme="Synthwave"] {
+  --color-primary: #ff77a8; /* Hot Pink */
+  --color-primary-content: #141414; /* Dark background for contrast */
+
+  --color-secondary: #46c9ff; /* Electric Blue */
+  --color-secondary-content: #141414; /* Dark background for contrast */
+
+  --color-accent: #f442ff; /* Vivid Purple */
+  --color-accent-content: #141414; /* Dark background for contrast */
+
+  --color-neutral: #242424; /* Dark Gray */
+  --color-neutral-content: #ffffff; /* Light text for contrast */
+
+  --color-base-100: #0a0a0a; /* Very Dark Gray */
+  --color-base-200: #141414; /* Slightly lighter for layering */
+  --color-base-300: #1e1e1e; /* Even lighter for more layers */
+  --color-base-content: #ffffff; /* White text */
+
+  --color-info: #a0f9ff; /* Light Cyan */
+  --color-info-content: #141414; /* Dark background for contrast */
+
+  --color-success: #7fff7f; /* Neon Green */
+  --color-success-content: #141414; /* Dark background for contrast */
+
+  --color-warning: #ffcc66; /* Golden Yellow */
+  --color-warning-content: #141414; /* Dark background for contrast */
+
+  --color-error: #ff4f4f; /* Bright Red */
+  --color-error-content: #141414; /* Dark background for contrast */
 }

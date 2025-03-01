@@ -23,6 +23,22 @@ export interface SessionRequestData {
   createdAt: string;
 }
 
+export interface AnalysisResponseData {
+  session_id: number;
+  timestamp: number;
+  x: number;
+  y: number;
+  prob: number;
+  created_at: string;
+}
+
+export interface AnalysisDisplayData {
+  timestamp: number;
+  x: number;
+  y: number;
+  prob: number;
+}
+
 export const getLandmarks = (landmarks: any[], indices: number[]): any[] => {
   return indices.map((index) => landmarks[index]);
 };
