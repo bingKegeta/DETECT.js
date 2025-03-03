@@ -2,6 +2,10 @@
 import Modal from "./Modal";
 import Section from "./Section.astro";
 import ThemeSwitcher from "./ThemeSwitcher";
+import SlidingBar from "./SlidingBar.svelte"
+import GraphingToggle from "./GraphingToggle.svelte";
+import NormalizationToggle from "./NormalizationToggle.svelte";
+import MinMaxToggle from "./MinMaxToggle.svelte";
 ---
 
 <Section
@@ -16,41 +20,29 @@ import ThemeSwitcher from "./ThemeSwitcher";
   <div
     class="flex justify-between items-center bg-base-300 py-4 rounded-lg shadow-md text-base-100"
   >
-    <span>Theme</span>
     <ThemeSwitcher client:load />
   </div>
 
   <!-- Tracking & Analysis Settings -->
   <div class="flex flex-col gap-4 text-base-content">
-    <label
-      class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md"
-    >
-      Normalization
-      <input type="checkbox" class="toggle-switch" />
-    </label>
-
-    <label
-      class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md"
-    >
-      Graphing
-      <input type="checkbox" class="toggle-switch" />
-    </label>
-
-    <label
-      class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md"
-    >
-      Griddy
-      <input type="checkbox" class="toggle-switch" />
-    </label>
-
-    <label
-      class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md"
-    >
-      Some Stuff
-      <input type="checkbox" class="toggle-switch" />
-    </label>
+    <NormalizationToggle client:load />
   </div>
 
+  <div class="flex flex-col gap-4 text-base-content">
+    <MinMaxToggle client:only />
+  </div>
+
+  <div class="flex flex-col gap-4 text-base-content">
+    <GraphingToggle client:only />
+  </div>
+  
+  <label class="flex items-center justify-between bg-base-400 p-4 rounded-lg shadow-md text-white">
+    Sensitivity
+    <div class="relative w-full ml-4">
+      <SlidingBar client:only />
+    </div>
+  </label>
+  
   <!-- Close Button -->
   <button
     id="settings-close-btn"
@@ -60,14 +52,13 @@ import ThemeSwitcher from "./ThemeSwitcher";
   >
     Close
   </button>
+  
   <Modal client:visible buttonText="Logout" buttonClassName="text-error-content bg-error w-full rounded-lg py-2">
     <p class="text-lg text-error-content">Are you sure?</p>
     <section class="flex flex-row">
-      <!-- <button id="settings-close-btn" class="rounded-lg bg-primary text-base-100 p-2 mx-2 w-full">No</button> -->
       <a href="/" class="rounded-lg bg-error text-error-content p-2 w-full text-center">Yes</a>
     </section>
   </Modal>
-
 
   <!-- iPhone-Style Toggle Switch Styling -->
   <style>
@@ -101,6 +92,16 @@ import ThemeSwitcher from "./ThemeSwitcher";
 
     .toggle-switch:checked::before {
       transform: translateX(24px);
+    }
+
+    .slider-thumb::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #2563eb;
+      border-radius: 50%;
+      cursor: pointer;
     }
   </style>
 </Section>
