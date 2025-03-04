@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { writable } from 'svelte/store';
+  import { createSession } from "../scripts/websocket";
   import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { Camera } from "@mediapipe/camera_utils";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
@@ -31,6 +33,8 @@
 
   let probabilityGraph: ProbabilityGraph | null = null;
 
+  export const webcamState = writable(false); // Default state: off
+
   // WebSocket message handler
   function handleWebSocketMessage(data: any) {
     if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
@@ -43,6 +47,20 @@
       if (probabilityGraph) {
         probabilityGraph.updateProbability(probability);
       }
+
+      // Create session data
+      const sessionData = {
+        name: "Session 1", // Default session name
+        startTime: new Date().toISOString(), // Capture the start time
+        endTime: new Date(new Date().getTime() + 3600000).toISOString(), // Set end time 1 hour from now for demo purposes
+        varMin: variance ?? 0, // Use received variance or fallback to 0
+        varMax: variance ?? 0,
+        accMin: acceleration ?? 0,
+        accMax: acceleration ?? 0
+      };
+
+      // Call createSession function to send the session data
+      createSession(sessionData);
     }
   }
 

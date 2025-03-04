@@ -19,7 +19,7 @@ export const server = {
     }),
     handler: async (input, event) => {
       const { email, password } = input;
-      const url = `${import.meta.env.SERVER_ADDRESS}/login`;
+      const url = `http://localhost:8080/login`;
 
       const backendResponse = await fetch(url, {
         method: "POST",
@@ -78,7 +78,7 @@ export const server = {
         .max(100, "Password must be less than 100 characters long"),
     }),
     handler: async (input, event) => {
-      const url = `${import.meta.env.SERVER_ADDRESS}/register`;
+      const url = `http://localhost:8080/register`;
 
       const backendResponse = await fetch(url, {
         method: "POST",
@@ -123,7 +123,7 @@ export const server = {
   logout: defineAction({
     accept: "form",
     handler: async (_, event) => {
-      const url = `${import.meta.env.SERVER_ADDRESS}/logout`;
+      const url = `http://localhost:8080/logout`;
 
       const backendResponse = await fetch(url, {
         method: "POST",

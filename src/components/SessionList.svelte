@@ -7,14 +7,16 @@
 
   onMount(async () => {
     try {
-      const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
+      const serverAddress = 'http://localhost:8080';
       const response = await fetch(`${serverAddress}/getSessions`, {
+      
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
       });
+
       if (!response.ok) throw new Error("Failed to fetch sessions");
       const rawJson = await response.json();
       sessions = rawJson.map((session: any) => ({
