@@ -1,10 +1,12 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { writable } from 'svelte/store';
-  import { createSession } from "../scripts/websocket";
+  import { createSession } from "../scripts/session";
   import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { Camera } from "@mediapipe/camera_utils";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
+  import { graphing } from '../scripts/graphingStore'; 
+
   import {
     LEFT_IRIS_CENTER,
     RIGHT_IRIS_CENTER,
@@ -30,37 +32,29 @@
   let variance: number | null = null;
   let acceleration: number | null = null;
   let probability: number | null = null;
+  let startTime = new Date().toISOString(); // Capture the start time 
 
   let probabilityGraph: ProbabilityGraph | null = null;
+  let sessionName: string = ""; // Default session name
 
   export const webcamState = writable(false); // Default state: off
+  let sessionCreated = false;
+
+  // Flag to handle modal visibility
+  let isModalVisible = writable(false);
+
+  // Flag to track whether webcam has started (for disabling Stop button initially)
+  let canStop = writable(false);
 
   // WebSocket message handler
   function handleWebSocketMessage(data: any) {
     if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
-      variance = data.variance;
-      acceleration = data.acceleration;
       probability = data.probability;
       console.log("Received Metrics - Variance:", variance, "Acceleration:", acceleration, "Probability:", probability);
 
-      // Update graph data
       if (probabilityGraph) {
         probabilityGraph.updateProbability(probability);
       }
-
-      // Create session data
-      const sessionData = {
-        name: "Session 1", // Default session name
-        startTime: new Date().toISOString(), // Capture the start time
-        endTime: new Date(new Date().getTime() + 3600000).toISOString(), // Set end time 1 hour from now for demo purposes
-        varMin: variance ?? 0, // Use received variance or fallback to 0
-        varMax: variance ?? 0,
-        accMin: acceleration ?? 0,
-        accMax: acceleration ?? 0
-      };
-
-      // Call createSession function to send the session data
-      createSession(sessionData);
     }
   }
 
@@ -77,6 +71,7 @@
         height: 480,
       });
       camera.start();
+      canStop.set(true); // Enable Stop button once webcam has started
     }
   }
 
@@ -90,6 +85,53 @@
         canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
       }
     }
+    
+    if (!sessionCreated) {
+      isModalVisible.set(true); // Show the modal to input the session name
+    } else {
+      endSession();
+    }
+  }
+
+  // Handle closing the modal
+  function closeModal() {
+    isModalVisible.set(false);
+  }
+
+  // Handle the form submit for the session name
+  function onSubmitSessionName() {
+    if (sessionName) {
+      endSession(); // End the session and create session data
+    }
+  }
+
+  // Finalize the session creation
+  function endSession() {
+    if (camera && canvasEl) {
+      camera.stop();
+      camera = null;
+      const canvasCtx = canvasEl.getContext("2d");
+      if (canvasCtx) {
+        canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      }
+    }
+
+    // Create session data if not created yet
+    if (!sessionCreated) {
+      const sessionData = {
+        name: sessionName || "Session", // Default session name if none provided
+        start_time: startTime,
+        end_time: new Date().toISOString(),
+        var_min: variance ?? 0,
+        var_max: variance ?? 0,
+        acc_min: acceleration ?? 0,
+        acc_max: acceleration ?? 0
+      };
+
+      createSession(sessionData);
+      sessionCreated = true;
+    }
+    window.location.href = "/dashboard";
   }
 
   // Handle FaceMesh results
@@ -132,8 +174,9 @@
           ]);
           drawLandmarks(canvasCtx, irisCenters, {
             color: "#FF0000",
-            lineWidth: 1,
+            lineWidth: 2,
           });
+
           const eyeCorners = getLandmarks(landmarks, [
             LEFT_EYE_CORNER,
             RIGHT_EYE_CORNER,
@@ -142,6 +185,7 @@
             color: "#FF0000",
             lineWidth: 1,
           });
+
           const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
           drawLandmarks(canvasCtx, noseTip, {
             color: "#FF0000",
@@ -156,7 +200,6 @@
 
           const timestampInSeconds = timestamp / 1000;
 
-          // Send metrics via WebSocket
           const metrics = {
             x: normX,
             y: normY,
@@ -172,13 +215,11 @@
       canvasCtx.restore();
     });
 
-    // Set the internal resolution to match the displayed size.
     if (canvasEl) {
       canvasEl.width = Math.floor(window.innerWidth * 0.9);
       canvasEl.height = Math.floor(window.innerHeight * 0.9);
     }
 
-    // Initialize the probability graph
     if (graphCanvasEl) {
       probabilityGraph = new ProbabilityGraph(graphCanvasEl);
     }
@@ -201,23 +242,22 @@
 <!-- Outer container -->
 <div class="bg-base-200 m-4 overflow-hidden flex flex-col items-center justify-center border-primary rounded-lg border-4 opacity-90 shadow-glow h-[84svh] relative">
   <div class="border-2 border-accent rounded-lg relative">
-    <!-- Hidden video element for camera frames -->
     <video bind:this={videoEl} style="display: none;">
       <track kind="captions" />
     </video>
-    <!-- Canvas where the camera feed and landmarks are drawn -->
     <canvas
       bind:this={canvasEl}
       class="m-2 rounded bg-neutral shadow-glow"
       style="width: 75vw; height: 63vh;"
     ></canvas>
 
-    <!-- Graph Overlay (positioned at the bottom right of the screen) -->
+    {#if $graphing}
     <canvas
       bind:this={graphCanvasEl}
       class="absolute bottom-4 right-4 border-2 border-accent rounded-lg"
       style="width: 600px; height: 400px; background: rgba(0, 0, 0, 0.5);"
     ></canvas>
+    {/if}
   </div>
 
   <div class="flex w-full font-semibold text-lg text-primary-content">
@@ -230,8 +270,38 @@
     <button
       on:click={stopCapture}
       class="bg-accent m-2 mr-3 my-2 py-4 rounded-md w-full h-full text-accent-content hover:bg-error hover:text-error-content hover:scale-105 hover:shadow-glow-magenta transition-transform"
+      disabled={!$canStop}
     >
       Stop
     </button>
   </div>
+
+  <!-- Modal to ask for session name -->
+{#if $isModalVisible}
+<div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
+  <div class="bg-base-100 p-6 rounded-lg border-2 border-accent shadow-glow w-96">
+    <h2 class="font-semibold text-xl text-primary-content mb-4">Enter Session Name</h2>
+    <input
+      type="text"
+      bind:value={sessionName}
+      class="border-2 border-accent p-2 rounded-md w-full mb-4 bg-base-200 text-primary-content"
+      placeholder="Session Name"
+    />
+    <div class="flex justify-between">
+      <button
+        on:click={closeModal}
+        class="bg-gray-300 text-primary-content p-2 rounded-md hover:bg-gray-400 transition-colors"
+      >
+        Cancel
+      </button>
+      <button
+        on:click={onSubmitSessionName}
+        class="bg-info text-info-content p-2 rounded-md hover:bg-success transition-colors"
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+</div>
+{/if}
 </div>

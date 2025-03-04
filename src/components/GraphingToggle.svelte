@@ -1,45 +1,26 @@
 <script>
-	import { onMount } from "svelte";
 	import { writable } from "svelte/store";
   
-	const serverAddress = 'http://localhost:8080';
+	const serverAddress = "http://localhost:8080";
+	let plotting = writable(false);
   
-	// Create a writable store for graphing state
-	let graphing = writable(false);
-  
-	// Function to fetch initial graphing state
-	async function fetchGraphingState() {
-	  try {
-		const response = await fetch(`${serverAddress}/getGraphing`);
-		if (response.ok) {
-		  const data = await response.json();
-		  graphing.set(data.graphing);
-		}
-	  } catch (error) {
-		console.error("Error fetching graphing state:", error);
-	  }
-	}
-  
-	// Function to update graphing state
+	// Function to update plotting state
 	async function updateGraphing(value) {
 	  try {
 		const response = await fetch(`${serverAddress}/updateGraphing`, {
 		  method: "POST",
 		  headers: { "Content-Type": "application/json" },
-		  body: JSON.stringify({ graphing: value }),
+		  body: JSON.stringify({ value }),
+		  credentials: "include",
 		});
   
-		if (!response.ok) throw new Error("Failed to update graphing");
+		if (!response.ok) throw new Error("Failed to update plotting");
   
-		const data = await response.json();
-		graphing.set(data.graphing);
+		plotting.set(value);
 	  } catch (error) {
-		console.error("Error updating graphing:", error);
+		console.error("Error updating plotting:", error);
 	  }
 	}
-  
-	// Fetch state on component mount
-	onMount(fetchGraphingState);
   </script>
   
   <label class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md">
@@ -47,8 +28,8 @@
 	<input
 	  type="checkbox"
 	  class="toggle-switch"
-	  bind:checked={$graphing}
-	  on:change={() => updateGraphing($graphing)}
+	  bind:checked={$plotting}
+	  on:change={(e) => updateGraphing(e.target.checked)}
 	/>
   </label>
   

@@ -2,34 +2,34 @@
 	import { writable } from "svelte/store";
   
 	const serverAddress = "http://localhost:8080";
-	let normalization = writable(false);
+	let minMax = writable(false);
   
-	// Function to update normalization state
-	async function updateNormalization(value) {
+	// Function to update minMax state
+	async function updateMinMax(value) {
 	  try {
-		const response = await fetch(`${serverAddress}/updateNormalization`, {
+		const response = await fetch(`${serverAddress}/updateMinMaxSetting`, {
 		  method: "POST",
 		  headers: { "Content-Type": "application/json" },
 		  body: JSON.stringify({ value }),
 		  credentials: "include",
 		});
   
-		if (!response.ok) throw new Error("Failed to update normalization");
+		if (!response.ok) throw new Error("Failed to update minMax");
   
-		normalization.set(value);
+		minMax.set(value);
 	  } catch (error) {
-		console.error("Error updating normalization:", error);
+		console.error("Error updating minMax:", error);
 	  }
 	}
   </script>
   
   <label class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md">
-	Normalization
+	Min/Max
 	<input
 	  type="checkbox"
 	  class="toggle-switch"
-	  bind:checked={$normalization}
-	  on:change={(e) => updateNormalization(e.target.checked)}
+	  bind:checked={$minMax}
+	  on:change={(e) => updateMinMax(e.target.checked)}
 	/>
   </label>
   
