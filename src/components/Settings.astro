@@ -2,10 +2,18 @@
 import Modal from "./Modal";
 import Section from "./Section.astro";
 import ThemeSwitcher from "./ThemeSwitcher";
-import SlidingBar from "./SlidingBar.svelte"
+import SlidingBar from "./SlidingBar.svelte";
 import GraphingToggle from "./GraphingToggle.svelte";
 import NormalizationToggle from "./NormalizationToggle.svelte";
 import MinMaxToggle from "./MinMaxToggle.svelte";
+
+let userSettings = {
+  plotting: false,
+  affine: false,
+  minMax: false,
+  sensitivity: 1.0,
+};
+
 ---
 
 <Section
@@ -17,42 +25,31 @@ import MinMaxToggle from "./MinMaxToggle.svelte";
   <h2 class="text-2xl font-semibold text-base-content mb-4">Settings</h2>
 
   <!-- Theme Switcher -->
-  <div
-    class="flex justify-between items-center bg-base-300 py-4 rounded-lg shadow-md text-base-100"
-  >
-    <ThemeSwitcher client:load />
+  <div class="flex justify-between items-center bg-base-300 py-4 rounded-lg shadow-md text-base-100">
+    <ThemeSwitcher client:load/>
   </div>
 
   <!-- Tracking & Analysis Settings -->
   <div class="flex flex-col gap-4 text-base-content">
-    <NormalizationToggle client:load />
+    <NormalizationToggle client:load checked={userSettings.affine}/>
   </div>
 
   <div class="flex flex-col gap-4 text-base-content">
-    <MinMaxToggle client:only />
+    <MinMaxToggle client:load checked={userSettings.minMax} />
   </div>
 
   <div class="flex flex-col gap-4 text-base-content">
-    <GraphingToggle client:only />
+    <GraphingToggle client:load checked={userSettings.plotting} />
   </div>
-  
+
+  <!-- Sensitivity Slider -->
   <label class="flex items-center justify-between bg-base-400 p-4 rounded-lg shadow-md text-white">
     Sensitivity
     <div class="relative w-full ml-4">
-      <SlidingBar client:only />
+      <SlidingBar client:load value={userSettings.sensitivity} />
     </div>
   </label>
-  
-  <!-- Close Button -->
-  <button
-    id="settings-close-btn"
-    class="mt-4 p-3 text-accent bg-base-100 rounded-lg border-2 border-accent
-    transition-transform transform-gpu cursor-pointer
-    hover:scale-105 hover:border-error hover:bg-error hover:text-error-content"
-  >
-    Close
-  </button>
-  
+
   <Modal client:visible buttonText="Logout" buttonClassName="text-error-content bg-error w-full rounded-lg py-2">
     <p class="text-lg text-error-content">Are you sure?</p>
     <section class="flex flex-row">
@@ -104,4 +101,39 @@ import MinMaxToggle from "./MinMaxToggle.svelte";
       cursor: pointer;
     }
   </style>
+  <script>
+    const serverAddress = 'http://localhost:8080';
+    let userSettings = {
+      plotting: false,
+      affine: false,
+      minMax: false,
+      sensitivity: 1.0,
+    };
+
+    async function fetchUserSettings() {
+      try {
+        const response = await fetch(`${serverAddress}/getUserSettings`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          userSettings.plotting = data.plotting;
+          userSettings.affine = data.affine;
+          userSettings.minMax = data.minMax;
+          userSettings.sensitivity = data.sensitivity;
+        } else {
+          console.error("Failed to fetch user settings:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching user settings:", error);
+      }
+    }
+
+    fetchUserSettings();
+  </script>
 </Section>
