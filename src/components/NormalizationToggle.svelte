@@ -1,24 +1,8 @@
 <script>
-	import { onMount } from "svelte";
 	import { writable } from "svelte/store";
   
-	const serverAddress = 'http://localhost:8080';
-  
-	// Create a writable store for normalization state
+	const serverAddress = "http://localhost:8080";
 	let normalization = writable(false);
-  
-	// Function to fetch initial normalization state
-	async function fetchNormalizationState() {
-	  try {
-		const response = await fetch(`${serverAddress}/getNormalization`);
-		if (response.ok) {
-		  const data = await response.json();
-		  normalization.set(data.normalization);
-		}
-	  } catch (error) {
-		console.error("Error fetching normalization state:", error);
-	  }
-	}
   
 	// Function to update normalization state
 	async function updateNormalization(value) {
@@ -26,20 +10,17 @@
 		const response = await fetch(`${serverAddress}/updateNormalization`, {
 		  method: "POST",
 		  headers: { "Content-Type": "application/json" },
-		  body: JSON.stringify({ normalization: value }),
+		  body: JSON.stringify({ value }),
+		  credentials: "include",
 		});
   
 		if (!response.ok) throw new Error("Failed to update normalization");
   
-		const data = await response.json();
-		normalization.set(data.normalization);
+		normalization.set(value);
 	  } catch (error) {
 		console.error("Error updating normalization:", error);
 	  }
 	}
-  
-	// Fetch state on component mount
-	onMount(fetchNormalizationState);
   </script>
   
   <label class="flex items-center justify-between bg-base-200 p-4 rounded-lg shadow-md">
@@ -48,7 +29,7 @@
 	  type="checkbox"
 	  class="toggle-switch"
 	  bind:checked={$normalization}
-	  on:change={() => updateNormalization($normalization)}
+	  on:change={(e) => updateNormalization(e.target.checked)}
 	/>
   </label>
   
