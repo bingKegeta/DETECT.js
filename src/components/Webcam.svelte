@@ -6,7 +6,6 @@
   import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { Camera } from "@mediapipe/camera_utils";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
-  import { graphing } from '../scripts/graphingStore'; 
 
   import {
     LEFT_IRIS_CENTER,
@@ -277,7 +276,7 @@
       class="absolute bottom-4 right-4 border-2 border-accent rounded-lg"
       style="width: 600px; height: 400px; background: rgba(0, 0, 0, 0.5);"
     ></canvas>
-    
+
   </div>
 
   <div class="flex w-full font-semibold text-lg text-primary-content">
