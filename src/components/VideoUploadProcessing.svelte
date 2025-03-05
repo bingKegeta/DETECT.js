@@ -2,6 +2,9 @@
   import { onMount, onDestroy } from "svelte";
   import { FaceMesh } from "@mediapipe/face_mesh";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
+  import { writable } from "svelte/store";
+  import { createSession } from "../scripts/session";
+
   import {
     LEFT_IRIS_CENTER,
     RIGHT_IRIS_CENTER,
@@ -38,12 +41,15 @@
   let ws: WebSocketConnection | null = null;
   let probabilityGraph: ProbabilityGraph;  // Declare a ProbabilityGraph instance
 
+  let isModalVisible = writable(false);
+  let sessionName = "";
+  let sessionCreated = false;
+  let startTime = new Date().toISOString();
+
   function handleWebSocketMessage(data: any) {
     if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
-      variance = data.variance;
-      acceleration = data.acceleration;
       probability = data.probability;
-      console.log("Received Metrics - Variance:", variance, "Acceleration:", acceleration, "Probability:", probability);
+      console.log("Probability:", probability);
 
       // Update the probability graph with the new probability value
       if (probability !== null) {
@@ -63,21 +69,6 @@
     if (faceMesh && videoElement) {
       faceMesh.send({ image: videoElement });
     }
-  }
-
-  function onVideoPlay() {
-    if (!faceMesh) return;
-
-    videoElement.addEventListener("timeupdate", processFrame);
-  }
-
-  function onVideoStop() {
-    videoElement.removeEventListener("timeupdate", processFrame);
-
-    const canvasCtx = processingCanvas.getContext("2d");
-
-    if (canvasCtx)
-      canvasCtx.clearRect(0, 0, processingCanvas.width, processingCanvas.height);
   }
 
   onMount(() => {
@@ -269,16 +260,41 @@
   }
 
   function handleStop() {
-    if (videoLoaded) {
-      isPlaying = false;
-      videoLoaded = false;
-      videoElement.pause();
-      videoElement.currentTime = 0;
-      if (offscreenCtx) {
-        offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-      }
+  if (!sessionCreated) {
+    isModalVisible.set(true);
+  } else {
+    endSession();
+  }
+}
+
+function endSession() {
+  if (!sessionCreated) {
+    const sessionData = {
+      name: sessionName || "Session", // Default name if none provided
+      start_time: startTime,
+      end_time: new Date().toISOString(),
+      var_min: variance ?? 0,
+      var_max: variance ?? 0,
+      acc_min: acceleration ?? 0,
+      acc_max: acceleration ?? 0
+    };
+
+    createSession(sessionData);
+    sessionCreated = false; 
+    isModalVisible.set(false);
+  }
+  if (videoLoaded) {
+    isPlaying = false;
+    videoLoaded = false;
+    videoElement.pause();
+    videoElement.currentTime = 0;
+    if (offscreenCtx) {
+      offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
     }
   }
+  window.location.href = "/dashboard";
+}
+
 </script>
 
 <div
@@ -338,4 +354,31 @@
     </div>
   {/if}
 
+  {#if $isModalVisible}
+  <div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
+    <div class="bg-base-100 p-6 rounded-lg border-2 border-accent shadow-glow w-96">
+      <h2 class="font-semibold text-xl text-primary-content mb-4">Enter Session Name</h2>
+      <input
+        type="text"
+        bind:value={sessionName}
+        class="border-2 border-accent p-2 rounded-md w-full mb-4 bg-base-200 text-primary-content"
+        placeholder="Session Name"
+      />
+      <div class="flex justify-between">
+        <button
+          on:click={() => isModalVisible.set(false)}
+          class="bg-gray-300 text-primary-content p-2 rounded-md hover:bg-gray-400 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          on:click={endSession}
+          class="bg-info text-info-content p-2 rounded-md hover:bg-success transition-colors"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+  {/if}
 </div>
