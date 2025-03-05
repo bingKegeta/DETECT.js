@@ -1,7 +1,8 @@
-// session.ts
 import { writable } from "svelte/store";
 
-const serverAddress = "http://localhost:8080/createSession"; // New endpoint for creating session
+export const sessionId = writable<number | null>(null); 
+
+const serverAddress = "http://localhost:8080/createSession";
 
 export async function createSession(sessionData: {
   name: string;
@@ -17,11 +18,11 @@ export async function createSession(sessionData: {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        
       },
-	  credentials: "include",
+      credentials: "include",
       body: JSON.stringify(sessionData),
     });
+
     console.log(sessionData);
 
     if (!response.ok) {
@@ -30,6 +31,11 @@ export async function createSession(sessionData: {
 
     const result = await response.json();
     console.log(result.message); // Handle success message
+
+    // Save sessionId to store
+    if (result.sessionId) {
+      sessionId.set(result.sessionId); // Store the sessionId in the writable store
+    }
 
   } catch (error) {
     console.error("Error creating session:", error);
