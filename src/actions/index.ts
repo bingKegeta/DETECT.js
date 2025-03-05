@@ -3,7 +3,6 @@ import { z } from "astro:schema";
 import { parseSetCookie } from "../scripts/utils";
 // import * as sessionActions from "./sessionActions";
 
-
 export const server = {
   login: defineAction({
     accept: "form",
@@ -145,12 +144,11 @@ export const server = {
       if (setCookieHeader) {
         const parsed = parseSetCookie(setCookieHeader);
         if (parsed) {
-          event.cookies.set(parsed.name, parsed.value, {
-            path: parsed.path,
-            httpOnly: parsed.httpOnly,
+          event.cookies.set("token", "", {
+            path: "/",
+            httpOnly: true,
             // secure: parsed.secure,
             expires: parsed.expires,
-            // sameSite: parsed.sameSite,
           });
         }
       }
@@ -163,19 +161,18 @@ export const server = {
       };
     },
   }),
-  
+
   getSessions: defineAction({
     accept: "json",
     handler: async () => {
       const url = `${import.meta.env.SERVER_ADDRESS}/getSessions`;
-  
+
       const backendResponse = await fetch(url, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
-      const data = (await backendResponse.json());
-      
+      const data = await backendResponse.json();
 
       if (!backendResponse.ok) {
         return {
@@ -194,15 +191,15 @@ export const server = {
       };
     },
   }),
-  
+
   getSessionDetails: defineAction({
     accept: "json",
     input: z.object({
       session_id: z.number().int(),
     }),
-    handler: async ({ session_id}) => {
+    handler: async ({ session_id }) => {
       const url = `${import.meta.env.SERVER_ADDRESS}/sessionAnalysis`;
-  
+
       const backendResponse = await fetch(url, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -211,7 +208,7 @@ export const server = {
         }),
         credentials: "include",
       });
-      const data = (await backendResponse.json());
+      const data = await backendResponse.json();
 
       if (!backendResponse.ok) {
         return {
@@ -241,7 +238,7 @@ export const server = {
     }),
     handler: async ({ start_time, end_time, min, max }) => {
       const url = `${import.meta.env.SERVER_ADDRESS}/createSession`; // API Endpoint
-  
+
       const backendResponse = await fetch(url, {
         method: "POST",
         headers: {
@@ -255,9 +252,9 @@ export const server = {
         }),
         credentials: "include",
       });
-  
+
       const data = await backendResponse.json();
-  
+
       if (!backendResponse.ok) {
         return {
           success: false,
@@ -266,7 +263,7 @@ export const server = {
           data: data,
         };
       }
-      
+
       return {
         success: true,
         message: "Session created successfully",
@@ -276,8 +273,3 @@ export const server = {
     },
   }),
 };
-
-
-
-
-
