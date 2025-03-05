@@ -102,11 +102,12 @@
             </th>
           </tr>
         </thead>
-        <tbody class="bg-base-100 divide-y divide-neutral-content">
+        <tbody class="divide-y divide-neutral-content">
           {#if tableData.length > 0}
-            {#each tableData as row (row.timestamp)}
+            {#each tableData as row, index (index)}
               <tr
-                class="hover:bg-secondary hover:text-secondary-content transition-colors"
+                class="hover:bg-secondary hover:text-secondary-content transition-colors
+                      odd:bg-neutral even:bg-base-200"
               >
                 <td class="px-4 py-2 text-sm">{row.timestamp}</td>
                 <td class="px-4 py-2 text-sm">{row.x}</td>
