@@ -5,10 +5,7 @@
   let sessions: SessionRequestData[] = [];
   let error: string = "";
 
-<<<<<<< HEAD
   // Function to store the clicked session ID
-=======
->>>>>>> 3b43d016b4aeabb140164bbbc09def8d2b377310
   function storeID(id: number) {
     sessionStorage.setItem("clickedID", id.toString());
     window.dispatchEvent(new StorageEvent("storage", { key: "clickedID" }));
@@ -16,7 +13,7 @@
 
   onMount(async () => {
     try {
-      const serverAddress = 'http://localhost:8080';
+      const serverAddress = "http://localhost:8080";
       const response = await fetch(`${serverAddress}/getSessions`, {
         method: "GET",
         headers: {
@@ -28,7 +25,7 @@
       if (!response.ok) throw new Error("Failed to fetch sessions");
 
       const rawJson = await response.json();
-      let seenNames: Set<string> = new Set();  // Track names that have already appeared
+      let seenNames: Set<string> = new Set(); // Track names that have already appeared
 
       // Iterate over sessions and handle duplicates
       sessions = rawJson.map((session: any) => {
