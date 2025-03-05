@@ -2,16 +2,12 @@
   import { get } from 'svelte/store';
   import { onMount, onDestroy } from "svelte";
   import { writable } from 'svelte/store';
-<<<<<<< HEAD
+  
   import { 
     createSession,
     sessionId
    } from "../scripts/session";
 
-=======
-  import { createSession } from "../scripts/session";
-  import { sessionId } from "../scripts/session";
->>>>>>> 3b43d016b4aeabb140164bbbc09def8d2b377310
   import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { Camera } from "@mediapipe/camera_utils";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
@@ -31,8 +27,6 @@
     WebSocketConnection,
     analysisData
    } from "../scripts/websocket";
-
-  import { insertAnalysisData } from "../scripts/insert";
 
   let videoEl: HTMLVideoElement;
   let canvasEl: HTMLCanvasElement;
@@ -61,20 +55,6 @@
   let canStop = writable(false);
 
   let currentSessionId: number | null;
-
-  // Define the Analysis type
-  type Analysis = {
-    session_id: number;
-    timestamp: number;
-    x: number;
-    y: number;
-    prob: number;
-  };
-<<<<<<< HEAD
-=======
-
-  let analysisData = writable<Analysis[]>([]);
->>>>>>> 3b43d016b4aeabb140164bbbc09def8d2b377310
 
   // WebSocket message handler
   function handleWebSocketMessage(data: any) {
@@ -162,39 +142,8 @@
 
       createSession(sessionData);
       sessionCreated = true;
-      
-<<<<<<< HEAD
-      const currentSessionId = get(sessionId);
-
-      // Check if the current sessionId is valid
-      if (currentSessionId === null) {
-        console.error("Session ID is null!");
-        return;
-      }
-
-      // Update analysisData store
-      analysisData.update((data) => {
-        return data.map(item => ({
-          ...item, // Retain other fields
-          session_id: currentSessionId // Use the current sessionId
-        }));
-      });
-      
-      console.log("analysisData:", get(analysisData));
-
-      insertAnalysisData($analysisData);
-
     }
-
-    //window.location.href = "/dashboard";
-=======
-      sessionId.subscribe(value => {
-      currentSessionId = value;
-      });
-    }
-
     window.location.href = "/dashboard";
->>>>>>> 3b43d016b4aeabb140164bbbc09def8d2b377310
   }
 
   // Handle FaceMesh results
@@ -364,11 +313,6 @@
       </button>
     </div>
   </div>
-<<<<<<< HEAD
-=======
-</div>
-{/if}
->>>>>>> 3b43d016b4aeabb140164bbbc09def8d2b377310
 </div>
 {/if}
 </div>
