@@ -98,7 +98,7 @@ let userSettings = {
     }
   </style>
   <script>
-    const serverAddress = "http://localhost:8080";
+    const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
     let userSettings = {
       plotting: false,
       affine: false,

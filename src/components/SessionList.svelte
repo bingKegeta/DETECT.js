@@ -13,7 +13,7 @@
 
   onMount(async () => {
     try {
-      const serverAddress = "http://localhost:8080";
+      const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
       const response = await fetch(`${serverAddress}/getSessions`, {
         method: "GET",
         headers: {

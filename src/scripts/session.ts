@@ -4,7 +4,7 @@ import { analysisData } from "../scripts/websocket";
 
 export const sessionId = writable<number | null>(null); 
 
-const serverAddress = "http://localhost:8080/createSession";
+const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS
 
 export async function createSession(sessionData: {
   name: string;
@@ -16,7 +16,7 @@ export async function createSession(sessionData: {
   acc_max: number;
 }) {
   try {
-    const response = await fetch(serverAddress, {
+    const response = await fetch(`${serverAddress}/createSession`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

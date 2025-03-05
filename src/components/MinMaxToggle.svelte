@@ -1,7 +1,7 @@
 <script>
   import { writable } from "svelte/store";
 
-  const serverAddress = "http://localhost:8080";
+  const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
   let minMax = writable(false);
 
   // Function to update minMax state

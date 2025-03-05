@@ -3,7 +3,7 @@
   let sensitivity = 1.0;
 
   async function updateSensitivity() {
-    const serverAddress = "http://localhost:8080";
+    const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
 
     try {
       const response = await fetch(`${serverAddress}/updateSensitivity`, {

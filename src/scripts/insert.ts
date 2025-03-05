@@ -7,10 +7,11 @@ export type AnalysisData = {
 	prob: number;
   };
   
+  const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
   // Function to send analysis data to the server
   export async function insertAnalysisData(analysisEntries: AnalysisData[]) {
 	try {
-	  const response = await fetch("http://localhost:8080/updateSessionAnalysis", {
+	  const response = await fetch(`${serverAddress}/updateSessionAnalysis`, {
 		method: "POST",
 		headers: {
 		  "Content-Type": "application/json",

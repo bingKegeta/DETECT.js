@@ -32,7 +32,7 @@
   const canvasWidth = 640;
   const canvasHeight = 480;
 
-  const WEBSOCKET_URL = "ws://localhost:9090/ws";
+  const WEBSOCKET_URL = import.meta.env.WEBSOCKET_SERVER_ADDRESS;
 
   let variance: number | null = null;
   let acceleration: number | null = null;
