@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { writable } from 'svelte/store';
   import { createSession } from "../scripts/session";
+  import { sessionId } from "../scripts/session";
   import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { Camera } from "@mediapipe/camera_utils";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
@@ -46,14 +47,29 @@
   // Flag to track whether webcam has started (for disabling Stop button initially)
   let canStop = writable(false);
 
+  let currentSessionId: number | null;
+
+  // Define the Analysis type
+  type Analysis = {
+    session_id: number;
+    timestamp: number;
+    x: number;
+    y: number;
+    prob: number;
+  };
+
+  let analysisData = writable<Analysis[]>([]);
+
   // WebSocket message handler
   function handleWebSocketMessage(data: any) {
     if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
       probability = data.probability;
-      console.log("Received Metrics - Variance:", variance, "Acceleration:", acceleration, "Probability:", probability);
+      console.log("Probability:", probability);
 
       if (probabilityGraph) {
-        probabilityGraph.updateProbability(probability);
+        if (probability !== null) {
+          probabilityGraph.updateProbability(probability);
+        }
       }
     }
   }
@@ -130,7 +146,12 @@
 
       createSession(sessionData);
       sessionCreated = true;
+      
+      sessionId.subscribe(value => {
+      currentSessionId = value;
+      });
     }
+
     window.location.href = "/dashboard";
   }
 
@@ -251,13 +272,12 @@
       style="width: 75vw; height: 63vh;"
     ></canvas>
 
-    {#if $graphing}
     <canvas
       bind:this={graphCanvasEl}
       class="absolute bottom-4 right-4 border-2 border-accent rounded-lg"
       style="width: 600px; height: 400px; background: rgba(0, 0, 0, 0.5);"
     ></canvas>
-    {/if}
+    
   </div>
 
   <div class="flex w-full font-semibold text-lg text-primary-content">
