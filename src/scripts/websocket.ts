@@ -1,7 +1,9 @@
-// websocket.ts
 import { writable } from "svelte/store";
 
-// Removed session related code from this file.
+// Variables to store metric values
+export const normX = writable<number | null>(null);
+export const normY = writable<number | null>(null);
+export const timestampInSeconds = writable<number | null>(null);
 
 export const wsStore = writable<WebSocket | null>(null);
 export const variance = writable<number | null>(null);
@@ -55,6 +57,15 @@ export class WebSocketConnection {
   }
 
   public sendMessage(message: object) {
+    // Assuming message includes normX, normY, and timestampInSeconds
+    if (message) {
+      const { x, y, time } = message as { x: number; y: number; time: number };
+      // Store values in respective writable variables
+      normX.set(x);
+      normY.set(y);
+      timestampInSeconds.set(time);
+    }
+
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
       console.log("WebSocket Sent:", message);
