@@ -1,0 +1,35 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<html data-theme="default">
+  <head>
+    <title>About DETECT</title>
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body class="bg-base-100 text-base-content">
+    <Header />
+    <main class="flex-grow flex items-center justify-center px-16 py-10 bg-base-200 text-base-content rounded-lg shadow-lg h-[66vh] border-4 border-primary m-4">
+      <section class="px-16">
+        <h1 class="text-5xl font-bold text-primary mb-10">About DETECT</h1>
+
+        <h2 class="text-4xl font-semibold text-secondary mb-4">Introduction</h2>
+        <p class="text-2xl text-neutral-content mb-8">
+          DETECT is an AI-powered lie detection system leveraging real-time eye-tracking and machine learning to analyze gaze patterns and identify deception based on NLP eye cue phenomena. It operates through advanced algorithms, ensuring high accuracy and reliability. The system integrates Hidden Markov Models (HMM) with Gaussian Mixture Models (GMM-HMM) to enhance detection precision.
+        </p>
+
+        <h2 class="text-4xl font-semibold text-secondary mb-4">Problem</h2>
+        <p class="text-2xl text-neutral-content mb-8">
+          Traditional lie detection methods are intrusive, unreliable, and ethically questionable. They fail to provide practical insights into behavioral cues in a scalable and non-invasive way, often resulting in inaccurate outcomes and discomfort for subjects. DETECT addresses these issues by offering a contactless, real-time solution that prioritizes ethical standards.
+        </p>
+
+        <h2 class="text-4xl font-semibold text-secondary mb-4">Goal</h2>
+        <p class="text-2xl text-neutral-content mb-8">
+          Our goal is to create a real-time, ethical solution that uses eye-tracking data to analyze gaze shifts and pupil movements, providing an accurate and innovative method for detecting deception. DETECT aims to integrate seamlessly into various settings, from security screenings to psychological research, offering over 80% gaze tracking accuracy and scalable web implementation.
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>

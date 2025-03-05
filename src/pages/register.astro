@@ -1,24 +1,13 @@
 ---
-import DynamicChooser from "../components/DynamicChooser";
-import EmptyHeader from "../components/EmptyHeader.astro";
 import LoginHeader from "../components/LoginHeader.astro";
-import LoginComponent from "../components/LoginComponent.astro";
 import RegisterComponent from "../components/RegisterComponent.astro";
-import Sidebar from "../components/Sidebar.astro";
+import CustomHead from "../layouts/CustomHead.astro";
 ---
 
-<html lang="en" data-theme="cyberpunk">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/styles/global.css" />
-    <title>DETECT</title>
-  </head>
-  <body class="bg-base-100">
-    <LoginHeader />
-    <main class="mx-[25vh] my-4">
-      <RegisterComponent />
-      <!-- <Register /> -->
-    </main>
-  </body>
-</html>
+<CustomHead title="Register">
+  <LoginHeader />
+  <main class="mx-[25vh] my-4">
+    <RegisterComponent />
+    <!-- <Register /> -->
+  </main>
+</CustomHead>

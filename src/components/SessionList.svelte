@@ -5,7 +5,10 @@
   let sessions: SessionRequestData[] = [];
   let error: string = "";
 
+<<<<<<< HEAD
   // Function to store the clicked session ID
+=======
+>>>>>>> 3b43d016b4aeabb140164bbbc09def8d2b377310
   function storeID(id: number) {
     sessionStorage.setItem("clickedID", id.toString());
     window.dispatchEvent(new StorageEvent("storage", { key: "clickedID" }));
