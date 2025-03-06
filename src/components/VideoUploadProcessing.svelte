@@ -322,9 +322,9 @@ function endSession() {
   <!-- When a video is loaded, display the controls -->
   {#if videoLoaded}
     <div
-      class="flex w-full font-semibold text-lg border-2 border-neutral-content rounded-lg mb-4"
+      class="flex w-full font-semibold"
     >
-      <button
+      <!-- <button
         on:click={handlePlay}
         aria-label="Play video"
         disabled={isPlaying}
@@ -350,7 +350,7 @@ function endSession() {
         class="bg-error m-2 mr-3 py-4 rounded-md w-full h-full text-error-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
       >
         Stop
-      </button>
+      </button> -->
     </div>
   {/if}
 
