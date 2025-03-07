@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from "preact/hooks";
-import { h } from "preact";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 const ThemeSwitcher = () => {
   // Add more themes here
@@ -9,6 +8,8 @@ const ThemeSwitcher = () => {
     "Yang and Yin",
     "Pastel",
     "Hacker",
+    "Steampunk",
+    "Synthwave",
   ];
 
   const [theme, setTheme] = useState<string>("Cyberpunk");
@@ -91,6 +92,8 @@ const ThemeSwitcher = () => {
     },
     Pastel: { primary: "#e0b0ff", secondary: "#c2a3ff", success: "#a7d1ab" },
     Hacker: { primary: "#00ff00", secondary: "#d8b4fe", success: "#ffff00" },
+    Steampunk: { primary: "#a87900", secondary: "#775639", success: "#6b8e23" },
+    Synthwave: { primary: "#ff77a8", secondary: "#46c9ff", success: "#7fff7f" },
   };
 
   return (
@@ -137,9 +140,8 @@ const ThemeSwitcher = () => {
       {isOpen && (
         <ul
           ref={dropdownRef}
-          className={`absolute z-50 w-36 py-1 bg-base-200 border-2 border-secondary rounded-lg shadow-xl max-h-[50vh] overflow-y-auto ${
-            dropDirection === "up" ? "bottom-full mb-1" : "top-full mt-1"
-          }`}
+          className={`absolute z-50 w-36 py-1 bg-base-200 border-2 border-secondary rounded-lg shadow-xl max-h-[50vh] overflow-y-auto ${dropDirection === "up" ? "bottom-full mb-1" : "top-full mt-1"
+            }`}
           role="listbox"
           style={{
             maxWidth: "calc(100vw - 32px)", // Ensure no horizontal overflow
@@ -153,7 +155,7 @@ const ThemeSwitcher = () => {
               className={`
                 flex items-center gap-1 px-2 py-2 cursor-pointer text-xs
                 ${theme === themeOption ? "bg-base-300 text-accent" : "text-base-content"}
-                hover:bg-base-300/60 
+                hover:bg-base-300/60
                 transition-all duration-150 group
               `}
               role="option"
