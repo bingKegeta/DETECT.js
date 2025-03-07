@@ -32,7 +32,7 @@
   const canvasWidth = 640;
   const canvasHeight = 480;
 
-  const WEBSOCKET_URL = import.meta.env.WEBSOCKET_SERVER_ADDRESS;
+  const WEBSOCKET_URL = import.meta.env.PUBLIC_WS_PORT;
 
   let variance: number | null = null;
   let acceleration: number | null = null;

@@ -34,7 +34,7 @@
   let faceMesh: FaceMesh | null = null;
   let ws: WebSocketConnection | null = null;
 
-  const WEBSOCKET_URL = import.meta.env.WEBSOCKET_SERVER_ADDRESS;
+  const WEBSOCKET_URL = import.meta.env.PUBLIC_WS_PORT;
   let variance: number | null = null;
   let acceleration: number | null = null;
   let probability: number | null = null;
