@@ -3,7 +3,7 @@ import ThemeSwitcher from "./ThemeSwitcher";
 ---
 
 <header
-  class="sticky top-0 z-50 flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg"
+  class="sticky top-0 z-50 flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg transition-all duration-300 md:flex-nowrap flex-wrap"
 >
   <!-- Logo Section -->
   <div class="flex flex-col flex-shrink-0">
@@ -11,7 +11,7 @@ import ThemeSwitcher from "./ThemeSwitcher";
     <span class="text-1xl">AAI Solution</span>
   </div>
   <!-- Navigation Section -->
-  <div class="flex items-center gap-6 flex-shrink-0">
+  <div class="flex items-center gap-4 md:gap-6 flex-shrink-0">
     <ThemeSwitcher client:load />
     <a href="/login" class="starfunk btn btn-primary btn-wide rounded-full"
       >Login</a
@@ -23,6 +23,7 @@ import ThemeSwitcher from "./ThemeSwitcher";
     >
   </div>
 </header>
+
 <style>
   .starfunk {
     background: linear-gradient(
@@ -40,5 +41,18 @@ import ThemeSwitcher from "./ThemeSwitcher";
   }
   .starfunk:hover {
     opacity: 0.9;
+  }
+
+  /* Adjust header when Sign Up button is removed */
+  @media (max-width: 768px) {
+    header {
+      padding: 5px 10px;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .starfunk {
+      padding: 0.6rem 1.5rem;
+      font-size: 0.9rem;
+    }
   }
 </style>
