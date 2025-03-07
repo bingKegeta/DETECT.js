@@ -83,7 +83,7 @@
     {#each sessions as session (session.id)}
       <button
         id={`Session-${session.id}`}
-        class="group max-w-full w-full m-auto p-4 bg-base-200 rounded-lg shadow-lg border-2 border-secondary hover:border-primary mb-4 cursor-pointer hover:bg-base-300 transition duration-150"
+        class="group max-w-full w-full m-auto p-4 bg-base-200 rounded-lg shadow-lg border-2 border-secondary hover:border-primary mb-4 cursor-pointer hover:bg-gradient-to-r from-secondary to-accent transition duration-300"
         on:click={() => storeID(session.id)}
       >
         <div class="flex justify-between items-center">
