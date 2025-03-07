@@ -215,7 +215,7 @@
   bind:this={container}
   bind:clientWidth={width}
   bind:clientHeight={height}
-  class="w-full h-full min-h-[60vh] border-2 border-accent rounded-lg shadow-lg backdrop-filter backdrop-blur-lg bg-opacity-20 bg-neutral before:absolute before:inset-0 before:rounded-lg relative overflow-hidden"
+  class="w-full h-full min-h-[60vh] border-2 flex-grow border-accent rounded-lg shadow-lg backdrop-filter backdrop-blur-lg bg-opacity-20 bg-neutral before:absolute before:inset-0 before:rounded-lg relative overflow-hidden"
 >
   <!-- D3 chart will render here -->
 </div>
