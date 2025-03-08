@@ -140,6 +140,7 @@
       sessionCreated = true;
     }
     window.location.href = "/dashboard";
+    //console.log("here");
   }
 
   onMount(() => {

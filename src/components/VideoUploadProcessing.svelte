@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
+  import { writable } from "svelte/store";
   import { FaceMesh } from "@mediapipe/face_mesh";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
-  import { writable } from "svelte/store";
   import { createSession } from "../scripts/session";
 
   import {
@@ -22,7 +22,9 @@
   let videoLoaded = false;
   let isProcessing = false;
 
-  // Offscreen processing variables
+  // Spinner for file loading
+  let isLoadingFile = false;
+
   let videoElement: HTMLVideoElement;
   let processingCanvas: HTMLCanvasElement;
   let offscreenCtx: CanvasRenderingContext2D | null;
@@ -46,25 +48,26 @@
   let sessionCreated = false;
   let startTime = new Date().toISOString();
 
+  // WebSocket handler
   function handleWebSocketMessage(data: any) {
     if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
       probability = data.probability;
       console.log("Probability:", probability);
-
-      // Update the probability graph with the new probability value
+// Update the probability graph with the new probability value
       if (probability !== null) {
         probabilityGraph.updateProbability(probability);
       }
     }
   }
 
+  // Start/Restart WebSocket
   function startWebSocket() {
-    if (ws) ws.close(); // Ensure no duplicate connections
-
+    if (ws) ws.close();
     ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
     ws.start();
   }
 
+  // Send frames to FaceMesh
   function processFrame() {
     if (faceMesh && videoElement) {
       faceMesh.send({ image: videoElement });
@@ -72,21 +75,32 @@
   }
 
   onMount(() => {
-    // Initialize the probability graph
+    // Probability graph canvas
     const graphCanvas = document.createElement("canvas");
     graphCanvas.width = canvasWidth;
-    graphCanvas.height = 200; // Set a fixed height for the graph
+    graphCanvas.height = 200;
     document.body.appendChild(graphCanvas);
     probabilityGraph = new ProbabilityGraph(graphCanvas);
 
-    // Create a hidden video element for loading and playback
+    // Hidden <video> element
     videoElement = document.createElement("video");
     videoElement.style.display = "none";
-    // Ensure inline playback (especially for mobile)
     videoElement.setAttribute("playsinline", "true");
     document.body.appendChild(videoElement);
 
-    // Create a hidden canvas element for processing
+    // === IMPORTANT ===
+    // This "ended" event closes the modal automatically when the video finishes playing.
+    videoElement.addEventListener("ended", () => {
+      // If no session created yet, we finalize it.
+      if (!sessionCreated) {
+        endSession();
+      } else {
+        // Otherwise, just close the modal if it's open
+        isModalVisible.set(false);
+      }
+    });
+
+    // Hidden processing canvas
     processingCanvas = document.createElement("canvas");
     processingCanvas.width = canvasWidth;
     processingCanvas.height = canvasHeight;
@@ -94,7 +108,7 @@
     document.body.appendChild(processingCanvas);
     offscreenCtx = processingCanvas.getContext("2d");
 
-    // Initialize MediaPipe FaceMesh
+    // Initialize FaceMesh
     faceMesh = new FaceMesh({
       locateFile: (file) =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
@@ -106,14 +120,15 @@
       minTrackingConfidence: 0.5,
     });
 
-    // Process results – drawing to the offscreen canvas (not displayed)
     faceMesh.onResults((results) => {
       if (!offscreenCtx) return;
       offscreenCtx.save();
       offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
       offscreenCtx.drawImage(results.image, 0, 0, canvasWidth, canvasHeight);
+
       if (results.multiFaceLandmarks) {
         for (const landmarks of results.multiFaceLandmarks) {
+          // Draw landmarks
           // Draw iris centers
           const irisCenterLandmarks = getLandmarks(landmarks, [
             LEFT_IRIS_CENTER,
@@ -147,15 +162,14 @@
           );
           console.log(
             `Normalized Iris Position: X: ${normX}, Y: ${normY}, Timestamp: ${timestamp}`
-          );
-
+          );          
+          
           // Send metrics via WebSocket
           const metrics = {
             x: normX,
             y: normY,
             time: timestamp / 1000,
           };
-
           if (ws) {
             ws.sendMessage(metrics);
             console.log("WebSocket Sent:", metrics);
@@ -165,16 +179,14 @@
       offscreenCtx.restore();
     });
 
-    // === Pre-warm mediapipe: perform a dummy send on a blank frame ===
+ // === Pre-warm mediapipe: perform a dummy send on a blank frame ===
     if (offscreenCtx) {
-      // Draw a blank frame (or any minimal dummy content)
       offscreenCtx.fillStyle = "#000";
       offscreenCtx.fillRect(0, 0, canvasWidth, canvasHeight);
       // Send the blank frame. This call will download and compile WASM, create a WebGL context, etc.
       faceMesh
         .send({ image: processingCanvas })
-        .catch((error) => console.error("Error during warm-up:", error));
-    }
+        .catch((error) => console.error("Error during warm-up:", error));    }
 
     // Start WebSocket connection
     startWebSocket();
@@ -194,7 +206,7 @@
     }
   });
 
-  // Process the video frame by frame:
+  // Loop to process video frames
   async function processVideoFrame() {
     // Check immediately: if paused or ended, stop processing.
     if (videoElement.paused || videoElement.ended) {
@@ -204,7 +216,6 @@
     if (offscreenCtx) {
       offscreenCtx.drawImage(videoElement, 0, 0, canvasWidth, canvasHeight);
     }
-    // Check again before processing the frame.
     if (videoElement.paused || videoElement.ended) {
       isProcessing = false;
       return;
@@ -227,9 +238,17 @@
     const input = event.target as HTMLInputElement;
     const file = input.files ? input.files[0] : null;
     if (file) {
+      // Show spinner for file loading
+      isLoadingFile = true;
+
       const url = URL.createObjectURL(file);
       videoElement.src = url;
+
+      // Once enough data is loaded to start playback
       videoElement.onloadeddata = () => {
+        // Hide the spinner
+        isLoadingFile = false;
+
         videoLoaded = true;
         isPlaying = true;
         isProcessing = true;
@@ -239,7 +258,7 @@
     }
   }
 
-  // Control handlers
+  // Optional controls
   function handlePlay() {
     if (videoLoaded && videoElement.paused) {
       isPlaying = true;
@@ -260,46 +279,53 @@
   }
 
   function handleStop() {
-  if (!sessionCreated) {
-    isModalVisible.set(true);
-  } else {
-    endSession();
-  }
-}
-
-function endSession() {
-  if (!sessionCreated) {
-    const sessionData = {
-      name: sessionName || "Session", // Default name if none provided
-      start_time: startTime,
-      end_time: new Date().toISOString(),
-      var_min: variance ?? 0,
-      var_max: variance ?? 0,
-      acc_min: acceleration ?? 0,
-      acc_max: acceleration ?? 0
-    };
-
-    createSession(sessionData);
-    sessionCreated = false; 
-    isModalVisible.set(false);
-  }
-  if (videoLoaded) {
-    isPlaying = false;
-    videoLoaded = false;
-    videoElement.pause();
-    videoElement.currentTime = 0;
-    if (offscreenCtx) {
-      offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+    if (!sessionCreated) {
+      isModalVisible.set(true);
+    } else {
+      endSession();
     }
   }
-  window.location.href = "/dashboard";
-}
 
+  // End session logic
+  function endSession() {
+    if (!sessionCreated) {
+      const sessionData = {
+        name: sessionName || "Session", // Default name if none provided
+        start_time: startTime,
+        end_time: new Date().toISOString(),
+        var_min: variance ?? 0,
+        var_max: variance ?? 0,
+        acc_min: acceleration ?? 0,
+        acc_max: acceleration ?? 0
+      };
+      createSession(sessionData);
+      sessionCreated = false;
+      // Close the modal if open
+      isModalVisible.set(false);
+    }
+    if (videoLoaded) {
+      isPlaying = false;
+      videoLoaded = false;
+      videoElement.pause();
+      videoElement.currentTime = 0;
+      offscreenCtx?.clearRect(0, 0, canvasWidth, canvasHeight);
+    }
+    // Redirect
+    window.location.href = "/dashboard";
+  }
 </script>
 
-<div
-  class="flex flex-col items-center justify-center rounded-lg border-4 border-primary opacity-90 shadow-glow bg-base-200 m-4 p-4"
->
+<!--
+  1) Loading Spinner for when the file is being selected and loaded
+     If you want it in a different place, move this {#if isLoadingFile} block
+-->
+{#if isLoadingFile}
+  <div class="spinner mt-4 flex justify-center">
+    <div class="loader"></div>
+  </div>
+{/if}
+
+<div class="flex flex-col items-center justify-center rounded-lg border-4 border-primary opacity-90 shadow-glow bg-base-200 m-4 p-4">
   <!-- Processing indicator: Spinner while processing, Pause symbol when paused -->
   {#if isProcessing}
     <div class="spinner mt-4 flex justify-center">
@@ -310,6 +336,7 @@ function endSession() {
       <div class="pause-symbol">&#10074;&#10074;</div>
     </div>
   {/if}
+
   <!-- Visible file input with original styling -->
   <input
     type="file"
@@ -317,68 +344,71 @@ function endSession() {
     on:change={handleVideoUpload}
     id="fileInput"
     class="flex p-2 bg-secondary hover:text-secondary-content rounded-md w-fit my-2 shadow-glow hover:scale-105 transition-transform"
+    disabled={isLoadingFile}
   />
 
-  <!-- When a video is loaded, display the controls -->
   {#if videoLoaded}
-    <div
-      class="flex w-full font-semibold"
-    >
-      <!-- <button
-        on:click={handlePlay}
-        aria-label="Play video"
-        disabled={isPlaying}
-        class="bg-info m-2 ml-3 my-2 py-4 rounded-md w-full h-full text-info-content hover:bg-success hover:text-success-content hover:scale-105 hover:shadow-glow transition-transform"
-        class:opacity-50={isPlaying}
-        class:cursor-not-allowed={isPlaying}
-      >
-        Play
-      </button>
-      <button
-        on:click={handlePause}
-        aria-label="Pause video"
-        disabled={!isPlaying}
-        class="bg-secondary m-2 py-4 rounded-md w-full h-full text-secondary-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
-        class:opacity-50={!isPlaying}
-        class:cursor-not-allowed={!isPlaying}
-      >
-        Pause
-      </button>
-      <button
-        on:click={handleStop}
-        aria-label="Stop video"
-        class="bg-error m-2 mr-3 py-4 rounded-md w-full h-full text-error-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
-      >
-        Stop
-      </button> -->
+    <div class="flex w-full font-semibold">
+      <!-- Example: your Play, Pause, Stop buttons -->
+      <!--
+      <button on:click={handlePlay}>Play</button>
+      <button on:click={handlePause}>Pause</button>
+      <button on:click={handleStop}>Stop</button>
+      -->
     </div>
   {/if}
 
+  <!-- Session Name Modal -->
   {#if $isModalVisible}
-  <div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
-    <div class="bg-base-100 p-6 rounded-lg border-2 border-accent shadow-glow w-96">
-      <h2 class="font-semibold text-xl text-primary-content mb-4">Enter Session Name</h2>
-      <input
-        type="text"
-        bind:value={sessionName}
-        class="border-2 border-accent p-2 rounded-md w-full mb-4 bg-base-200 text-primary-content"
-        placeholder="Session Name"
-      />
-      <div class="flex justify-between">
-        <button
-          on:click={() => isModalVisible.set(false)}
-          class="bg-gray-300 text-primary-content p-2 rounded-md hover:bg-gray-400 transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          on:click={endSession}
-          class="bg-info text-info-content p-2 rounded-md hover:bg-success transition-colors"
-        >
-          Submit
-        </button>
+    <div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
+      <div class="bg-base-100 p-6 rounded-lg border-2 border-accent shadow-glow w-96">
+        <h2 class="font-semibold text-xl text-primary-content mb-4">Enter Session Name</h2>
+        <input
+          type="text"
+          bind:value={sessionName}
+          class="border-2 border-accent p-2 rounded-md w-full mb-4 bg-base-200 text-primary-content"
+          placeholder="Session Name"
+        />
+        <div class="flex justify-between">
+          <button
+            on:click={() => isModalVisible.set(false)}
+            class="bg-gray-300 text-primary-content p-2 rounded-md hover:bg-gray-400 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            on:click={endSession}
+            class="bg-info text-info-content p-2 rounded-md hover:bg-success transition-colors"
+          >
+            Submit
+          </button>
+        </div>
       </div>
     </div>
-  </div>
   {/if}
 </div>
+
+<style>
+  /* Basic spinner styling */
+  .spinner {
+    margin: 1rem auto;
+  }
+  .loader {
+    border: 8px solid rgba(0, 0, 0, 0.1);
+    border-top: 8px solid #3498db; /* or your color choice */
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  /* Optional pause symbol styling */
+  .pause-symbol {
+    font-size: 2rem;
+    color: #fff;
+  }
+</style>
