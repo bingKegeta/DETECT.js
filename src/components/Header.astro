@@ -1,7 +1,5 @@
 ---
-import ThemeSwitcher from "./ThemeSwitcher";
 import Settings from "./Settings.astro";
-import Modal from "./Modal";
 ---
 
 <header
@@ -48,11 +46,11 @@ import Modal from "./Modal";
       </a>
       <a
         href="/upload"
-        class="p-3 transition-transform transform-gpu hover:scale-110"
+        class="p-3 transition-transform transform-gpu hover:scale-110 hidden md:block"
       >
         <!-- Upload Icon -->
         <svg
-          class="h-[5vh] w-auto fill-current text-base-content hover:text-primary transition-colors duration-300 hidden md:block"
+          class="h-[5vh] w-auto fill-current text-base-content hover:text-primary transition-colors duration-300"
           viewBox="0 0 24 24"
         >
           <path d="M5 20h14v-2H5v2zm7-18l-7 7h4v6h6v-6h4l-7-7z"></path>
