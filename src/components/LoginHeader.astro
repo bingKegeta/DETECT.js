@@ -3,15 +3,16 @@ import ThemeSwitcher from "./ThemeSwitcher";
 ---
 
 <header
-  class="top-0 z-50 flex justify-between bg-base-200 items-center p-5 text-base-content border-4 border-primary m-4 rounded-lg relative"
+  class="top-0 z-50 flex justify-between bg-base-200 items-center p-4 md:p-5 text-base-content border-4 border-primary m-4 rounded-lg relative flex-nowrap"
 >
   <!-- Logo Section -->
-  <div class="flex flex-col flex-shrink-0">
-    <h1 class="font-bold text-6xl">DETECT</h1>
-    <span class="text-1xl">AAI Solution</span>
+  <div class="flex flex-col flex-shrink-0 text-4xl md:text-5xl">
+    <h1 class="font-bold text-4xl md:text-5xl">DETECT</h1>
+    <span class="text-sm md:text-base">AAI Solution</span>
   </div>
+  
   <!-- Navigation Section -->
-  <div class="flex items-center gap-6 flex-shrink-0">
+  <div class="flex items-center gap-3 md:gap-5 flex-shrink-0 text-sm md:text-base">
     <ThemeSwitcher client:load />
   </div>
 </header>
