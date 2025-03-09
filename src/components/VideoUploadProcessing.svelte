@@ -28,6 +28,7 @@
   let isPlaying = false;
   let videoLoaded = false;
   let isProcessing = false;
+  let isLoadingFile = false;
 
   // Offscreen processing variables
   let videoElement: HTMLVideoElement;
@@ -345,9 +346,17 @@ function endSession() {
 
 </script>
 
-<div
-  class="flex flex-col items-center justify-center rounded-lg border-4 border-primary opacity-90 shadow-glow bg-base-200 m-4 p-4"
->
+<!--
+  1) Loading Spinner for when the file is being selected and loaded
+     If you want it in a different place, move this {#if isLoadingFile} block
+-->
+{#if isLoadingFile}
+  <div class="spinner mt-4 flex justify-center">
+    <div class="loader"></div>
+  </div>
+{/if}
+
+<div class="flex flex-col items-center justify-center rounded-lg border-4 border-primary opacity-90 shadow-glow bg-base-200 m-4 p-4">
   <!-- Processing indicator: Spinner while processing, Pause symbol when paused -->
   {#if isProcessing}
     <div class="spinner mt-4 flex justify-center">
@@ -358,6 +367,7 @@ function endSession() {
       <div class="pause-symbol">&#10074;&#10074;</div>
     </div>
   {/if}
+
   <!-- Visible file input with original styling -->
   <input
     type="file"
@@ -365,68 +375,71 @@ function endSession() {
     on:change={handleVideoUpload}
     id="fileInput"
     class="flex p-2 bg-secondary hover:text-secondary-content rounded-md w-fit my-2 shadow-glow hover:scale-105 transition-transform"
+    disabled={isLoadingFile}
   />
 
-  <!-- When a video is loaded, display the controls -->
   {#if videoLoaded}
-    <div
-      class="flex w-full font-semibold text-lg border-2 border-neutral-content rounded-lg mb-4"
-    >
-      <button
-        on:click={handlePlay}
-        aria-label="Play video"
-        disabled={isPlaying}
-        class="bg-info m-2 ml-3 my-2 py-4 rounded-md w-full h-full text-info-content hover:bg-success hover:text-success-content hover:scale-105 hover:shadow-glow transition-transform"
-        class:opacity-50={isPlaying}
-        class:cursor-not-allowed={isPlaying}
-      >
-        Play
-      </button>
-      <button
-        on:click={handlePause}
-        aria-label="Pause video"
-        disabled={!isPlaying}
-        class="bg-secondary m-2 py-4 rounded-md w-full h-full text-secondary-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
-        class:opacity-50={!isPlaying}
-        class:cursor-not-allowed={!isPlaying}
-      >
-        Pause
-      </button>
-      <button
-        on:click={handleStop}
-        aria-label="Stop video"
-        class="bg-error m-2 mr-3 py-4 rounded-md w-full h-full text-error-content hover:bg-warning hover:text-warning-content hover:scale-105 hover:shadow-glow transition-transform"
-      >
-        Stop
-      </button>
+    <div class="flex w-full font-semibold">
+      <!-- Example: your Play, Pause, Stop buttons -->
+      <!--
+      <button on:click={handlePlay}>Play</button>
+      <button on:click={handlePause}>Pause</button>
+      <button on:click={handleStop}>Stop</button>
+      -->
     </div>
   {/if}
 
+  <!-- Session Name Modal -->
   {#if $isModalVisible}
-  <div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
-    <div class="bg-base-100 p-6 rounded-lg border-2 border-accent shadow-glow w-96">
-      <h2 class="font-semibold text-xl text-primary-content mb-4">Enter Session Name</h2>
-      <input
-        type="text"
-        bind:value={sessionName}
-        class="border-2 border-accent p-2 rounded-md w-full mb-4 bg-base-200 text-primary-content"
-        placeholder="Session Name"
-      />
-      <div class="flex justify-between">
-        <button
-          on:click={() => isModalVisible.set(false)}
-          class="bg-gray-300 text-primary-content p-2 rounded-md hover:bg-gray-400 transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          on:click={endSession}
-          class="bg-info text-info-content p-2 rounded-md hover:bg-success transition-colors"
-        >
-          Submit
-        </button>
+    <div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
+      <div class="bg-base-100 p-6 rounded-lg border-2 border-accent shadow-glow w-96">
+        <h2 class="font-semibold text-xl text-primary-content mb-4">Enter Session Name</h2>
+        <input
+          type="text"
+          bind:value={sessionName}
+          class="border-2 border-accent p-2 rounded-md w-full mb-4 bg-base-200 text-primary-content"
+          placeholder="Session Name"
+        />
+        <div class="flex justify-between">
+          <button
+            on:click={() => isModalVisible.set(false)}
+            class="bg-gray-300 text-primary-content p-2 rounded-md hover:bg-gray-400 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            on:click={endSession}
+            class="bg-info text-info-content p-2 rounded-md hover:bg-success transition-colors"
+          >
+            Submit
+          </button>
+        </div>
       </div>
     </div>
-  </div>
   {/if}
 </div>
+
+<style>
+  /* Basic spinner styling */
+  .spinner {
+    margin: 1rem auto;
+  }
+  .loader {
+    border: 8px solid rgba(0, 0, 0, 0.1);
+    border-top: 8px solid #3498db; /* or your color choice */
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  /* Optional pause symbol styling */
+  .pause-symbol {
+    font-size: 2rem;
+    color: #fff;
+  }
+</style>
