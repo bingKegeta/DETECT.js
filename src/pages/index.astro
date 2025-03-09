@@ -58,7 +58,7 @@ import Section from "../components/Section.astro";
           <div
             class="mt-4 p-3 bg-base-300/50 rounded-md border-l-4 border-info w-full"
           >
-            <p class="text-info-content text-sm italic">
+            <p class="text-base-content text-sm italic">
               "The future of truth verification is here, and it's focusing on
               your eyes." — Dr. Eye Observer
             </p>
@@ -335,7 +335,7 @@ import Section from "../components/Section.astro";
   <script is:inline>
     document.addEventListener("DOMContentLoaded", function () {
       const animatedElements = document.querySelectorAll(
-        ".slideFromLeft, .slideFromRight, .slideFromTop"
+        ".slideFromLeft, .slideFromRight, .slideFromTop",
       );
       const options = { threshold: 0.2 };
 
