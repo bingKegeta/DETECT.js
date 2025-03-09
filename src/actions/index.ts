@@ -130,7 +130,7 @@ export const server = {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
-      const data = await backendResponse.text();
+      const data = await backendResponse.json();
       if (!backendResponse.ok) {
         return {
           success: false,
