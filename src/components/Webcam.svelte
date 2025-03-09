@@ -1,11 +1,15 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { writable } from 'svelte/store';
-  import {
-    createSession,
-    sessionId
-  } from "../scripts/session";
+  import { createSession } from "../scripts/session";
 
+  import {
+    calculateAffineTransformation,
+    applyAffineTransformation
+  } from "../scripts/affineTransformation";
+
+  import type { Coordinates } from "../scripts/affineTransformation";
+  import { applySmoothing } from "../scripts/smoothing";
   import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { Camera } from "@mediapipe/camera_utils";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
@@ -52,7 +56,10 @@
   // Flag to track whether webcam has started (for disabling Stop button initially)
   let canStop = writable(false);
 
-  let currentSessionId: number | null;
+  let initialNoseTip: Coordinates | null = null; // Track the initial nose tip position
+
+  let previousXValues: number[] = [];
+  let previousYValues: number[] = [];
 
   // WebSocket message handler
   function handleWebSocketMessage(data: any) {
@@ -164,6 +171,7 @@
     const canvasCtx = canvasEl.getContext("2d");
     if (!canvasCtx) return;
 
+    // Inside the onResults function, after drawing landmarks:
     faceMesh.onResults((results: Results) => {
       canvasCtx.save();
       canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
@@ -174,6 +182,7 @@
         canvasEl.width,
         canvasEl.height
       );
+
       if (results.multiFaceLandmarks) {
         for (const landmarks of results.multiFaceLandmarks) {
           const irisCenters = getLandmarks(landmarks, [
@@ -200,19 +209,44 @@
             lineWidth: 1,
           });
 
+          // Smoothing iris positions
           const { normX, normY, timestamp } = getNormalizedIrisPosition(
             landmarks,
             canvasEl.width,
             canvasEl.height
           );
 
-          const timestampInSeconds = timestamp / 1000;
+          // Apply smoothing to the iris position
+          const smoothedNormX = applySmoothing(normX, previousXValues);
+          const smoothedNormY = applySmoothing(normY, previousYValues);
+
+          // Track the current nose tip for affine transformation
+          const currentNoseTip: Coordinates = getLandmarks(landmarks, [NOSE_TIP])[0];
+
+          if (initialNoseTip) {
+            // Calculate the affine transformation matrix based on initial and current nose tip positions
+            const transformationMatrix = calculateAffineTransformation(initialNoseTip, currentNoseTip);
+
+            // Apply the transformation to all landmarks (using smoothed iris position)
+            const transformedLandmarks = landmarks.map(landmark => 
+              applyAffineTransformation(landmark, transformationMatrix)
+            );
+
+            // Draw the transformed landmarks on the canvas
+            drawLandmarks(canvasCtx, transformedLandmarks, {
+              color: "#0000FF",
+              lineWidth: 2,
+            });
+          }
+
+          const timestampInSeconds = timestamp / 1000; // Convert timestamp to seconds
 
           const metrics = {
-            x: normX,
-            y: normY,
+            x: smoothedNormX,
+            y: smoothedNormY,
             time: timestampInSeconds,
           };
+
           if (ws) {
             ws.sendMessage(metrics);
             console.log("WebSocket Sent:", metrics);
@@ -222,7 +256,11 @@
       canvasCtx.restore();
     });
 
-    // Initialize ProbabilityGraph
+    if (canvasEl) {
+      canvasEl.width = Math.floor(window.innerWidth * 0.9);
+      canvasEl.height = Math.floor(window.innerHeight * 0.9);
+    }
+
     if (graphCanvasEl) {
       probabilityGraph = new ProbabilityGraph(graphCanvasEl);
     }
