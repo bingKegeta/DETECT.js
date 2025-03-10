@@ -101,15 +101,11 @@
 
   // === IMPORTANT ===
   // This "ended" event closes the modal automatically when the video finishes playing.
-  videoElement.addEventListener("ended", () => {
-  // If no session created yet, we finalize it.
-  if (!sessionCreated) {
-    endSession();
-  } else {
-  // Otherwise, just close the modal if it's open
-    isModalVisible.set(false);
-  }
-  });
+// Instead of automatically ending the session when the video ends,
+// show the modal so the user can input the session name.
+videoElement.onended = () => {
+  isModalVisible.set(true);
+};
 
     // Create a hidden canvas element for processing
     processingCanvas = document.createElement("canvas");
@@ -405,33 +401,48 @@ function endSession() {
   {/if}
 
   <!-- Session Name Modal -->
-  {#if $isModalVisible}
-    <div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
-      <div class="bg-base-100 p-6 rounded-lg border-2 border-accent shadow-glow w-96">
-        <h2 class="font-semibold text-xl text-primary-content mb-4">Enter Session Name</h2>
-        <input
-          type="text"
-          bind:value={sessionName}
-          class="border-2 border-accent p-2 rounded-md w-full mb-4 bg-base-200 text-primary-content"
-          placeholder="Session Name"
-        />
-        <div class="flex justify-between">
-          <button
-            on:click={() => isModalVisible.set(false)}
-            class="bg-gray-300 text-primary-content p-2 rounded-md hover:bg-gray-400 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            on:click={endSession}
-            class="bg-info text-info-content p-2 rounded-md hover:bg-success transition-colors"
-          >
-            Submit
-          </button>
-        </div>
+<!-- Session Name Modal -->
+{#if $isModalVisible}
+  <div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
+    <div class="bg-base-100 p-6 rounded-lg border-4 border-primary shadow-xl w-96">
+      
+      <!-- High-Contrast Heading -->
+      <h2 class="font-extrabold text-3xl text-secondary mb-4 text-center uppercase tracking-wide">
+        Enter Session Name
+      </h2>
+      
+      <!-- Input Field -->
+      <input
+        type="text"
+        bind:value={sessionName}
+        class="border border-primary p-3 rounded-md w-full mb-4
+               bg-base-200 text-primary-content focus:ring-4 focus:ring-primary
+               transition-all outline-none"
+        placeholder="Session Name"
+      />
+      
+       <!-- Buttons Section -->
+       <div class="flex justify-between">
+        <button
+          on:click={() => isModalVisible.set(false)}
+          class="bg-neutral text-primary-content p-3 rounded-md hover:bg-error
+                 transition-all font-semibold w-1/2 mr-2"
+        >
+          Cancel
+        </button>
+        <button
+          on:click={endSession}
+          class="bg-neutral text-primary-content p-3 rounded-md hover:bg-success
+                 transition-all font-semibold w-1/2"
+        >
+          Submit
+        </button>
       </div>
+
     </div>
-  {/if}
+  </div>
+{/if}
+
 </div>
 
 <style>
