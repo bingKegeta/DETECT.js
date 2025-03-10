@@ -22,7 +22,7 @@
   import type { Coordinates } from "../scripts/affineTransformation";
   import { applySmoothing } from "../scripts/smoothing";
   import { WebSocketConnection } from "../scripts/websocket";
-  import { ProbabilityGraph } from "../scripts/graph";  // Import the ProbabilityGraph class
+  // import { ProbabilityGraph } from "../scripts/graph";  // Import the ProbabilityGraph class
 
   // UI state variables
   let isPlaying = false;
@@ -47,7 +47,7 @@
   let probability: number | null = null;
 
   let ws: WebSocketConnection | null = null;
-  let probabilityGraph: ProbabilityGraph;  // Declare a ProbabilityGraph instance
+  // let probabilityGraph: ProbabilityGraph;  // Declare a ProbabilityGraph instance
 
   let isModalVisible = writable(false);
   let sessionName = "";
@@ -64,9 +64,9 @@
       console.log("Probability:", probability);
 
       // Update the probability graph with the new probability value
-      if (probability !== null) {
-        probabilityGraph.updateProbability(probability);
-      }
+      // if (probability !== null) {
+      //   probabilityGraph.updateProbability(probability);
+      // }
     }
   }
 
@@ -83,13 +83,14 @@
     }
   }
 
+
   onMount(() => {
     // Initialize the probability graph
-    const graphCanvas = document.createElement("canvas");
-    graphCanvas.width = canvasWidth;
-    graphCanvas.height = 200; // Set a fixed height for the graph
-    document.body.appendChild(graphCanvas);
-    probabilityGraph = new ProbabilityGraph(graphCanvas);
+    // const graphCanvas = document.createElement("canvas");
+    // graphCanvas.width = canvasWidth;
+    // graphCanvas.height = 200; // Set a fixed height for the graph
+    // document.body.appendChild(graphCanvas);
+    // probabilityGraph = new ProbabilityGraph(graphCanvas);
 
     // Create a hidden video element for loading and playback
     videoElement = document.createElement("video");
@@ -97,6 +98,18 @@
     // Ensure inline playback (especially for mobile)
     videoElement.setAttribute("playsinline", "true");
     document.body.appendChild(videoElement);
+
+  // === IMPORTANT ===
+  // This "ended" event closes the modal automatically when the video finishes playing.
+  videoElement.addEventListener("ended", () => {
+  // If no session created yet, we finalize it.
+  if (!sessionCreated) {
+    endSession();
+  } else {
+  // Otherwise, just close the modal if it's open
+    isModalVisible.set(false);
+  }
+  });
 
     // Create a hidden canvas element for processing
     processingCanvas = document.createElement("canvas");
@@ -273,20 +286,22 @@
 
   // Triggered when a file is selected.
   function handleVideoUpload(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files ? input.files[0] : null;
-    if (file) {
-      const url = URL.createObjectURL(file);
-      videoElement.src = url;
-      videoElement.onloadeddata = () => {
-        videoLoaded = true;
-        isPlaying = true;
-        isProcessing = true;
-        videoElement.play();
-        processVideoFrame();
-      };
-    }
+  const input = event.target as HTMLInputElement;
+  const file = input.files ? input.files[0] : null;
+  if (file) {
+    const url = URL.createObjectURL(file);
+    videoElement.src = url;
+    videoElement.onloadeddata = () => {
+      // Close the modal automatically when the video is done uploading
+      isModalVisible.set(false);
+      videoLoaded = true;
+      isPlaying = true;
+      isProcessing = true;
+      videoElement.play();
+      processVideoFrame();
+    };
   }
+}
 
   // Control handlers
   function handlePlay() {
