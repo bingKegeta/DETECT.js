@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { writable } from 'svelte/store';
   import { createSession } from "../scripts/session";
+  import { fetchUserSettings, userSettings } from '../scripts/settings'; 
 
   import {
     calculateAffineTransformation,
@@ -25,10 +26,7 @@
   } from "../scripts/utils";
 
   import { ProbabilityGraph } from "../scripts/graph";
-  import { 
-    WebSocketConnection,
-    analysisData
-  } from "../scripts/websocket";
+  import { WebSocketConnection } from "../scripts/websocket";
 
   let videoEl: HTMLVideoElement;
   let canvasEl: HTMLCanvasElement;
@@ -60,6 +58,30 @@
 
   let previousXValues: number[] = [];
   let previousYValues: number[] = [];
+
+  let sensitivity: number | null = null;
+
+  export const shouldShowGraph = writable(false);
+
+  let affineTransformEnabled = writable(false);
+
+  // Log the settings whenever they change
+  userSettings.subscribe((settings: any) => {
+      console.log("User settings:", settings);
+      sensitivity = settings.sensitivity;
+      shouldShowGraph.set(settings.plotting ?? false);
+      affineTransformEnabled.set(settings.affine ?? false);
+    });
+
+  $: {
+    $shouldShowGraph;
+
+    if (graphCanvasEl && $shouldShowGraph) {
+      probabilityGraph = new ProbabilityGraph(graphCanvasEl);
+    } else {
+      probabilityGraph = null;
+    }
+  }
 
   // WebSocket message handler
   function handleWebSocketMessage(data: any) {
@@ -151,6 +173,9 @@
   }
 
   onMount(() => {
+    // Fetch user settings on component mount
+    fetchUserSettings();
+
     // Initialize WebSocket
     ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
     ws.start();
@@ -173,96 +198,93 @@
 
     // Inside the onResults function, after drawing landmarks:
     faceMesh.onResults((results: Results) => {
-      canvasCtx.save();
-      canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-      canvasCtx.drawImage(
-        results.image,
-        0,
-        0,
+  canvasCtx.save();
+  canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+  canvasCtx.drawImage(
+    results.image,
+    0,
+    0,
+    canvasEl.width,
+    canvasEl.height
+  );
+
+  if (results.multiFaceLandmarks) {
+    for (const landmarks of results.multiFaceLandmarks) {
+      const irisCenters = getLandmarks(landmarks, [
+        LEFT_IRIS_CENTER,
+        RIGHT_IRIS_CENTER,
+      ]);
+      drawLandmarks(canvasCtx, irisCenters, {
+        color: "#FF0000",
+        lineWidth: 2,
+      });
+
+      const eyeCorners = getLandmarks(landmarks, [
+        LEFT_EYE_CORNER,
+        RIGHT_EYE_CORNER,
+      ]);
+      drawLandmarks(canvasCtx, eyeCorners, {
+        color: "#FF0000",
+        lineWidth: 1,
+      });
+
+      const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
+      drawLandmarks(canvasCtx, noseTip, {
+        color: "#FF0000",
+        lineWidth: 1,
+      });
+
+      // Smoothing iris positions
+      const { normX, normY, timestamp } = getNormalizedIrisPosition(
+        landmarks,
         canvasEl.width,
         canvasEl.height
       );
 
-      if (results.multiFaceLandmarks) {
-        for (const landmarks of results.multiFaceLandmarks) {
-          const irisCenters = getLandmarks(landmarks, [
-            LEFT_IRIS_CENTER,
-            RIGHT_IRIS_CENTER,
-          ]);
-          drawLandmarks(canvasCtx, irisCenters, {
-            color: "#FF0000",
-            lineWidth: 2,
-          });
+      // Apply smoothing to the iris position
+      const smoothedNormX = applySmoothing(normX, previousXValues);
+      const smoothedNormY = applySmoothing(normY, previousYValues);
 
-          const eyeCorners = getLandmarks(landmarks, [
-            LEFT_EYE_CORNER,
-            RIGHT_EYE_CORNER,
-          ]);
-          drawLandmarks(canvasCtx, eyeCorners, {
-            color: "#FF0000",
-            lineWidth: 1,
-          });
+      // Track the current nose tip for affine transformation
+      const currentNoseTip: Coordinates = getLandmarks(landmarks, [NOSE_TIP])[0];
 
-          const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
-          drawLandmarks(canvasCtx, noseTip, {
-            color: "#FF0000",
-            lineWidth: 1,
-          });
+      // Conditionally apply affine transformation
+      if (initialNoseTip && $affineTransformEnabled) {
+        // Calculate the affine transformation matrix based on initial and current nose tip positions
+        const transformationMatrix = calculateAffineTransformation(initialNoseTip, currentNoseTip);
 
-          // Smoothing iris positions
-          const { normX, normY, timestamp } = getNormalizedIrisPosition(
-            landmarks,
-            canvasEl.width,
-            canvasEl.height
-          );
+        // Apply the transformation to all landmarks (using smoothed iris position)
+        const transformedLandmarks = landmarks.map(landmark =>
+          applyAffineTransformation(landmark, transformationMatrix)
+        );
 
-          // Apply smoothing to the iris position
-          const smoothedNormX = applySmoothing(normX, previousXValues);
-          const smoothedNormY = applySmoothing(normY, previousYValues);
-
-          // Track the current nose tip for affine transformation
-          const currentNoseTip: Coordinates = getLandmarks(landmarks, [NOSE_TIP])[0];
-
-          if (initialNoseTip) {
-            // Calculate the affine transformation matrix based on initial and current nose tip positions
-            const transformationMatrix = calculateAffineTransformation(initialNoseTip, currentNoseTip);
-
-            // Apply the transformation to all landmarks (using smoothed iris position)
-            const transformedLandmarks = landmarks.map(landmark => 
-              applyAffineTransformation(landmark, transformationMatrix)
-            );
-
-            // Draw the transformed landmarks on the canvas
-            drawLandmarks(canvasCtx, transformedLandmarks, {
-              color: "#0000FF",
-              lineWidth: 2,
-            });
-          }
-
-          const timestampInSeconds = timestamp / 1000; // Convert timestamp to seconds
-
-          const metrics = {
-            x: smoothedNormX,
-            y: smoothedNormY,
-            time: timestampInSeconds,
-          };
-
-          if (ws) {
-            ws.sendMessage(metrics);
-            console.log("WebSocket Sent:", metrics);
-          }
-        }
+        // Draw the transformed landmarks on the canvas
+        drawLandmarks(canvasCtx, transformedLandmarks, {
+          color: "#0000FF",
+          lineWidth: 2,
+        });
       }
-      canvasCtx.restore();
-    });
 
+      const timestampInSeconds = timestamp / 1000; // Convert timestamp to seconds
+
+      const metrics = {
+        x: smoothedNormX,
+        y: smoothedNormY,
+        time: timestampInSeconds,
+        sensitivity: sensitivity ?? 1.0
+      };
+
+      if (ws) {
+        ws.sendMessage(metrics);
+        console.log("WebSocket Sent:", metrics);
+      }
+    }
+  }
+  canvasCtx.restore();
+});
     if (canvasEl) {
       canvasEl.width = Math.floor(window.innerWidth * 0.9);
       canvasEl.height = Math.floor(window.innerHeight * 0.9);
-    }
-
-    if (graphCanvasEl) {
-      probabilityGraph = new ProbabilityGraph(graphCanvasEl);
     }
   });
 
@@ -287,7 +309,10 @@
   <!-- Row container for the webcam canvas (left) and graph canvas (right) -->
   <div class="flex flex-row w-full h-auto justify-center items-center">
     <!-- Left side: Webcam -->
-    <div class="w-1/2 flex justify-center items-center p-4">
+    <div
+      class="flex justify-center items-center p-4"
+      style="width: { $shouldShowGraph ? '50%' : '100%' }"
+    >
       <!-- Hidden video (used by FaceMesh) -->
       <video bind:this={videoEl} class="hidden">
         <track kind="captions" />
@@ -300,13 +325,15 @@
       ></canvas>
     </div>
 
-    <!-- Right side: Graph -->
-    <div class="w-1/2 flex justify-center items-center p-4">
-      <canvas
-        bind:this={graphCanvasEl}
-        class="border-2 border-accent rounded-lg bg-black/50 w-full h-[60vh]"
-      ></canvas>
-    </div>
+    <!-- Right side: Graph (conditionally rendered) -->
+    {#if $shouldShowGraph}
+      <div class="w-1/2 flex justify-center items-center p-4">
+        <canvas
+          bind:this={graphCanvasEl}
+          class="border-2 border-accent rounded-lg bg-black/50 w-full h-[60vh]"
+        ></canvas>
+      </div>
+    {/if}
   </div>
 
   <!-- Control buttons at the bottom -->
