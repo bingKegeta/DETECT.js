@@ -4,6 +4,7 @@
   import { drawLandmarks } from "@mediapipe/drawing_utils";
   import { writable } from "svelte/store";
   import { createSession } from "../scripts/session";
+  import { fetchUserSettings, userSettings } from '../scripts/settings'; 
 
   import {
     LEFT_IRIS_CENTER,
@@ -57,6 +58,19 @@
 
   let previousXValues: number[] = [];
   let previousYValues: number[] = [];
+
+  let sensitivity: number | null = null;
+
+  export const shouldShowGraph = writable(false);
+
+  let affineTransformEnabled = writable(false);
+
+  // Log the settings whenever they change
+  userSettings.subscribe((settings: any) => {
+      console.log("User settings:", settings);
+      sensitivity = settings.sensitivity;
+      affineTransformEnabled.set(settings.affine ?? false);
+    });
 
   function handleWebSocketMessage(data: any) {
     if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
@@ -186,7 +200,7 @@ videoElement.onended = () => {
           // Track the current nose tip for affine transformation
           const currentNoseTip: Coordinates = getLandmarks(landmarks, [NOSE_TIP])[0];
 
-          if (initialNoseTip) {
+          if (initialNoseTip && $affineTransformEnabled) {
             // Calculate the affine transformation matrix based on initial and current nose tip positions
             const transformationMatrix = calculateAffineTransformation(initialNoseTip, currentNoseTip);
 
@@ -210,6 +224,7 @@ videoElement.onended = () => {
             x: smoothedNormX,
             y: smoothedNormY,
             time: timestampInSeconds,
+            sensitivity: sensitivity ?? 1.0
           };
 
           if (ws) {
