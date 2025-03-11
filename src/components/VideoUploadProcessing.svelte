@@ -4,7 +4,6 @@
   import { drawLandmarks } from "@mediapipe/drawing_utils";
   import { writable } from "svelte/store";
   import { createSession } from "../scripts/session";
-  import { fetchUserSettings, userSettings } from '../scripts/settings'; 
 
   import {
     LEFT_IRIS_CENTER,
@@ -23,6 +22,7 @@
   import type { Coordinates } from "../scripts/affineTransformation";
   import { applySmoothing } from "../scripts/smoothing";
   import { WebSocketConnection } from "../scripts/websocket";
+  // import { number } from "astro:schema";
   // import { ProbabilityGraph } from "../scripts/graph";  // Import the ProbabilityGraph class
 
   // UI state variables
@@ -59,18 +59,9 @@
   let previousXValues: number[] = [];
   let previousYValues: number[] = [];
 
-  let sensitivity: number | null = null;
+  let remainingTime = 0;
+  let countdownTimer: number;
 
-  export const shouldShowGraph = writable(false);
-
-  let affineTransformEnabled = writable(false);
-
-  // Log the settings whenever they change
-  userSettings.subscribe((settings: any) => {
-      console.log("User settings:", settings);
-      sensitivity = settings.sensitivity;
-      affineTransformEnabled.set(settings.affine ?? false);
-    });
 
   function handleWebSocketMessage(data: any) {
     if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
@@ -95,6 +86,23 @@
     if (faceMesh && videoElement) {
       faceMesh.send({ image: videoElement });
     }
+  }
+
+
+  // Start the countdown when video metadata is available
+  function startCountdown() {
+    clearInterval(countdownTimer);
+    remainingTime = videoElement.duration;
+    countdownTimer = setInterval(() => {
+      remainingTime = Math.max(remainingTime - 1, 0);
+      if (remainingTime === 0) {
+        clearInterval(countdownTimer);
+      }
+    }, 1000);
+  }
+
+  function stopCountdown() {
+    clearInterval(countdownTimer);
   }
 
 
@@ -200,7 +208,7 @@ videoElement.onended = () => {
           // Track the current nose tip for affine transformation
           const currentNoseTip: Coordinates = getLandmarks(landmarks, [NOSE_TIP])[0];
 
-          if (initialNoseTip && $affineTransformEnabled) {
+          if (initialNoseTip) {
             // Calculate the affine transformation matrix based on initial and current nose tip positions
             const transformationMatrix = calculateAffineTransformation(initialNoseTip, currentNoseTip);
 
@@ -224,7 +232,6 @@ videoElement.onended = () => {
             x: smoothedNormX,
             y: smoothedNormY,
             time: timestampInSeconds,
-            sensitivity: sensitivity ?? 1.0
           };
 
           if (ws) {
@@ -302,6 +309,10 @@ videoElement.onended = () => {
   if (file) {
     const url = URL.createObjectURL(file);
     videoElement.src = url;
+    // Start countdown once metadata is available (duration etc.)
+    videoElement.onloadedmetadata = () => {
+      startCountdown();
+    };
     videoElement.onloadeddata = () => {
       // Close the modal automatically when the video is done uploading
       isModalVisible.set(false);
@@ -379,6 +390,12 @@ function endSession() {
 {#if isLoadingFile}
   <div class="spinner mt-4 flex justify-center">
     <div class="loader"></div>
+  </div>
+{/if}
+
+{#if videoLoaded && isPlaying}
+  <div class="mt-2 text-center">
+    Estimated Time Remaining: {Math.floor(remainingTime)} sec
   </div>
 {/if}
 
