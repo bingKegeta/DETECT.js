@@ -91,7 +91,7 @@ export class WebSocketConnection {
   public sendMessage(message: object) {
     // Assuming message includes normX, normY, and timestampInSeconds
     if (message) {
-      const { x, y, time } = message as { x: number; y: number; time: number };
+      const { x, y, time } = message as { x: number; y: number; time: number; sensitivity: number };
       // Store values in respective writable variables
       x_coord = x;
       y_coord = y;
