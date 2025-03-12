@@ -8,7 +8,7 @@
   <form>
     <!-- Email Input Group -->
     <label class="block mb-2 text-sm font-medium text-base-content">
-      Your Email
+      Email
     </label>
     <div class="flex relative">
       <span
@@ -99,9 +99,9 @@
     <!-- Submit Button -->
     <button
       type="submit"
-      class="bg-primary text-primary-content rounded-md px-4 py-2 w-full"
+      class="bg-primary text-base-100 rounded-md px-4 py-2 w-full"
     >
-      Submit
+      Register
     </button>
     <p class="text-center text-base-content pt-4">
       Already have an account?
@@ -138,8 +138,9 @@
   </div>
   <div class="my-5">
     <button
-      onclick="window.location.href='http://localhost:8080/auth/google'"
-      class="w-full text-center py-3 my-3 border flex space-x-2 items-center justify-center bg-neutral rounded-lg text-neutral-content hover:border-info hover:shadow transition duration-150"
+      id="google-login-btn"
+      class="w-full text-center py-3 my-3 border flex space-x-2 items-center justify-center bg-neutral rounded-lg text-neutral-content
+      hover:border-info hover:shadow transition duration-150"
     >
       <img
         src="https://www.svgrepo.com/show/355037/google.svg"
@@ -152,6 +153,13 @@
 </div>
 
 <script>
+  const googleLoginBtn = document.getElementById("google-login-btn");
+  if (googleLoginBtn) {
+    googleLoginBtn.addEventListener("click", () => {
+      window.location.href = `${import.meta.env.PUBLIC_SERVER_ADDRESS}/auth/google`;
+    });
+  }
+  
   import { isInputError } from "astro:actions";
   import { actions } from "astro:actions";
 

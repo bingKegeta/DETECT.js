@@ -1,13 +1,18 @@
 ---
-
+import Themes from "astro-themes";
+const { title } = Astro.props;
 ---
 
-<html data-theme="cybrepunk" lang="en">
+<html data-theme="cyberpunk" lang="en">
   <head>
-    <title>Test</title>
+    <title>{title}</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/styles/global.css" />
+    <Themes />
   </head>
   <body class="bg-base-100 text-base-content">
     <slot />
   </body>
 </html>
+<script src="../scripts/theme_switch.ts"></script>

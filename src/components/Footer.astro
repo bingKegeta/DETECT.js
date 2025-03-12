@@ -7,9 +7,9 @@ import Section from "./Section.astro";
 ---
 
 <footer
-  class="p-5 bg-base-200 text-base-content text-center relative border-4 border-primary m-4 rounded-lg h-[10svh]"
+  class="p-3 md:p-4 lg:p-5 bg-base-300 text-base-content text-center relative border-4 border-primary rounded-lg min-h-[8vh] md:min-h-[10vh] flex flex-col justify-center text-sm md:text-base"
 >
-  <p>&copy; 2024 DETECT. All rights reserved.</p>
+  <p>&copy; {new Date().getFullYear()} DETECT. All rights reserved.</p>
   <nav>
     <ul class="list-none flex justify-center gap-5 p-0">
       <li>
@@ -17,10 +17,10 @@ import Section from "./Section.astro";
         <Modal
           client:visible
           buttonText="Privacy Policy"
-          closeButtonClassName="text-2xl text-primary"
+          closeButtonClassName="text-3xl text-primary"
           overlayClassName="bg-white"
           buttonClassName="link"
-          modalClassName="w-[40vw] max-w-md p-5"
+          modalClassName="w-[55vw] max-w-[750px] md:w-[65vw] lg:w-[60vw] max-h-[85vh] overflow-y-auto p-[4vh] px-[6vw] md:px-[4vw] lg:px-[3vw] rounded-lg"
         >
           <PrivacyPolicy />
         </Modal>
@@ -34,7 +34,7 @@ import Section from "./Section.astro";
           closeButtonClassName="text-2xl text-primary"
           overlayClassName="bg-white"
           buttonClassName="link"
-          modalClassName="w-[40vw] max-w-md p-5"
+          modalClassName="w-[55vw] max-w-[750px] md:w-[65vw] lg:w-[60vw] max-h-[85vh] overflow-y-auto p-[4vh] px-[6vw] md:px-[4vw] lg:px-[3vw] rounded-lg"
         >
           <TermsOfService />
         </Modal>
@@ -48,7 +48,7 @@ import Section from "./Section.astro";
           closeButtonClassName="text-2xl text-primary"
           overlayClassName="bg-white"
           buttonClassName="link"
-          modalClassName="w-[40vw] max-w-md p-5"
+          modalClassName="w-[55vw] max-w-[750px] md:w-[65vw] lg:w-[60vw] max-h-[85vh] overflow-y-auto p-[4vh] px-[6vw] md:px-[4vw] lg:px-[3vw] rounded-lg"
         >
           <Support />
         </Modal>

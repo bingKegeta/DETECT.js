@@ -1,7 +1,11 @@
+---
+import SessionList from "./SessionList.svelte"; // New component for the list of sessions
+// You may also import types from utils if needed
+---
+
 <aside
-  class="max-w-[20%] w-fit p-5 h-full bg-base-200 rounded-lg shadow-lg mx-4 justify-center border-4 border-primary"
+  class="w-full md:max-w-[45vh] p-5 bg-base-300 rounded-lg shadow-lg
+    border-4 border-primary overflow-y-auto md:mb-0 mb-[2vh] h-full"
 >
-  <nav>
-    <slot />
-  </nav>
+  <SessionList client:load />
 </aside>

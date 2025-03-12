@@ -1,7 +1,12 @@
+---
+import Themes from "astro-themes";
+---
+
 <html lang="en" data-theme="cyberpunk">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <Themes />
     <link rel="stylesheet" href="/styles/global.css" />
     <title>DETECT - Landing</title>
     <style>
@@ -10,14 +15,24 @@
         position: fixed;
         inset: 0;
         z-index: -1;
-        background: radial-gradient(circle, rgba(0,0,0,0.05), transparent 70%);
+        background: radial-gradient(
+          circle,
+          var(--color-base-100) 0%,
+          transparent 70%
+        );
         opacity: 0.2;
         animation: bgAnim 30s linear infinite;
       }
       @keyframes bgAnim {
-        0% { transform: scale(1) rotate(0deg); }
-        50% { transform: scale(1.1) rotate(5deg); }
-        100% { transform: scale(1) rotate(0deg); }
+        0% {
+          transform: scale(1) rotate(0deg);
+        }
+        50% {
+          transform: scale(1.1) rotate(5deg);
+        }
+        100% {
+          transform: scale(1) rotate(0deg);
+        }
       }
     </style>
   </head>
@@ -26,3 +41,4 @@
     <slot />
   </body>
 </html>
+<script src="../scripts/theme_switch.ts"></script>

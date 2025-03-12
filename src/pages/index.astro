@@ -1,75 +1,355 @@
 ---
 import LandingLayout from "../layouts/LandingLayout.astro";
 import LandingHeader from "../components/LandingHeader.astro";
+import Section from "../components/Section.astro";
 ---
+
 <LandingLayout>
   <LandingHeader />
-  <main class="w-full max-w-screen-xl mx-auto px-4 md:px-8 text-base-content py-8 space-y-12">
-    <!-- Hero Section -->
-    <section class="text-center fadeOnScroll" style="animation-delay: 0s;">
-      <h1 class="text-7xl font-bold text-primary mb-4">Welcome to DETECT</h1>
-      <h2 class="text-4xl font-semibold text-secondary mb-6">
-        AI-Powered Lie Detection Through Eye Movement Analysis
-      </h2>
-      <p class="text-lg leading-relaxed">
-        Experience a cutting-edge approach to deception detection that uses advanced eye movement analysis as a non-intrusive alternative to traditional polygraphs.
+  <main
+    class="w-full max-w-screen-xl mx-auto px-4 md:px-8 text-base-content py-8"
+  >
+    <!-- Hero Section with Gradient Text -->
+    <div class="mb-12 slideFromTop" style="animation-delay: 0s;">
+      <h1 class="text-7xl font-bold mb-4 text-center gradient-text">
+        Welcome to DETECT
+      </h1>
+      <div class="flex justify-center mb-6">
+        <span class="badge badge-lg badge-primary px-4 py-3 text-xl font-medium"
+          >AI-Powered Eye Movement Analysis</span
+        >
+      </div>
+      <p class="text-lg leading-relaxed text-center max-w-3xl mx-auto">
+        Experience a cutting-edge approach to deception detection that uses
+        advanced eye movement analysis as a <span
+          class="text-accent font-semibold">non-intrusive alternative</span
+        > to traditional polygraphs.
       </p>
-    </section>
-    <!-- Purpose Section -->
-    <section class="fadeOnScroll" style="animation-delay: 0s;">
-      <h2 class="text-4xl font-semibold mb-4">What is the Purpose of DETECT?</h2>
-      <p class="text-lg leading-relaxed">
-        Unlike traditional polygraph tests—which are intrusive and stressful—DETECT offers a non-intrusive, advanced method for assessing truthfulness. By analyzing subtle eye movement patterns, DETECT provides a reliable alternative that preserves user comfort.
-      </p>
-    </section>
-    <!-- Features Section -->
-    <section class="fadeOnScroll" style="animation-delay: 0s;">
-      <h2 class="text-4xl font-semibold mb-4">Project Features</h2>
-      <ul class="list-disc list-inside text-lg leading-relaxed">
-        <li><strong>Real-Time Analysis</strong> – Immediate feedback powered by advanced statistical modeling.</li>
-        <li><strong>Multiple Analysis Methods</strong> – Choose between video upload, live webcam analysis, or reviewing historical data.</li>
-        <li><strong>Secure Authentication</strong> – Streamlined, robust login procedures ensure your data stays protected.</li>
-        <li><strong>Intuitive Dashboard</strong> – A user-friendly interface for monitoring results and insights.</li>
-      </ul>
-    </section>
-    <!-- Privacy Section -->
-    <section class="fadeOnScroll" style="animation-delay: 0s;">
-      <h2 class="text-4xl font-semibold mb-4">Privacy &amp; Security</h2>
-      <p class="text-lg leading-relaxed">
-        Your privacy is paramount. DETECT never stores any personally identifiable data, such as video recordings. All processing occurs in real time and only with your explicit consent.
-      </p>
-    </section>
-    <!-- Images Section -->
-    <section class="flex w-full gap-4 mt-8 fadeOnScroll" style="animation-delay: 0s;">
-      <img src="/images/001.jpg" alt="Corporate Cartoon 1" class="w-1/2 object-cover" />
-      <img src="/images/002.jpg" alt="Corporate Cartoon 2" class="w-1/2 object-cover" />
-    </section>
+    </div>
+
+    <!-- Two-Column Content Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Left Column: Purpose Section -->
+      <div class="slideFromLeft" style="animation-delay: 0.2s;">
+        <Section
+          size="full"
+          padding="p-6"
+          bg="bg-gradient-to-br from-base-100 to-base-200"
+          border="border-2 border-primary"
+          rounded="rounded-lg"
+          shadow="shadow-xl shadow-primary/10"
+          class="flex flex-col items-start justify-start h-full backdrop-blur-sm"
+        >
+          <div class="flex items-center mb-4 w-full">
+            <div class="w-2 h-8 bg-primary rounded-full mr-3"></div>
+            <h2 class="text-3xl font-semibold text-primary">
+              What is the Purpose?
+            </h2>
+          </div>
+          <p class="text-lg leading-relaxed">
+            Unlike traditional <span class="text-error font-medium"
+              >intrusive and stressful</span
+            > polygraph tests, DETECT offers a <span
+              class="text-success font-medium"
+              >non-intrusive, advanced method</span
+            > for assessing truthfulness. By analyzing subtle eye movement patterns,
+            DETECT provides a reliable alternative that preserves user comfort.
+          </p>
+          <div
+            class="mt-4 p-3 bg-base-300/50 rounded-md border-l-4 border-info w-full"
+          >
+            <p class="text-base-content text-sm italic">
+              "The future of truth verification is here, and it's focusing on
+              your eyes." — Dr. Eye Observer
+            </p>
+          </div>
+        </Section>
+      </div>
+
+      <!-- Right Column: Features Section -->
+      <div class="slideFromRight" style="animation-delay: 0.4s;">
+        <Section
+          size="full"
+          padding="p-6"
+          bg="bg-gradient-to-tr from-base-100 to-base-200"
+          border="border-2 border-secondary"
+          rounded="rounded-lg"
+          shadow="shadow-xl shadow-secondary/10"
+          class="flex flex-col items-start justify-start h-full backdrop-blur-sm"
+        >
+          <div class="flex items-center mb-4 w-full">
+            <div class="w-2 h-8 bg-secondary rounded-full mr-3"></div>
+            <h2 class="text-3xl font-semibold text-secondary">
+              Project Features
+            </h2>
+          </div>
+          <ul class="space-y-4 w-full">
+            <li
+              class="feature-card bg-base-300/40 p-3 rounded-md border-l-4 border-success"
+            >
+              <strong class="text-success">Real-Time Analysis</strong>
+              <p class="text-sm mt-1">
+                Immediate feedback powered by advanced statistical modeling.
+              </p>
+            </li>
+            <li
+              class="feature-card bg-base-300/40 p-3 rounded-md border-l-4 border-warning"
+            >
+              <strong class="text-warning">Multiple Analysis Methods</strong>
+              <p class="text-sm mt-1">
+                Choose between video upload, live webcam analysis, or historical
+                data.
+              </p>
+            </li>
+            <li
+              class="feature-card bg-base-300/40 p-3 rounded-md border-l-4 border-info"
+            >
+              <strong class="text-info">Secure Authentication</strong>
+              <p class="text-sm mt-1">
+                Streamlined, robust login procedures ensure your data stays
+                protected.
+              </p>
+            </li>
+            <li
+              class="feature-card bg-base-300/40 p-3 rounded-md border-l-4 border-accent"
+            >
+              <strong class="text-accent">Intuitive Dashboard</strong>
+              <p class="text-sm mt-1">
+                A user-friendly interface for monitoring results and insights.
+              </p>
+            </li>
+          </ul>
+        </Section>
+      </div>
+
+      <!-- Left Column: Privacy Section -->
+      <div class="slideFromLeft" style="animation-delay: 0.6s;">
+        <Section
+          size="full"
+          padding="p-6"
+          bg="bg-gradient-to-br from-base-100 to-base-200"
+          border="border-2 border-accent"
+          rounded="rounded-lg"
+          shadow="shadow-xl shadow-accent/10"
+          class="flex flex-col items-start justify-start h-full backdrop-blur-sm"
+        >
+          <div class="flex items-center mb-4 w-full">
+            <div class="w-2 h-8 bg-accent rounded-full mr-3"></div>
+            <h2 class="text-3xl font-semibold text-accent">
+              Privacy &amp; Security
+            </h2>
+          </div>
+          <p class="text-lg leading-relaxed">
+            Your privacy is <span class="text-accent font-semibold"
+              >paramount</span
+            >. DETECT never stores any personally identifiable data, such as
+            video recordings. All processing occurs in real time and only with
+            your explicit consent.
+          </p>
+
+          <div class="mt-auto w-full space-y-3">
+            <div
+              class="flex items-center justify-between bg-base-300/50 p-4 rounded-lg shadow-md"
+            >
+              <span class="text-base-content/80 font-medium"
+                >Data Protection</span
+              >
+              <div class="toggle-switch-wrapper">
+                <input
+                  type="checkbox"
+                  id="dataProtection"
+                  class="toggle-switch"
+                  checked
+                />
+                <label for="dataProtection" class="toggle-switch-label"></label>
+              </div>
+            </div>
+            <div
+              class="flex items-center justify-between bg-base-300/50 p-4 rounded-lg shadow-md"
+            >
+              <span class="text-base-content/80 font-medium"
+                >Anonymous Processing</span
+              >
+              <div class="toggle-switch-wrapper">
+                <input
+                  type="checkbox"
+                  id="anonProcessing"
+                  class="toggle-switch"
+                  checked
+                />
+                <label for="anonProcessing" class="toggle-switch-label"></label>
+              </div>
+            </div>
+          </div>
+        </Section>
+      </div>
+
+      <!-- Right Column: Media Section -->
+      <div class="slideFromRight" style="animation-delay: 0.8s;">
+        <Section
+          size="full"
+          padding="p-6"
+          bg="bg-gradient-to-tr from-base-100 to-base-200"
+          border="border-2 border-neutral"
+          rounded="rounded-lg"
+          shadow="shadow-xl shadow-neutral/10"
+          class="flex flex-col items-start justify-start h-full backdrop-blur-sm"
+        >
+          <div class="flex items-center mb-4 w-full">
+            <div class="w-2 h-8 bg-neutral rounded-full mr-3"></div>
+            <h2 class="text-3xl font-semibold text-neutral-content">
+              Visual Examples
+            </h2>
+          </div>
+          <div class="grid grid-cols-1 gap-4 w-full h-full">
+            <div
+              class="relative overflow-hidden rounded-lg border-2 border-neutral-content/20 group"
+            >
+              <img
+                src="/images/001.jpg"
+                alt="Corporate Cartoon 1"
+                class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div
+                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-neutral to-transparent p-3"
+              >
+                <p class="text-neutral-content text-sm">
+                  Eye movement tracking visualization
+                </p>
+              </div>
+            </div>
+            <div
+              class="relative overflow-hidden rounded-lg border-2 border-neutral-content/20 group"
+            >
+              <img
+                src="/images/002.jpg"
+                alt="Corporate Cartoon 2"
+                class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div
+                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-neutral to-transparent p-3"
+              >
+                <p class="text-neutral-content text-sm">
+                  Results dashboard preview
+                </p>
+              </div>
+            </div>
+          </div>
+        </Section>
+      </div>
+    </div>
   </main>
   <style>
-    .fadeOnScroll {
+    .slideFromLeft {
       opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 2s ease-out, transform 2s ease-out;
+      transform: translateX(-50px);
+      transition:
+        opacity 1s ease-out,
+        transform 1s ease-out;
+    }
+    .slideFromRight {
+      opacity: 0;
+      transform: translateX(50px);
+      transition:
+        opacity 1s ease-out,
+        transform 1s ease-out;
+    }
+    .slideFromTop {
+      opacity: 0;
+      transform: translateY(-30px);
+      transition:
+        opacity 1s ease-out,
+        transform 1s ease-out;
     }
     .fadeIn {
       opacity: 1;
-      transform: translateY(0);
+      transform: translateX(0) translateY(0);
+    }
+    .gradient-text {
+      background: linear-gradient(
+        to right,
+        var(--color-primary),
+        var(--color-secondary)
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .feature-card {
+      transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Toggle Switch Styling */
+    .toggle-switch-wrapper {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+    .toggle-switch {
+      appearance: none;
+      width: 100%;
+      height: 100%;
+      background-color: var(--color-primary);
+      border-radius: 20px;
+      position: absolute;
+      transition: background 0.3s ease-in-out;
+      cursor: pointer;
+      outline: none;
+    }
+    .toggle-switch-label {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+    .toggle-switch-label::before {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background-color: var(--color-base-100);
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s ease-in-out;
+    }
+    .toggle-switch:checked {
+      background-color: var(--color-success);
+    }
+    .toggle-switch:checked + .toggle-switch-label::before {
+      transform: translateX(24px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .gradient-text {
+        font-size: 3rem;
+      }
     }
   </style>
   <script is:inline>
     document.addEventListener("DOMContentLoaded", function () {
-      const faders = document.querySelectorAll('.fadeOnScroll');
-      const options = { threshold: 0.1 };
+      const animatedElements = document.querySelectorAll(
+        ".slideFromLeft, .slideFromRight, .slideFromTop",
+      );
+      const options = { threshold: 0.2 };
+
       const appearOnScroll = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('fadeIn');
+            entry.target.classList.add("fadeIn");
             observer.unobserve(entry.target);
           }
         });
       }, options);
-      faders.forEach(fader => {
-        appearOnScroll.observe(fader);
+
+      animatedElements.forEach((element) => {
+        appearOnScroll.observe(element);
       });
     });
   </script>
