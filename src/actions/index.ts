@@ -1,6 +1,8 @@
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { parseSetCookie } from "../scripts/utils";
+
+const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
 // import * as sessionActions from "./sessionActions";
 
 export const server = {
@@ -20,7 +22,7 @@ export const server = {
     }),
     handler: async (input, event) => {
       const { email, password } = input;
-      const url = `http://localhost:8080/login`;
+      const url = `${serverAddress}/login`;
 
       const backendResponse = await fetch(url, {
         method: "POST",
@@ -79,7 +81,7 @@ export const server = {
         .max(100, "Password must be less than 100 characters long"),
     }),
     handler: async (input, event) => {
-      const url = `http://localhost:8080/register`;
+      const url = `${serverAddress}/register`;
 
       const backendResponse = await fetch(url, {
         method: "POST",
@@ -124,7 +126,7 @@ export const server = {
   logout: defineAction({
     accept: "form",
     handler: async (_, event) => {
-      const url = `http://localhost:8080/logout`;
+      const url = `${serverAddress}/logout`;
 
       const backendResponse = await fetch(url, {
         method: "GET",
