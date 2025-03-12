@@ -38,7 +38,7 @@ export const server = {
           success: false,
           message: data.error || "Failed to login",
           status: backendResponse.status,
-          data,
+          data: data,
         };
       }
 
