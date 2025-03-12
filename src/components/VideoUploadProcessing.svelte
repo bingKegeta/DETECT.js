@@ -4,6 +4,7 @@
   import { onDestroy, onMount } from "svelte";
   import { writable } from "svelte/store";
   import { createSession } from "../scripts/session";
+  import { fetchUserSettings, userSettings } from '../scripts/settings'; 
 
   import {
     applyAffineTransformation,
@@ -41,7 +42,7 @@
   const canvasWidth = 640;
   const canvasHeight = 480;
 
-  const WEBSOCKET_URL = "ws://localhost:9090/ws";
+  const WEBSOCKET_URL = import.meta.env.PUBLIC_WS_PORT;
 
   let variance: number | null = null;
   let acceleration: number | null = null;
@@ -61,6 +62,19 @@
 
   let remainingTime = 0;
   let countdownTimer: number;
+
+  let sensitivity: number | null = null;
+ 
+   export const shouldShowGraph = writable(false);
+ 
+   let affineTransformEnabled = writable(false);
+ 
+   // Log the settings whenever they change
+   userSettings.subscribe((settings: any) => {
+       console.log("User settings:", settings);
+       sensitivity = settings.sensitivity;
+       affineTransformEnabled.set(settings.affine ?? false);
+     });
 
   function handleWebSocketMessage(data: any) {
     if (
@@ -216,7 +230,7 @@
             NOSE_TIP,
           ])[0];
 
-          if (initialNoseTip) {
+          if (initialNoseTip && affineTransformEnabled) {
             // Calculate the affine transformation matrix based on initial and current nose tip positions
             const transformationMatrix = calculateAffineTransformation(
               initialNoseTip,
@@ -243,6 +257,7 @@
             x: smoothedNormX,
             y: smoothedNormY,
             time: timestampInSeconds,
+            sensitivity: sensitivity ?? 1.0
           };
 
           if (ws) {
