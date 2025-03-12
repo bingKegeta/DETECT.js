@@ -1,28 +1,28 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
-  import { writable } from 'svelte/store';
+  import { onDestroy, onMount } from "svelte";
+  import { writable } from "svelte/store";
   import { createSession } from "../scripts/session";
-  import { fetchUserSettings, userSettings } from '../scripts/settings'; 
+  import { fetchUserSettings, userSettings } from "../scripts/settings";
 
   import {
+    applyAffineTransformation,
     calculateAffineTransformation,
-    applyAffineTransformation
   } from "../scripts/affineTransformation";
 
-  import type { Coordinates } from "../scripts/affineTransformation";
-  import { applySmoothing } from "../scripts/smoothing";
-  import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { Camera } from "@mediapipe/camera_utils";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
+  import { FaceMesh, type Results } from "@mediapipe/face_mesh";
+  import type { Coordinates } from "../scripts/affineTransformation";
+  import { applySmoothing } from "../scripts/smoothing";
 
   import {
-    LEFT_IRIS_CENTER,
-    RIGHT_IRIS_CENTER,
     LEFT_EYE_CORNER,
-    RIGHT_EYE_CORNER,
+    LEFT_IRIS_CENTER,
     NOSE_TIP,
+    RIGHT_EYE_CORNER,
+    RIGHT_IRIS_CENTER,
+    getLandmarks,
     getNormalizedIrisPosition,
-    getLandmarks
   } from "../scripts/utils";
 
   import { ProbabilityGraph } from "../scripts/graph";
@@ -40,7 +40,7 @@
   let variance: number | null = null;
   let acceleration: number | null = null;
   let probability: number | null = null;
-  let startTime = new Date().toISOString(); // Capture the start time 
+  let startTime = new Date().toISOString(); // Capture the start time
 
   let probabilityGraph: ProbabilityGraph | null = null;
   let sessionName: string = ""; // Default session name
@@ -67,11 +67,11 @@
 
   // Log the settings whenever they change
   userSettings.subscribe((settings: any) => {
-      console.log("User settings:", settings);
-      sensitivity = settings.sensitivity;
-      shouldShowGraph.set(settings.plotting ?? false);
-      affineTransformEnabled.set(settings.affine ?? false);
-    });
+    console.log("User settings:", settings);
+    sensitivity = settings.sensitivity;
+    shouldShowGraph.set(settings.plotting ?? false);
+    affineTransformEnabled.set(settings.affine ?? false);
+  });
 
   $: {
     $shouldShowGraph;
@@ -85,7 +85,11 @@
 
   // WebSocket message handler
   function handleWebSocketMessage(data: any) {
-    if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
+    if (
+      data.variance !== undefined &&
+      data.acceleration !== undefined &&
+      data.probability !== undefined
+    ) {
       probability = data.probability;
       console.log("Probability:", probability);
 
@@ -93,7 +97,7 @@
         if (probability !== null) {
           probabilityGraph.updateProbability(probability);
         }
-     }
+      }
     }
   }
 
@@ -124,7 +128,7 @@
         canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
       }
     }
-    
+
     if (!sessionCreated) {
       isModalVisible.set(true); // Show the modal to input the session name
     } else {
@@ -163,7 +167,7 @@
         var_min: variance ?? 0,
         var_max: variance ?? 0,
         acc_min: acceleration ?? 0,
-        acc_max: acceleration ?? 0
+        acc_max: acceleration ?? 0,
       };
       createSession(sessionData);
       sessionCreated = true;
@@ -179,7 +183,7 @@
     // Initialize WebSocket
     ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
     ws.start();
-    
+
     // Initialize FaceMesh
     faceMesh = new FaceMesh({
       locateFile: (file) =>
@@ -198,90 +202,89 @@
 
     // Inside the onResults function, after drawing landmarks:
     faceMesh.onResults((results: Results) => {
-  canvasCtx.save();
-  canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-  canvasCtx.drawImage(
-    results.image,
-    0,
-    0,
-    canvasEl.width,
-    canvasEl.height
-  );
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      canvasCtx.drawImage(results.image, 0, 0, canvasEl.width, canvasEl.height);
 
-  if (results.multiFaceLandmarks) {
-    for (const landmarks of results.multiFaceLandmarks) {
-      const irisCenters = getLandmarks(landmarks, [
-        LEFT_IRIS_CENTER,
-        RIGHT_IRIS_CENTER,
-      ]);
-      drawLandmarks(canvasCtx, irisCenters, {
-        color: "#FF0000",
-        lineWidth: 2,
-      });
+      if (results.multiFaceLandmarks) {
+        for (const landmarks of results.multiFaceLandmarks) {
+          const irisCenters = getLandmarks(landmarks, [
+            LEFT_IRIS_CENTER,
+            RIGHT_IRIS_CENTER,
+          ]);
+          drawLandmarks(canvasCtx, irisCenters, {
+            color: "#FF0000",
+            lineWidth: 2,
+          });
 
-      const eyeCorners = getLandmarks(landmarks, [
-        LEFT_EYE_CORNER,
-        RIGHT_EYE_CORNER,
-      ]);
-      drawLandmarks(canvasCtx, eyeCorners, {
-        color: "#FF0000",
-        lineWidth: 1,
-      });
+          const eyeCorners = getLandmarks(landmarks, [
+            LEFT_EYE_CORNER,
+            RIGHT_EYE_CORNER,
+          ]);
+          drawLandmarks(canvasCtx, eyeCorners, {
+            color: "#FF0000",
+            lineWidth: 1,
+          });
 
-      const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
-      drawLandmarks(canvasCtx, noseTip, {
-        color: "#FF0000",
-        lineWidth: 1,
-      });
+          const noseTip = getLandmarks(landmarks, [NOSE_TIP]);
+          drawLandmarks(canvasCtx, noseTip, {
+            color: "#FF0000",
+            lineWidth: 1,
+          });
 
-      // Smoothing iris positions
-      const { normX, normY, timestamp } = getNormalizedIrisPosition(
-        landmarks,
-        canvasEl.width,
-        canvasEl.height
-      );
+          // Smoothing iris positions
+          const { normX, normY, timestamp } = getNormalizedIrisPosition(
+            landmarks,
+            canvasEl.width,
+            canvasEl.height,
+          );
 
-      // Apply smoothing to the iris position
-      const smoothedNormX = applySmoothing(normX, previousXValues);
-      const smoothedNormY = applySmoothing(normY, previousYValues);
+          // Apply smoothing to the iris position
+          const smoothedNormX = applySmoothing(normX, previousXValues);
+          const smoothedNormY = applySmoothing(normY, previousYValues);
 
-      // Track the current nose tip for affine transformation
-      const currentNoseTip: Coordinates = getLandmarks(landmarks, [NOSE_TIP])[0];
+          // Track the current nose tip for affine transformation
+          const currentNoseTip: Coordinates = getLandmarks(landmarks, [
+            NOSE_TIP,
+          ])[0];
 
-      // Conditionally apply affine transformation
-      if (initialNoseTip && $affineTransformEnabled) {
-        // Calculate the affine transformation matrix based on initial and current nose tip positions
-        const transformationMatrix = calculateAffineTransformation(initialNoseTip, currentNoseTip);
+          // Conditionally apply affine transformation
+          if (initialNoseTip && $affineTransformEnabled) {
+            // Calculate the affine transformation matrix based on initial and current nose tip positions
+            const transformationMatrix = calculateAffineTransformation(
+              initialNoseTip,
+              currentNoseTip,
+            );
 
-        // Apply the transformation to all landmarks (using smoothed iris position)
-        const transformedLandmarks = landmarks.map(landmark =>
-          applyAffineTransformation(landmark, transformationMatrix)
-        );
+            // Apply the transformation to all landmarks (using smoothed iris position)
+            const transformedLandmarks = landmarks.map((landmark) =>
+              applyAffineTransformation(landmark, transformationMatrix),
+            );
 
-        // Draw the transformed landmarks on the canvas
-        drawLandmarks(canvasCtx, transformedLandmarks, {
-          color: "#0000FF",
-          lineWidth: 2,
-        });
+            // Draw the transformed landmarks on the canvas
+            drawLandmarks(canvasCtx, transformedLandmarks, {
+              color: "#0000FF",
+              lineWidth: 2,
+            });
+          }
+
+          const timestampInSeconds = timestamp / 1000; // Convert timestamp to seconds
+
+          const metrics = {
+            x: smoothedNormX,
+            y: smoothedNormY,
+            time: timestampInSeconds,
+            sensitivity: sensitivity ?? 1.0,
+          };
+
+          if (ws) {
+            ws.sendMessage(metrics);
+            console.log("WebSocket Sent:", metrics);
+          }
+        }
       }
-
-      const timestampInSeconds = timestamp / 1000; // Convert timestamp to seconds
-
-      const metrics = {
-        x: smoothedNormX,
-        y: smoothedNormY,
-        time: timestampInSeconds,
-        sensitivity: sensitivity ?? 1.0
-      };
-
-      if (ws) {
-        ws.sendMessage(metrics);
-        console.log("WebSocket Sent:", metrics);
-      }
-    }
-  }
-  canvasCtx.restore();
-});
+      canvasCtx.restore();
+    });
     if (canvasEl) {
       canvasEl.width = Math.floor(window.innerWidth * 0.9);
       canvasEl.height = Math.floor(window.innerHeight * 0.9);
@@ -311,7 +314,7 @@
     <!-- Left side: Webcam -->
     <div
       class="flex justify-center items-center p-4"
-      style="width: { $shouldShowGraph ? '50%' : '100%' }"
+      style="width: {$shouldShowGraph ? '50%' : '100%'}"
     >
       <!-- Hidden video (used by FaceMesh) -->
       <video bind:this={videoEl} class="hidden">
@@ -359,30 +362,36 @@
 
   <!-- Modal for session name -->
   {#if $isModalVisible}
-    <div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
-      <div class="bg-base-100 p-6 rounded-lg border-2 border-accent shadow-glow w-96">
-        <h2 class="font-semibold text-xl text-primary-content mb-4">Enter Session Name</h2>
+    <div
+      class="fixed inset-0 bg-base-200 flex justify-center items-center z-10"
+    >
+      <div
+        class="bg-base-300 p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+      >
+        <h2
+          class="font-mono font-semibold text-center text-2xl text-primary mb-4"
+        >
+          Save Session?
+        </h2>
         <input
           type="text"
           bind:value={sessionName}
-          class="border-2 border-accent p-2 rounded-md w-full mb-4
-                 bg-base-200 text-primary-content"
+          class="border border-accent p-2 rounded-md w-full mb-4
+                 bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
           placeholder="Session Name"
         />
         <div class="flex justify-between">
           <button
             on:click={closeModal}
-            class="bg-gray-300 text-primary-content p-2 rounded-md
-                   hover:bg-gray-400 transition-colors"
+            class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
           >
             Cancel
           </button>
           <button
             on:click={onSubmitSessionName}
-            class="bg-info text-info-content p-2 rounded-md hover:bg-success
-                   transition-colors"
+            class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
           >
-            Submit
+            Save
           </button>
         </div>
       </div>

@@ -1,23 +1,23 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
-  import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { drawLandmarks } from "@mediapipe/drawing_utils";
+  import { FaceMesh, type Results } from "@mediapipe/face_mesh";
+  import { onDestroy, onMount } from "svelte";
   import { writable } from "svelte/store";
   import { createSession } from "../scripts/session";
 
   import {
-    LEFT_IRIS_CENTER,
-    RIGHT_IRIS_CENTER,
-    LEFT_EYE_CORNER,
-    RIGHT_EYE_CORNER,
-    NOSE_TIP,
-    getNormalizedIrisPosition,
-    getLandmarks,
-  } from "../scripts/utils";
-  import {
+    applyAffineTransformation,
     calculateAffineTransformation,
-    applyAffineTransformation
   } from "../scripts/affineTransformation";
+  import {
+    LEFT_EYE_CORNER,
+    LEFT_IRIS_CENTER,
+    NOSE_TIP,
+    RIGHT_EYE_CORNER,
+    RIGHT_IRIS_CENTER,
+    getLandmarks,
+    getNormalizedIrisPosition,
+  } from "../scripts/utils";
 
   import type { Coordinates } from "../scripts/affineTransformation";
   import { applySmoothing } from "../scripts/smoothing";
@@ -62,9 +62,12 @@
   let remainingTime = 0;
   let countdownTimer: number;
 
-
   function handleWebSocketMessage(data: any) {
-    if (data.variance !== undefined && data.acceleration !== undefined && data.probability !== undefined) {
+    if (
+      data.variance !== undefined &&
+      data.acceleration !== undefined &&
+      data.probability !== undefined
+    ) {
       probability = data.probability;
       console.log("Probability:", probability);
 
@@ -88,7 +91,6 @@
     }
   }
 
-
   // Start the countdown when video metadata is available
   function startCountdown() {
     clearInterval(countdownTimer);
@@ -105,7 +107,6 @@
     clearInterval(countdownTimer);
   }
 
-
   onMount(() => {
     // Initialize the probability graph
     // const graphCanvas = document.createElement("canvas");
@@ -121,13 +122,13 @@
     videoElement.setAttribute("playsinline", "true");
     document.body.appendChild(videoElement);
 
-  // === IMPORTANT ===
-  // This "ended" event closes the modal automatically when the video finishes playing.
-// Instead of automatically ending the session when the video ends,
-// show the modal so the user can input the session name.
-videoElement.onended = () => {
-  isModalVisible.set(true);
-};
+    // === IMPORTANT ===
+    // This "ended" event closes the modal automatically when the video finishes playing.
+    // Instead of automatically ending the session when the video ends,
+    // show the modal so the user can input the session name.
+    videoElement.onended = () => {
+      isModalVisible.set(true);
+    };
 
     // Create a hidden canvas element for processing
     processingCanvas = document.createElement("canvas");
@@ -156,13 +157,18 @@ videoElement.onended = () => {
     faceMesh.onResults((results: Results) => {
       if (offscreenCtx) {
         offscreenCtx.save();
-        offscreenCtx.clearRect(0, 0, processingCanvas.width, processingCanvas.height);
+        offscreenCtx.clearRect(
+          0,
+          0,
+          processingCanvas.width,
+          processingCanvas.height,
+        );
         offscreenCtx.drawImage(
           results.image,
           0,
           0,
           processingCanvas.width,
-          processingCanvas.height
+          processingCanvas.height,
         );
       }
 
@@ -198,7 +204,7 @@ videoElement.onended = () => {
           const { normX, normY, timestamp } = getNormalizedIrisPosition(
             landmarks,
             processingCanvas.width,
-            processingCanvas.height
+            processingCanvas.height,
           );
 
           // Apply smoothing to the iris position
@@ -206,15 +212,20 @@ videoElement.onended = () => {
           const smoothedNormY = applySmoothing(normY, previousYValues);
 
           // Track the current nose tip for affine transformation
-          const currentNoseTip: Coordinates = getLandmarks(landmarks, [NOSE_TIP])[0];
+          const currentNoseTip: Coordinates = getLandmarks(landmarks, [
+            NOSE_TIP,
+          ])[0];
 
           if (initialNoseTip) {
             // Calculate the affine transformation matrix based on initial and current nose tip positions
-            const transformationMatrix = calculateAffineTransformation(initialNoseTip, currentNoseTip);
+            const transformationMatrix = calculateAffineTransformation(
+              initialNoseTip,
+              currentNoseTip,
+            );
 
             // Apply the transformation to all landmarks (using smoothed iris position)
-            const transformedLandmarks = landmarks.map(landmark => 
-              applyAffineTransformation(landmark, transformationMatrix)
+            const transformedLandmarks = landmarks.map((landmark) =>
+              applyAffineTransformation(landmark, transformationMatrix),
             );
 
             // Draw the transformed landmarks on the canvas
@@ -304,26 +315,26 @@ videoElement.onended = () => {
 
   // Triggered when a file is selected.
   function handleVideoUpload(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const file = input.files ? input.files[0] : null;
-  if (file) {
-    const url = URL.createObjectURL(file);
-    videoElement.src = url;
-    // Start countdown once metadata is available (duration etc.)
-    videoElement.onloadedmetadata = () => {
-      startCountdown();
-    };
-    videoElement.onloadeddata = () => {
-      // Close the modal automatically when the video is done uploading
-      isModalVisible.set(false);
-      videoLoaded = true;
-      isPlaying = true;
-      isProcessing = true;
-      videoElement.play();
-      processVideoFrame();
-    };
+    const input = event.target as HTMLInputElement;
+    const file = input.files ? input.files[0] : null;
+    if (file) {
+      const url = URL.createObjectURL(file);
+      videoElement.src = url;
+      // Start countdown once metadata is available (duration etc.)
+      videoElement.onloadedmetadata = () => {
+        startCountdown();
+      };
+      videoElement.onloadeddata = () => {
+        // Close the modal automatically when the video is done uploading
+        isModalVisible.set(false);
+        videoLoaded = true;
+        isPlaying = true;
+        isProcessing = true;
+        videoElement.play();
+        processVideoFrame();
+      };
+    }
   }
-}
 
   // Control handlers
   function handlePlay() {
@@ -346,41 +357,40 @@ videoElement.onended = () => {
   }
 
   function handleStop() {
-  if (!sessionCreated) {
-    isModalVisible.set(true);
-  } else {
-    endSession();
-  }
-}
-
-function endSession() {
-  if (!sessionCreated) {
-    const sessionData = {
-      name: sessionName || "Session", // Default name if none provided
-      start_time: startTime,
-      end_time: new Date().toISOString(),
-      var_min: variance ?? 0,
-      var_max: variance ?? 0,
-      acc_min: acceleration ?? 0,
-      acc_max: acceleration ?? 0
-    };
-
-    createSession(sessionData);
-    sessionCreated = false; 
-    isModalVisible.set(false);
-  }
-  if (videoLoaded) {
-    isPlaying = false;
-    videoLoaded = false;
-    videoElement.pause();
-    videoElement.currentTime = 0;
-    if (offscreenCtx) {
-      offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+    if (!sessionCreated) {
+      isModalVisible.set(true);
+    } else {
+      endSession();
     }
   }
-  window.location.href = "/dashboard";
-}
 
+  function endSession() {
+    if (!sessionCreated) {
+      const sessionData = {
+        name: sessionName || "Session", // Default name if none provided
+        start_time: startTime,
+        end_time: new Date().toISOString(),
+        var_min: variance ?? 0,
+        var_max: variance ?? 0,
+        acc_min: acceleration ?? 0,
+        acc_max: acceleration ?? 0,
+      };
+
+      createSession(sessionData);
+      sessionCreated = false;
+      isModalVisible.set(false);
+    }
+    if (videoLoaded) {
+      isPlaying = false;
+      videoLoaded = false;
+      videoElement.pause();
+      videoElement.currentTime = 0;
+      if (offscreenCtx) {
+        offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+      }
+    }
+    window.location.href = "/dashboard";
+  }
 </script>
 
 <!--
@@ -399,7 +409,9 @@ function endSession() {
   </div>
 {/if}
 
-<div class="flex flex-col items-center justify-center rounded-lg border-4 border-primary opacity-90 shadow-glow bg-base-200 m-4 p-4">
+<div
+  class="flex flex-col items-center justify-center rounded-lg border-4 border-primary opacity-90 shadow-glow bg-base-200 m-4 p-4"
+>
   <!-- Processing indicator: Spinner while processing, Pause symbol when paused -->
   {#if isProcessing}
     <div class="spinner mt-4 flex justify-center">
@@ -433,48 +445,43 @@ function endSession() {
   {/if}
 
   <!-- Session Name Modal -->
-<!-- Session Name Modal -->
-{#if $isModalVisible}
-  <div class="fixed inset-0 bg-base-200 bg-opacity-75 flex justify-center items-center z-10">
-    <div class="bg-base-100 p-6 rounded-lg border-4 border-primary shadow-xl w-96">
-      
-      <!-- High-Contrast Heading -->
-      <h2 class="font-extrabold text-3xl text-secondary mb-4 text-center uppercase tracking-wide">
-        Enter Session Name
-      </h2>
-      
-      <!-- Input Field -->
-      <input
-        type="text"
-        bind:value={sessionName}
-        class="border border-primary p-3 rounded-md w-full mb-4
-               bg-base-200 text-primary-content focus:ring-4 focus:ring-primary
-               transition-all outline-none"
-        placeholder="Session Name"
-      />
-      
-       <!-- Buttons Section -->
-       <div class="flex justify-between">
-        <button
-          on:click={() => isModalVisible.set(false)}
-          class="bg-neutral text-primary-content p-3 rounded-md hover:bg-error
-                 transition-all font-semibold w-1/2 mr-2"
+  <!-- Session Name Modal -->
+  {#if $isModalVisible}
+    <div
+      class="fixed inset-0 bg-base-200 flex justify-center items-center z-10"
+    >
+      <div
+        class="bg-base-300 p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+      >
+        <h2
+          class="font-mono font-semibold text-center text-2xl text-primary mb-4"
         >
-          Cancel
-        </button>
-        <button
-          on:click={endSession}
-          class="bg-neutral text-primary-content p-3 rounded-md hover:bg-success
-                 transition-all font-semibold w-1/2"
-        >
-          Submit
-        </button>
+          Enter Session Name
+        </h2>
+        <input
+          type="text"
+          bind:value={sessionName}
+          class="border border-accent p-2 rounded-md w-full mb-4
+                 bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
+          placeholder="Session Name"
+        />
+        <div class="flex justify-between">
+          <button
+            on:click={() => isModalVisible.set(false)}
+            class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
+          >
+            Cancel
+          </button>
+          <button
+            on:click={endSession}
+            class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
+          >
+            Submit
+          </button>
+        </div>
       </div>
-
     </div>
-  </div>
-{/if}
-
+  {/if}
 </div>
 
 <style>
