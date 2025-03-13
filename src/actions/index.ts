@@ -2,7 +2,7 @@ import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { parseSetCookie } from "../scripts/utils";
 
-const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
+const serverAddress = import.meta.env.SERVER_ADDRESS;
 // import * as sessionActions from "./sessionActions";
 
 export const server = {
