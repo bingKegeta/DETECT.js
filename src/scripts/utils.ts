@@ -103,16 +103,16 @@ export function parseSetCookie(setCookieHeader: string) {
   // Default cookie settings
   let path = "/";
   let httpOnly = false;
-  // let secure = false;
+  let secure = false;
   let expires: Date | undefined;
-  // let sameSite: "none" | "lax" | "strict" | undefined;
+  let sameSite: "none" | "lax" | "strict" | undefined;
 
   // Now parse the remaining attributes
   for (const attr of parts) {
     const trimmed = attr.trim().toLowerCase();
     if (trimmed === "httponly") {
       httpOnly = true;
-      // secure = false; //! Change to true when prod
+      secure = false; //! Change to true when prod
     } else if (trimmed.startsWith("expires=")) {
       const dateStr = trimmed.substring("expires=".length).trim();
       const parsedDate = new Date(dateStr);
@@ -123,10 +123,10 @@ export function parseSetCookie(setCookieHeader: string) {
       path = attr.split("=")[1]?.trim() || "/";
     } else if (trimmed.startsWith("samesite=")) {
       const samesiteVal = attr.split("=")[1]?.trim().toLowerCase();
-      // if (samesiteVal === "none") sameSite = "none";
-      // else if (samesiteVal === "lax") sameSite = "lax";
-      // else if (samesiteVal === "strict") sameSite = "strict";
-      // sameSite = "lax";
+      if (samesiteVal === "none") sameSite = "none";
+      else if (samesiteVal === "lax") sameSite = "lax";
+      else if (samesiteVal === "strict") sameSite = "strict";
+      sameSite = "lax";
     }
   }
 
