@@ -126,7 +126,6 @@ export function parseSetCookie(setCookieHeader: string) {
       if (samesiteVal === "none") sameSite = "none";
       else if (samesiteVal === "lax") sameSite = "lax";
       else if (samesiteVal === "strict") sameSite = "strict";
-      sameSite = "lax";
     }
   }
 
