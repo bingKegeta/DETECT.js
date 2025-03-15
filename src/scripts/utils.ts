@@ -130,5 +130,5 @@ export function parseSetCookie(setCookieHeader: string) {
     }
   }
 
-  return { name, value, path, httpOnly, expires };
+  return { name, value, path, httpOnly, secure, sameSite, expires };
 }

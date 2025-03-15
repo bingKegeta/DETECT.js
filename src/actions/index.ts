@@ -51,9 +51,9 @@ export const server = {
           event.cookies.set(parsed.name, parsed.value, {
             path: parsed.path,
             httpOnly: parsed.httpOnly,
-            // secure: parsed.secure,
+            secure: parsed.secure,
             expires: parsed.expires,
-            // sameSite: parsed.sameSite,
+            sameSite: parsed.sameSite,
           });
         }
       }
@@ -107,9 +107,9 @@ export const server = {
           event.cookies.set(parsed.name, parsed.value, {
             path: parsed.path,
             httpOnly: parsed.httpOnly,
-            // secure: parsed.secure,
+            secure: parsed.secure,
             expires: parsed.expires,
-            // sameSite: parsed.sameSite,
+            sameSite: parsed.sameSite,
           });
         }
       }
