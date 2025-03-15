@@ -103,7 +103,7 @@ export function parseSetCookie(setCookieHeader: string) {
   // Default cookie settings
   let path = "/";
   let httpOnly = false;
-  let secure = false;
+  let secure = true;
   let expires: Date | undefined;
   let sameSite: "none" | "lax" | "strict" | undefined;
 
@@ -112,7 +112,7 @@ export function parseSetCookie(setCookieHeader: string) {
     const trimmed = attr.trim().toLowerCase();
     if (trimmed === "httponly") {
       httpOnly = true;
-      secure = false; //! Change to true when prod
+      secure = true; //! Change to true when prod
     } else if (trimmed.startsWith("expires=")) {
       const dateStr = trimmed.substring("expires=".length).trim();
       const parsedDate = new Date(dateStr);
