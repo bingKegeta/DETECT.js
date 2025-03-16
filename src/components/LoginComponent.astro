@@ -170,47 +170,51 @@
     event.preventDefault();
     const formData = new FormData(form);
     const { error, data } = await actions.login(formData);
+
+    // Clear previous error messages
+    const emailErrorElement = document.querySelector(".email-error");
+    const passwordErrorElement = document.querySelector(".pw-error");
+
+    if (emailErrorElement) emailErrorElement.textContent = "";
+    if (passwordErrorElement) passwordErrorElement.textContent = "";
+
     if (!isInputError(error)) {
       if (data?.success) {
-        console.log("Logged in successfully", data.data);
-        const emailErrorElement = document.querySelector(".email-error");
-        if (emailErrorElement) {
-          emailErrorElement.textContent = "";
+        console.log("Logged in successfully");
+
+        // Store userID in sessionStorage
+        if (data.userID) {
+          sessionStorage.setItem("userId", data.userID.toString());
+          console.log("User ID stored:", data.userID);
         }
-        const passwordErrorElement = document.querySelector(".pw-error");
-        if (passwordErrorElement) {
-          passwordErrorElement.textContent = "";
-        }
+
+        // Redirect to dashboard
         window.location.href = "/dashboard";
       } else {
-        const emailErrorElement = document.querySelector(".email-error");
+        // Display general error message for login failure
         if (emailErrorElement) {
-          emailErrorElement.textContent = data?.message || "";
+          emailErrorElement.textContent =
+            data?.message || "Login failed. Please check your credentials.";
         }
       }
     } else {
-      if (error.fields?.email) {
-        const emailErrorElement = document.querySelector(".email-error");
-        if (emailErrorElement) {
-          emailErrorElement.textContent = error.fields.email.join(", ");
-        }
-      } else {
-        const emailErrorElement = document.querySelector(".email-error");
-        if (emailErrorElement) {
-          emailErrorElement.textContent = "";
-        }
+      // Handle validation errors
+      if (error.fields?.email && emailErrorElement) {
+        emailErrorElement.textContent = error.fields.email.join(", ");
       }
 
-      if (error.fields?.password) {
-        const passwordErrorElement = document.querySelector(".pw-error");
-        if (passwordErrorElement) {
-          passwordErrorElement.textContent = error.fields.password.join(", ");
-        }
-      } else {
-        const passwordErrorElement = document.querySelector(".pw-error");
-        if (passwordErrorElement) {
-          passwordErrorElement.textContent = "";
-        }
+      if (error.fields?.password && passwordErrorElement) {
+        passwordErrorElement.textContent = error.fields.password.join(", ");
+      }
+
+      // Display general error if no specific field errors
+      if (
+        !error.fields?.email &&
+        !error.fields?.password &&
+        emailErrorElement
+      ) {
+        emailErrorElement.textContent =
+          "There was a problem with your submission. Please try again.";
       }
     }
   });
