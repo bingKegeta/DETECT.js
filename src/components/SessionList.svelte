@@ -30,7 +30,6 @@
       const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
       const response = await fetch(`${serverAddress}/deleteSession`, {
         method: "POST",
-        credentials: "include",
         body: JSON.stringify({ session_id: sessionToDelete }),
       });
 
@@ -62,43 +61,42 @@
   onMount(async () => {
     try {
       const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
-      const response = await fetch(`${serverAddress}/getSessions`, {
+      const userId = sessionStorage.getItem("userID");
+
+      if (!userId) {
+        error = "User ID not found in session storage.";
+        return;
+      }
+
+      const response = await fetch(`${serverAddress}/getSessions?userId=${userId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
       });
 
       if (!response.ok) throw new Error("Failed to fetch sessions");
 
       const rawJson = await response.json();
-      let seenNames: Set<string> = new Set(); // Track names that have already appeared
+      let seenNames: Set<string> = new Set();
 
-      // Iterate over sessions and handle duplicates
+      // Process only required session data
       sessions = rawJson.map((session: any) => {
         let sessionName = session.Name;
         let originalName = sessionName;
         let counter = 1;
 
-        // Check for duplicate names and append a counter
         while (seenNames.has(sessionName)) {
           sessionName = `${originalName} (${counter})`;
           counter++;
         }
-
-        seenNames.add(sessionName); // Add the name to the set
+        seenNames.add(sessionName);
 
         return {
           id: session.ID,
-          userId: session.UserID,
-          name: sessionName, // Updated name with potential counter
+          name: sessionName,
           startTime: new Date(session.StartTime).toLocaleString(),
           endTime: new Date(session.EndTime).toLocaleString(),
-          varMin: session.VarMin,
-          varMax: session.VarMax,
-          accMin: session.AccMin,
-          accMax: session.AccMax,
           createdAt: (() => {
             const date = new Date(session.CreatedAt);
             const diffMs = Date.now() - date.getTime();
