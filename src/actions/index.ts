@@ -59,9 +59,9 @@ export const server = {
 
       return {
         success: true,
-        message: data.message || "Login successful",
+        message: data.user_id || "Login successful",
         status: backendResponse.status,
-        userID: data.userID,
+        userID: data.userID || -1,
         data,
       };
     },
@@ -90,6 +90,7 @@ export const server = {
       });
 
       const data = await backendResponse.json();
+      debugger;
 
       if (!backendResponse.ok) {
         return {
@@ -118,7 +119,7 @@ export const server = {
         success: true,
         message: data.message || "Registration successful",
         status: backendResponse.status,
-        userID: data.userID,
+        userID: data.userID || -1,
         data,
       };
     },
