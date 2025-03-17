@@ -16,16 +16,13 @@
   async function fetchUserSettings() {
     try {
       const userId = sessionStorage.getItem("userId");
-      console.log("user ID:", userId);
       if (!userId) {
         error = "User ID not found in session storage.";
         return;
       }
       const response = await fetch(`${serverAddress}/getUserSettings?user_id=${userId}`, {
         method: "GET",
-        // headers: { "Content-Type": "application/json" },
       });
-      console.log(response);
       if (response.ok) {
         const data = await response.json();
         userSettings.update(settings => {
@@ -57,7 +54,6 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: parseFloat(userId), normalization: value }),
       });
-      console.log(response);
       if (!response.ok) throw new Error("Failed to update normalization");
 
       userSettings.update(settings => {
