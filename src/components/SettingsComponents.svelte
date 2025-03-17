@@ -15,10 +15,14 @@
 
   async function fetchUserSettings() {
     try {
-      const response = await fetch(`${serverAddress}/getUserSettings`, {
+      const userId = sessionStorage.getItem("userId");
+      if (!userId) {
+        error = "User ID not found in session storage.";
+        return;
+      }
+      const response = await fetch(`${serverAddress}/getUserSettings?user_id=${userId}`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-        credentials: "include"
       });
       if (response.ok) {
         const data = await response.json();
@@ -41,11 +45,15 @@
 
   async function updateNormalization(value) {
     try {
+      const userId = sessionStorage.getItem("userId");
+      if (!userId) {
+        error = "User ID not found in session storage.";
+        return;
+      }
       const response = await fetch(`${serverAddress}/updateNormalization`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ normalization: value }),
-        credentials: "include",
+        body: JSON.stringify({ user_id: parseFloat(userId), normalization: value }),
       });
       if (!response.ok) throw new Error("Failed to update normalization");
 
@@ -61,11 +69,15 @@
 
   async function updateGraphing(value) {
     try {
+      const userId = sessionStorage.getItem("userId");
+      if (!userId) {
+        error = "User ID not found in session storage.";
+        return;
+      }
       const response = await fetch(`${serverAddress}/updateGraphing`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plotting: value }),
-        credentials: "include",
+        body: JSON.stringify({ user_id: parseFloat(userId), plotting: value }),
       });
 
       if (!response.ok) throw new Error("Failed to update plotting");
@@ -81,11 +93,15 @@
 
   async function updateMinMax(value) {
     try {
+      const userId = sessionStorage.getItem("userId");
+      if (!userId) {
+        error = "User ID not found in session storage.";
+        return;
+      }
       const response = await fetch(`${serverAddress}/updateMinMaxSetting`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ minMax: value }),
-        credentials: "include",
+        body: JSON.stringify({ user_id: parseFloat(userId), minMax: value }),
       });
 
       if (!response.ok) throw new Error("Failed to update minMax");
@@ -103,11 +119,15 @@
     const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
 
     try {
+      const userId = sessionStorage.getItem("userId");
+      if (!userId) {
+        error = "User ID not found in session storage.";
+        return;
+      }
       const response = await fetch(`${serverAddress}/updateSensitivity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sensitivity: parseFloat(value) }),
-        credentials: "include",
+        body: JSON.stringify({ user_id: parseFloat(userId), sensitivity: parseFloat(value) }),
       });
       if (!response.ok) throw new Error("Failed to update sensitivity");
 
