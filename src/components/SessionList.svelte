@@ -74,7 +74,7 @@
       return;
     }
 
-    const url = `${serverAddress}/getSessions?userId=${userId}`;
+    const url = `${serverAddress}/getSessions?user_id=${userId}`;
     console.log("📡 Fetching from:", url);
 
     const response = await fetch(url, {
