@@ -154,7 +154,7 @@ import Modal from "./Modal.tsx";
             >Yes</button
           >
           <button
-            id="close-logout"
+            id="logout-no"
             class="w-full bg-neutral hover:bg-secondary text-base-content p-2 rounded-lg text-center m-1"
             >No</button
           >
@@ -218,14 +218,19 @@ import Modal from "./Modal.tsx";
       const logoutButton = document.getElementById("logout-btn");
       const logoutModal = document.getElementById("logout-modal");
       const logoutYes = document.getElementById("logout-yes");
+      const logoutNo = document.getElementById("logout-no");
       const closeLogout = document.getElementById("close-logout");
 
-      if (logoutButton && logoutModal && logoutYes && closeLogout) {
+      if (logoutButton && logoutModal && logoutYes && closeLogout && logoutNo) {
         logoutButton.addEventListener("click", () => {
           logoutModal.classList.remove("hidden");
         });
 
         closeLogout.addEventListener("click", () => {
+          logoutModal.classList.add("hidden");
+        });
+
+        logoutNo.addEventListener("click", () => {
           logoutModal.classList.add("hidden");
         });
 
