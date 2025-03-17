@@ -22,7 +22,7 @@
       }
       const response = await fetch(`${serverAddress}/getUserSettings?user_id=${userId}`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        // headers: { "Content-Type": "application/json" },
       });
       if (response.ok) {
         const data = await response.json();
