@@ -95,6 +95,13 @@
     const rawJson = await response.json();
     console.log("✅ Fetch Successful! Received Data:", rawJson);
 
+    if (!rawJson || rawJson.length === 0) {
+      console.log("ℹNo sessions found.");
+      sessions = [];
+      error = "";
+      return;
+    }
+
     let seenNames: Set<string> = new Set();
 
     sessions = rawJson.map((session: any) => {
