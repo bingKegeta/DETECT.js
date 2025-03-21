@@ -28,20 +28,21 @@ import Modal from "./Modal.tsx";
           <path d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3z"></path>
         </svg>
       </a>
+    </nav>
 
-      <!-- About Button -->
-      <Modal
-        buttonText="About"
-        buttonClassName="p-3 transition-transform transform-gpu hover:scale-110 hidden md:flex"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-md"
-        modalClassName="w-[55vw] max-w-[750px] md:w-[65vw] lg:w-[60vw] max-h-[85vh] overflow-y-auto p-[4vh] px-[6vw] md:px-[4vw] lg:px-[3vw] rounded-lg bg-base-200 border border-primary shadow-lg"
-        closeButtonClassName="text-3xl text-primary"
-        client:visible
-      >
+    <!-- About Button -->
+    <button id="about-btn" class="transition-transform hover:scale-110 cursor-pointer text-base-content">
+      <svg class="h-[5vh] w-auto fill-current" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 17c-.55 0-1-.45-1-1v-1c0-.55.45-1 1-1s1 .45 1 1v1c0 .55-.45 1-1 1zm1.07-7.75l-.9.92c-.22.22-.37.5-.43.81-.04.23-.07.49-.07.74H11v-.5c0-.55.22-1.05.59-1.41l1.2-1.2c.37-.37.59-.88.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-1.66 1.34-3 3-3s3 1.34 3 3c0 .66-.26 1.26-.68 1.75z"/>
+      </svg>
+    </button>
+
+    <!-- About Pop-Up -->
+    <div id="about-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+      <div class="bg-base-100 rounded-lg border border-primary shadow-lg w-[60vw] max-w-[850px] p-8 relative">
+        <button id="close-about-popup" class="absolute top-4 right-4 text-primary text-xl cursor-pointer">&times;</button>
         <div class="flex flex-col items-center">
-          <h3 class="text-xl font-semibold text-primary text-center mb-4">
-            What Powers DETECT?
-          </h3>
+          <h3 class="text-xl font-semibold text-primary text-center mb-4">What Powers DETECT?</h3>
           <ul class="flex flex-col gap-3 text-base-content text-center">
             <li>
               <a href="https://github.com/bingKegeta/DETECT" target="_blank" class="hover:text-secondary">
@@ -49,7 +50,7 @@ import Modal from "./Modal.tsx";
               </a>
             </li>
             <li>
-              <a href="https://github.com/bingKegeta/go" target="_blank" class="hover:text-secondary">
+              <a href="https://github.com/bingKegeta/DETECT.go" target="_blank" class="hover:text-secondary">
                 Powering our fast & reliable backend built with Go →
               </a>
             </li>
@@ -60,8 +61,9 @@ import Modal from "./Modal.tsx";
             </li>
           </ul>
         </div>
-      </Modal>
-    </nav>
+      </div>
+    </div>
+
 
     <!-- Settings Button (SVG Icon) -->
     <button
@@ -198,6 +200,30 @@ import Modal from "./Modal.tsx";
       if (closeBtn) closeBtn.addEventListener("click", closeMenu);
       if (backdrop) backdrop.addEventListener("click", closeMenu);
     });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const aboutBtn = document.getElementById("about-btn");
+      const aboutPopup = document.getElementById("about-popup");
+      const closeAboutPopup = document.getElementById("close-about-popup");
+
+      if (aboutBtn && aboutPopup && closeAboutPopup) {
+        aboutBtn.addEventListener("click", () => {
+          aboutPopup.classList.remove("hidden");
+        });
+
+        closeAboutPopup.addEventListener("click", () => {
+          aboutPopup.classList.add("hidden");
+        });
+
+        // Optional: click outside the box to close
+        aboutPopup.addEventListener("click", (event) => {
+          if (event.target === aboutPopup) {
+            aboutPopup.classList.add("hidden");
+          }
+        });
+      }
+    });
+
 
     import { actions } from "astro:actions";
 
