@@ -17,21 +17,23 @@ export const isLoading = writable(true);
 // Fetch user settings from the server
 export async function fetchUserSettings() {
   try {
-    const response = await fetch(`${serverAddress}/getUserSettings`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include"
-    });
-    if (response.ok) {
-      const data = await response.json();
-      // Update the userSettings store with the fetched data
-      userSettings.update(settings => {
-        settings.affine = data.affine;
-        settings.min_max = data.min_max;
-        settings.plotting = data.plotting;
-        settings.sensitivity = data.sensitivity;
-        return settings;
+    const userId = sessionStorage.getItem("userId");
+      if (!userId) {
+        console.error("User ID not found in session storage.");
+        return;
+      }
+      const response = await fetch(`${serverAddress}/getUserSettings?user_id=${userId}`, {
+        method: "GET",
       });
+      if (response.ok) {
+        const data = await response.json();
+        userSettings.update(settings => {
+          settings.affine = data.affine;
+          settings.min_max = data.min_max;
+          settings.plotting = data.plotting;
+          settings.sensitivity = data.sensitivity;
+          return settings;
+        });
     } else {
       console.error("Failed to fetch user settings:", response.statusText);
     }
