@@ -54,7 +54,7 @@ export async function createSession(sessionData: {
   }
 }
 
-function uploadData() {
+async function uploadData() {
   await tick(); // Ensures the sessionId update is applied
   
   const currentSessionId = get(sessionId);
