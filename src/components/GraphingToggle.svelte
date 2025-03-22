@@ -11,7 +11,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ value }),
-        credentials: "include",
+        // credentials: "include",
       });
 
       if (!response.ok) throw new Error("Failed to update plotting");
