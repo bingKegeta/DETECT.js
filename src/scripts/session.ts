@@ -21,7 +21,6 @@ export async function createSession(sessionData: {
     if (!userId) {
       throw new Error("User ID is not found in sessionStorage");
     }
-
     const response = await fetch(`${serverAddress}/createSession`, {
       method: "POST",
       headers: {
@@ -29,7 +28,7 @@ export async function createSession(sessionData: {
       },
       body: JSON.stringify({
         ...sessionData,
-        user_id: userId,
+        user_id: Number(userId),
       }),
     });
 
