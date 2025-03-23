@@ -1,6 +1,7 @@
 import { writable, get } from "svelte/store";
 import { insertAnalysisData } from "./insert";
 import { analysisData } from "../scripts/websocket";
+import { tick } from "svelte";
 
 export const sessionId = writable<number | null>(null); 
 
@@ -44,6 +45,7 @@ export async function createSession(sessionData: {
     // Save sessionId to store
     if (result.sessionId) {
       sessionId.set(Number(result.sessionId)); // Ensure it's treated as a number
+      await tick(); // Wait for Svelte to update sessionId
       uploadData(); // Upload the data to the server
     }    
 
@@ -52,7 +54,9 @@ export async function createSession(sessionData: {
   }
 }
 
-function uploadData() {
+async function uploadData() {
+  await tick(); // Ensures the sessionId update is applied
+  
   const currentSessionId = get(sessionId);
   console.log("Session Id:", currentSessionId);
   if (currentSessionId) {

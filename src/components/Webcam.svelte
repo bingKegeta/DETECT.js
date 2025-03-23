@@ -362,39 +362,43 @@
 
   <!-- Modal for session name -->
   {#if $isModalVisible}
+  <div
+    class="fixed inset-0 flex justify-center items-center z-50"
+    style="background-color: black !important;"  
+  >
     <div
-      class="fixed inset-0 bg-base-200 flex justify-center items-center z-10"
+      class="p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+      style="background-color: #000000;" 
     >
-      <div
-        class="bg-base-300 p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+      <h2
+        class="font-mono font-semibold text-center text-2xl text-primary mb-4"
       >
-        <h2
-          class="font-mono font-semibold text-center text-2xl text-primary mb-4"
+        Save Session?
+      </h2>
+
+      <input
+        type="text"
+        bind:value={sessionName}
+        class="border border-accent p-2 rounded-md w-full mb-4
+               bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
+        placeholder="Session Name"
+      />
+
+      <div class="flex justify-between">
+        <button
+          on:click={closeModal}
+          class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
         >
-          Save Session?
-        </h2>
-        <input
-          type="text"
-          bind:value={sessionName}
-          class="border border-accent p-2 rounded-md w-full mb-4
-                 bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
-          placeholder="Session Name"
-        />
-        <div class="flex justify-between">
-          <button
-            on:click={closeModal}
-            class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
-          >
-            Cancel
-          </button>
-          <button
-            on:click={onSubmitSessionName}
-            class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
-          >
-            Save
-          </button>
-        </div>
+          Cancel
+        </button>
+        <button
+          on:click={onSubmitSessionName}
+          class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
+        >
+          Save
+        </button>
       </div>
     </div>
-  {/if}
+  </div>
+{/if}
 </div>

@@ -10,7 +10,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sensitivity }),
-        credentials: "include",
+        // credentials: "include",
       });
 
       if (!response.ok) throw new Error("Failed to update sensitivity");
@@ -21,7 +21,7 @@
 
   onMount(() => {
     const slider = document.getElementById(
-      "sensitivity-slider"
+      "sensitivity-slider",
     ) as HTMLInputElement;
     if (slider) {
       slider.addEventListener("input", (event) => {
