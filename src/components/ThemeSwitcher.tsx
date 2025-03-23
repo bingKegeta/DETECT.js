@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 const ThemeSwitcher = () => {
   // Add more themes here
   const themes = [
-    "Cyberpunk",
+    "dark",
     "Yin and Yang",
     "Yang and Yin",
     "Pastel",
@@ -12,7 +12,7 @@ const ThemeSwitcher = () => {
     "Synthwave",
   ];
 
-  const [theme, setTheme] = useState<string>("Cyberpunk");
+  const [theme, setTheme] = useState<string>("dark");
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [dropDirection, setDropDirection] = useState<"down" | "up">("down");
 
@@ -79,7 +79,7 @@ const ThemeSwitcher = () => {
     string,
     { primary: string; secondary: string; success: string }
   > = {
-    Cyberpunk: { primary: "#00ffff", secondary: "#8a2be2", success: "#39ff14" },
+    dark: { primary: "#00ffff", secondary: "#8a2be2", success: "#39ff14" },
     "Yin and Yang": {
       primary: "#ffffff",
       secondary: "#000000",
