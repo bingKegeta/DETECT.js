@@ -39,7 +39,7 @@ html {
     --color-base-content: #ffffff;
 }
 
-[data-theme="dark"] {
+[data-theme="Cyberpunk"] {
     --color-primary: #00ffff;
     /* Electric Blue */
     --color-primary-content: #000000;
