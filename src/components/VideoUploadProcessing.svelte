@@ -1,4 +1,5 @@
 
+
 <script lang="ts">
   import { drawLandmarks } from "@mediapipe/drawing_utils";
   import { FaceMesh, type Results } from "@mediapipe/face_mesh";
@@ -69,8 +70,6 @@
    export const shouldShowGraph = writable(false);
 
    let affineTransformEnabled = writable(false);
-
-   let timestamp = 0;
 
    // Log the settings whenever they change
    userSettings.subscribe((settings: any) => {
@@ -217,14 +216,11 @@
             });
           }
 
-          timestamp = performance.now();
-
           // Smoothing iris positions
-          const { normX, normY } = getNormalizedIrisPosition(
+          const { normX, normY, timestamp } = getNormalizedIrisPosition(
             landmarks,
             processingCanvas.width,
             processingCanvas.height,
-            timestamp
           );
 
           // Apply smoothing to the iris position
