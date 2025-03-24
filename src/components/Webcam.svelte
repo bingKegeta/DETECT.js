@@ -1,3 +1,4 @@
+
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import { writable } from "svelte/store";
@@ -149,38 +150,48 @@
   }
 
   // Finalize the session creation
-  function endSession() {
-    if (camera && canvasEl) {
-      camera.stop();
-      camera = null;
-      const canvasCtx = canvasEl.getContext("2d");
-      if (canvasCtx) {
-        canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-      }
-    }
+  async function endSession() {
+    try {
+        // Stop the camera and clear the canvas if they exist
+        if (camera && canvasEl) {
+            camera.stop();
+            camera = null;
+            const canvasCtx = canvasEl.getContext("2d");
+            if (canvasCtx) {
+                canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+            }
+        }
 
-    if (ws) {
-      ws.close();
-      ws = null;
-      console.log("WebSocket closed before session creation.");
-    }
+        // Close WebSocket if it exists
+        if (ws) {
+            ws.close();
+            ws = null;
+            console.log("WebSocket closed before session creation.");
+        }
 
-    if (!sessionCreated) {
-      const sessionData = {
-        name: sessionName || "Session",
-        start_time: startTime,
-        end_time: new Date().toISOString(),
-        var_min: variance ?? 0,
-        var_max: variance ?? 0,
-        acc_min: acceleration ?? 0,
-        acc_max: acceleration ?? 0,
-      };
-      createSession(sessionData);
-      sessionCreated = true;
+        // Create session if it hasn't been created already
+        if (!sessionCreated) {
+            const sessionData = {
+                name: sessionName || "Session",
+                start_time: startTime,
+                end_time: new Date().toISOString(),
+                var_min: variance ?? 0,
+                var_max: variance ?? 0,
+                acc_min: acceleration ?? 0,
+                acc_max: acceleration ?? 0,
+            };
+
+            // Await the session creation process (assuming createSession is an async function)
+            await createSession(sessionData);
+            sessionCreated = true;
+        }
+
+        // Redirect to dashboard
+        window.location.href = "/dashboard";
+    } catch (error) {
+        console.error("Error during session end:", error);
     }
-    window.location.href = "/dashboard";
-    //console.log("here");
-  }
+}
 
   onMount(() => {
     // Fetch user settings on component mount
