@@ -66,8 +66,6 @@
 
   let affineTransformEnabled = writable(false);
 
-  let timestamp = 0;
-
   // Log the settings whenever they change
   userSettings.subscribe((settings: any) => {
     console.log("User settings:", settings);
@@ -253,14 +251,11 @@
             lineWidth: 1,
           });
 
-          timestamp = performance.now();
-
           // Smoothing iris positions
-          const { normX, normY } = getNormalizedIrisPosition(
+          const { normX, normY, timestamp } = getNormalizedIrisPosition(
             landmarks,
             canvasEl.width,
             canvasEl.height,
-            timestamp
           );
 
           // Apply smoothing to the iris position
