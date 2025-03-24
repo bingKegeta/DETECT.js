@@ -1,16 +1,16 @@
 // src/scripts/mediapipe.ts
 
-import { FaceMesh } from "@mediapipe/face_mesh";
 import { Camera } from "@mediapipe/camera_utils";
 import { drawLandmarks } from "@mediapipe/drawing_utils";
+import { FaceMesh } from "@mediapipe/face_mesh";
 import {
-  LEFT_IRIS_CENTER,
-  RIGHT_IRIS_CENTER,
   LEFT_EYE_CORNER,
-  RIGHT_EYE_CORNER,
+  LEFT_IRIS_CENTER,
   NOSE_TIP,
-  getNormalizedIrisPosition,
+  RIGHT_EYE_CORNER,
+  RIGHT_IRIS_CENTER,
   getLandmarks,
+  getNormalizedIrisPosition,
 } from "./utils";
 
 export class MediaPipeProcessor {
