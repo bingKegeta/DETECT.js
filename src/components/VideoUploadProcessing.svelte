@@ -417,6 +417,8 @@
                 offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
             }
         }
+        previousXValues = [];
+        previousYValues = [];
 
         // After everything completes, redirect to the dashboard
         window.location.href = "/dashboard";
