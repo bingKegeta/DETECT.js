@@ -10,10 +10,10 @@ import node from "@astrojs/node";
 export default defineConfig({
   vite: {
     server: {
-      allowedHosts: ["boofoo.store", "www.boofoo.store", "localhost"],
+      allowedHosts: ["localhost", "asdqwe.online", "www.asdqwe.online"],
     },
   },
-  site: "https://boofoo.store",
+  site: "https://asdqwe.online",
   output: "static", // Explicitly setting to static mode
   integrations: [tailwind(), svelte(), preact()],
   adapter: node({ mode: "standalone" }),
