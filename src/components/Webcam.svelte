@@ -5,8 +5,8 @@
   import { fetchUserSettings, userSettings } from "../scripts/settings";
 
   import {
-    applyAffineTransformation,
-    calculateAffineTransformation,
+      applyAffineTransformation,
+      calculateAffineTransformation,
   } from "../scripts/affineTransformation";
 
   import { Camera } from "@mediapipe/camera_utils";
@@ -16,13 +16,13 @@
   import { applySmoothing } from "../scripts/smoothing";
 
   import {
-    LEFT_EYE_CORNER,
-    LEFT_IRIS_CENTER,
-    NOSE_TIP,
-    RIGHT_EYE_CORNER,
-    RIGHT_IRIS_CENTER,
-    getLandmarks,
-    getNormalizedIrisPosition,
+      LEFT_EYE_CORNER,
+      LEFT_IRIS_CENTER,
+      NOSE_TIP,
+      RIGHT_EYE_CORNER,
+      RIGHT_IRIS_CENTER,
+      getLandmarks,
+      getNormalizedIrisPosition,
   } from "../scripts/utils";
 
   import { ProbabilityGraph } from "../scripts/graph";
@@ -172,7 +172,7 @@
       createSession(sessionData);
       sessionCreated = true;
     }
-    window.location.href = "/dashboard";
+    // window.location.href = "/dashboard";
     //console.log("here");
   }
 
@@ -364,11 +364,11 @@
   {#if $isModalVisible}
   <div
     class="fixed inset-0 flex justify-center items-center z-50"
-    style="background-color: black !important;"  
+    style="background-color: black !important;"
   >
     <div
       class="p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
-      style="background-color: #000000;" 
+      style="background-color: #000000;"
     >
       <h2
         class="font-mono font-semibold text-center text-2xl text-primary mb-4"

@@ -4,20 +4,20 @@
   import { onDestroy, onMount } from "svelte";
   import { writable } from "svelte/store";
   import { createSession } from "../scripts/session";
-  import { fetchUserSettings, userSettings } from '../scripts/settings'; 
+  import { userSettings } from '../scripts/settings';
 
   import {
-    applyAffineTransformation,
-    calculateAffineTransformation,
+      applyAffineTransformation,
+      calculateAffineTransformation,
   } from "../scripts/affineTransformation";
   import {
-    LEFT_EYE_CORNER,
-    LEFT_IRIS_CENTER,
-    NOSE_TIP,
-    RIGHT_EYE_CORNER,
-    RIGHT_IRIS_CENTER,
-    getLandmarks,
-    getNormalizedIrisPosition,
+      LEFT_EYE_CORNER,
+      LEFT_IRIS_CENTER,
+      NOSE_TIP,
+      RIGHT_EYE_CORNER,
+      RIGHT_IRIS_CENTER,
+      getLandmarks,
+      getNormalizedIrisPosition,
   } from "../scripts/utils";
 
   import type { Coordinates } from "../scripts/affineTransformation";
@@ -64,11 +64,11 @@
   let countdownTimer: number;
 
   let sensitivity: number | null = null;
- 
+
    export const shouldShowGraph = writable(false);
- 
+
    let affineTransformEnabled = writable(false);
- 
+
    // Log the settings whenever they change
    userSettings.subscribe((settings: any) => {
        console.log("User settings:", settings);
@@ -404,7 +404,7 @@
         offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
       }
     }
-    window.location.href = "/dashboard";
+    // window.location.href = "/dashboard";
   }
 </script>
 
@@ -468,7 +468,7 @@
   >
     <div
       class="p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
-      style="background-color: #000000;"  
+      style="background-color: #000000;"
     >
       <h2
         class="font-mono font-semibold text-center text-2xl text-primary mb-4"
