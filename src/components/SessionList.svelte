@@ -38,9 +38,12 @@
       // Remove the session from the list
       sessions = sessions.filter((s) => s.id !== sessionToDelete);
 
-      // If the deleted session was selected, clear selection
+      // If the deleted session was selected, clear selection and graph
       if (selectedSessionId === sessionToDelete) {
         selectedSessionId = null;
+        sessionStorage.removeItem("clickedID");
+        // Reload the page to clear the graph and other session-dependent UI elements
+        window.location.reload();
       }
     } catch (err) {
       error = "Failed to delete session.";
@@ -59,85 +62,92 @@
   }
 
   onMount(async () => {
-  console.log("🔍 Starting fetch process...");
+    console.log("🔍 Starting fetch process...");
 
-  try {
-    const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
-    console.log("🌐 Server Address:", serverAddress);
+    try {
+      const serverAddress = import.meta.env.PUBLIC_SERVER_ADDRESS;
+      console.log("🌐 Server Address:", serverAddress);
 
-    const userId = sessionStorage.getItem("userId");
-    console.log("👤 User ID from sessionStorage:", userId);
+      const userId = sessionStorage.getItem("userId");
+      console.log("👤 User ID from sessionStorage:", userId);
 
-    if (!userId) {
-      console.error("❌ User ID not found in session storage.");
-      error = "User ID not found in session storage.";
-      return;
-    }
-
-    const url = `${serverAddress}/getSessions?user_id=${userId}`;
-    console.log("📡 Fetching from:", url);
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    console.log("📡 Response Status:", response.status);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Fetch failed. Response text:", errorText);
-      throw new Error(`Failed to fetch sessions: ${errorText}`);
-    }
-
-    const rawJson = await response.json();
-    console.log("✅ Fetch Successful! Received Data:", rawJson);
-
-    if (!rawJson || rawJson.length === 0) {
-      console.log("ℹNo sessions found.");
-      sessions = [];
-      error = "";
-      return;
-    }
-
-    let seenNames: Set<string> = new Set();
-
-    sessions = rawJson.map((session: any) => {
-      let sessionName = session.Name;
-      let originalName = sessionName;
-      let counter = 1;
-
-      while (seenNames.has(sessionName)) {
-        sessionName = `${originalName} (${counter})`;
-        counter++;
+      if (!userId) {
+        console.error("❌ User ID not found in session storage.");
+        error = "User ID not found in session storage.";
+        return;
       }
-      seenNames.add(sessionName);
 
-      return {
-        id: session.ID,
-        name: sessionName,
-        startTime: new Date(session.StartTime).toLocaleString(),
-        endTime: new Date(session.EndTime).toLocaleString(),
-        createdAt: (() => {
-          const date = new Date(session.CreatedAt);
-          const diffMs = Date.now() - date.getTime();
-          const hours = diffMs / (1000 * 60 * 60);
-          if (hours < 24)
-            return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-          else if (hours < 72) return `${Math.floor(hours / 24)}d ago`;
-          else return date.toLocaleDateString([], { month: "2-digit", day: "2-digit" });
-        })(),
-      };
-    });
+      const url = `${serverAddress}/getSessions?user_id=${userId}`;
+      console.log("📡 Fetching from:", url);
 
-    console.log("✅ Sessions processed successfully!", sessions);
-  } catch (err) {
-    console.error("🚨 Fetch error:", err);
-    error = "Failed to fetch sessions.";
-  }
-});
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("📡 Response Status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ Fetch failed. Response text:", errorText);
+        throw new Error(`Failed to fetch sessions: ${errorText}`);
+      }
+
+      const rawJson = await response.json();
+      console.log("✅ Fetch Successful! Received Data:", rawJson);
+
+      if (!rawJson || rawJson.length === 0) {
+        console.log("ℹNo sessions found.");
+        sessions = [];
+        error = "";
+        return;
+      }
+
+      let seenNames: Set<string> = new Set();
+
+      sessions = rawJson.map((session: any) => {
+        let sessionName = session.Name;
+        let originalName = sessionName;
+        let counter = 1;
+
+        while (seenNames.has(sessionName)) {
+          sessionName = `${originalName} (${counter})`;
+          counter++;
+        }
+        seenNames.add(sessionName);
+
+        return {
+          id: session.ID,
+          name: sessionName,
+          startTime: new Date(session.StartTime).toLocaleString(),
+          endTime: new Date(session.EndTime).toLocaleString(),
+          createdAt: (() => {
+            const date = new Date(session.CreatedAt);
+            const diffMs = Date.now() - date.getTime();
+            const hours = diffMs / (1000 * 60 * 60);
+            if (hours < 24)
+              return date.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+            else if (hours < 72) return `${Math.floor(hours / 24)}d ago`;
+            else
+              return date.toLocaleDateString([], {
+                month: "2-digit",
+                day: "2-digit",
+              });
+          })(),
+        };
+      });
+
+      console.log("✅ Sessions processed successfully!", sessions);
+    } catch (err) {
+      console.error("🚨 Fetch error:", err);
+      error = "Failed to fetch sessions.";
+    }
+  });
 </script>
 
 {#if error}
