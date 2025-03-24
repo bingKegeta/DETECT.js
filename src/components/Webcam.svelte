@@ -185,6 +185,8 @@
             await createSession(sessionData);
             sessionCreated = true;
         }
+        previousXValues = [];
+        previousYValues = [];
 
         // Redirect to dashboard
         window.location.href = "/dashboard";
