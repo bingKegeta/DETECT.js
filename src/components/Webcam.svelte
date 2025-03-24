@@ -159,6 +159,12 @@
       }
     }
 
+    if (ws) {
+      ws.close();
+      ws = null;
+      console.log("WebSocket closed before session creation.");
+    }
+
     if (!sessionCreated) {
       const sessionData = {
         name: sessionName || "Session",
