@@ -4,20 +4,20 @@
   import { onDestroy, onMount } from "svelte";
   import { writable } from "svelte/store";
   import { createSession } from "../scripts/session";
-  import { userSettings } from '../scripts/settings';
+  import { userSettings } from "../scripts/settings";
 
   import {
-      applyAffineTransformation,
-      calculateAffineTransformation,
+    applyAffineTransformation,
+    calculateAffineTransformation,
   } from "../scripts/affineTransformation";
   import {
-      LEFT_EYE_CORNER,
-      LEFT_IRIS_CENTER,
-      NOSE_TIP,
-      RIGHT_EYE_CORNER,
-      RIGHT_IRIS_CENTER,
-      getLandmarks,
-      getNormalizedIrisPosition,
+    LEFT_EYE_CORNER,
+    LEFT_IRIS_CENTER,
+    NOSE_TIP,
+    RIGHT_EYE_CORNER,
+    RIGHT_IRIS_CENTER,
+    getLandmarks,
+    getNormalizedIrisPosition,
   } from "../scripts/utils";
 
   import type { Coordinates } from "../scripts/affineTransformation";
@@ -65,16 +65,16 @@
 
   let sensitivity: number | null = null;
 
-   export const shouldShowGraph = writable(false);
+  export const shouldShowGraph = writable(false);
 
-   let affineTransformEnabled = writable(false);
+  let affineTransformEnabled = writable(false);
 
-   // Log the settings whenever they change
-   userSettings.subscribe((settings: any) => {
-       console.log("User settings:", settings);
-       sensitivity = settings.sensitivity;
-       affineTransformEnabled.set(settings.affine ?? false);
-     });
+  // Log the settings whenever they change
+  userSettings.subscribe((settings: any) => {
+    console.log("User settings:", settings);
+    sensitivity = settings.sensitivity;
+    affineTransformEnabled.set(settings.affine ?? false);
+  });
 
   function handleWebSocketMessage(data: any) {
     if (
@@ -257,7 +257,7 @@
             x: smoothedNormX,
             y: smoothedNormY,
             time: timestampInSeconds,
-            sensitivity: sensitivity ?? 1.0
+            sensitivity: sensitivity ?? 1.0,
           };
 
           if (ws) {
@@ -404,7 +404,9 @@
         offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
       }
     }
-    // window.location.href = "/dashboard";
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 1000);
   }
 </script>
 
@@ -462,47 +464,46 @@
   <!-- Session Name Modal -->
   <!-- Session Name Modal -->
   {#if $isModalVisible}
-  <div
-    class="fixed inset-0 flex justify-center items-center z-50"
-    style="background-color: black !important;"
-  >
     <div
-      class="p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
-      style="background-color: #000000;"
+      class="fixed inset-0 flex justify-center items-center z-50"
+      style="background-color: black !important;"
     >
-      <h2
-        class="font-mono font-semibold text-center text-2xl text-primary mb-4"
+      <div
+        class="p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+        style="background-color: #000000;"
       >
-        Enter Session Name
-      </h2>
-      <p class="text-center text-base-content mb-4">
-        Please name your session to save the results.
-      </p>
-      <input
-        type="text"
-        bind:value={sessionName}
-        class="border border-accent p-2 rounded-md w-full mb-4
+        <h2
+          class="font-mono font-semibold text-center text-2xl text-primary mb-4"
+        >
+          Enter Session Name
+        </h2>
+        <p class="text-center text-base-content mb-4">
+          Please name your session to save the results.
+        </p>
+        <input
+          type="text"
+          bind:value={sessionName}
+          class="border border-accent p-2 rounded-md w-full mb-4
                bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
-        placeholder="Session Name"
-      />
-      <div class="flex justify-between">
-        <button
-          on:click={() => isModalVisible.set(false)}
-          class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
-        >
-          Cancel
-        </button>
-        <button
-          on:click={endSession}
-          class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
-        >
-          Submit
-        </button>
+          placeholder="Session Name"
+        />
+        <div class="flex justify-between">
+          <button
+            on:click={() => isModalVisible.set(false)}
+            class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
+          >
+            Cancel
+          </button>
+          <button
+            on:click={endSession}
+            class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
+          >
+            Submit
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-{/if}
-
+  {/if}
 </div>
 
 <style>
