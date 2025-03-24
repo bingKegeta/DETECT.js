@@ -17,6 +17,7 @@ export async function createSession(sessionData: {
   acc_max: number;
 }) {
   try {
+    await tick();
     const userId = sessionStorage.getItem("userId");
 
     if (!userId) {
