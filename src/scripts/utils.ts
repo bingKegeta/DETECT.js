@@ -1,3 +1,4 @@
+
 export const LEFT_IRIS_CENTER = 468;
 export const LEFT_EYE_CORNER = 33;
 export const RIGHT_EYE_CORNER = 263;
@@ -46,8 +47,7 @@ export const getLandmarks = (landmarks: any[], indices: number[]): any[] => {
 export const getNormalizedIrisPosition = (
   faceLandmarks: any[],
   imgW: number,
-  imgH: number,
-  timestamp: number
+  imgH: number
 ): IrisPosition => {
   const leftIris = faceLandmarks[LEFT_IRIS_CENTER];
   const rightIris = faceLandmarks[RIGHT_IRIS_CENTER];
@@ -70,6 +70,7 @@ export const getNormalizedIrisPosition = (
 
   const normX = relX / interOcularDistance;
   const normY = relY / interOcularDistance;
+  const timestamp = performance.now();
 
   return { normX, normY, timestamp };
 };
@@ -103,16 +104,16 @@ export function parseSetCookie(setCookieHeader: string) {
   // Default cookie settings
   let path = "/";
   let httpOnly = false;
-  // let secure = false;
+  let secure = true;
   let expires: Date | undefined;
-  // let sameSite: "none" | "lax" | "strict" | undefined;
+  let sameSite: "none" | "lax" | "strict" | undefined;
 
   // Now parse the remaining attributes
   for (const attr of parts) {
     const trimmed = attr.trim().toLowerCase();
     if (trimmed === "httponly") {
       httpOnly = true;
-      // secure = false; //! Change to true when prod
+      secure = true; //! Change to true when prod
     } else if (trimmed.startsWith("expires=")) {
       const dateStr = trimmed.substring("expires=".length).trim();
       const parsedDate = new Date(dateStr);
@@ -123,12 +124,11 @@ export function parseSetCookie(setCookieHeader: string) {
       path = attr.split("=")[1]?.trim() || "/";
     } else if (trimmed.startsWith("samesite=")) {
       const samesiteVal = attr.split("=")[1]?.trim().toLowerCase();
-      // if (samesiteVal === "none") sameSite = "none";
-      // else if (samesiteVal === "lax") sameSite = "lax";
-      // else if (samesiteVal === "strict") sameSite = "strict";
-      // sameSite = "lax";
+      if (samesiteVal === "none") sameSite = "none";
+      else if (samesiteVal === "lax") sameSite = "lax";
+      else if (samesiteVal === "strict") sameSite = "strict";
     }
   }
 
-  return { name, value, path, httpOnly, expires };
+  return { name, value, path, httpOnly, secure, sameSite, expires };
 }
