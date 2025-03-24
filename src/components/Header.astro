@@ -247,10 +247,6 @@ import Modal from "./Modal.tsx";
         });
 
         logoutYes.addEventListener("click", async () => {
-          const formData = new FormData();
-          const { error, data } = await actions.logout(formData);
-          console.log(error);
-          console.log(data?.message);
 
           if (sessionStorage.getItem("userId")) {
             sessionStorage.removeItem("userId");
@@ -258,11 +254,7 @@ import Modal from "./Modal.tsx";
           if (sessionStorage.getItem("clickedID")) {
             sessionStorage.removeItem("clickedID");
           }
-          if (!error && data.success) {
-            window.location.href = "/";
-          } else {
-            console.error("Logout failed:", error || data.message);
-          }
+          window.location.href = "/";
         });
       }
     });
