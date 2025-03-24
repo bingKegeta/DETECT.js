@@ -1,5 +1,6 @@
 import { writable } from "svelte/store";
 import { get } from 'svelte/store';
+import { tick } from "svelte";
 
 // Writable store for storing AnalysisData
 export const analysisData = writable<Analysis[]>([]);
@@ -58,7 +59,7 @@ export class WebSocketConnection {
       this.ws?.close(); // Reset connection on error
     };
 
-    this.ws.onmessage = (event) => {
+    this.ws.onmessage = async (event) => {
       console.log("WebSocket message received:", event.data);
       try {
         const data = JSON.parse(event.data);
@@ -76,6 +77,8 @@ export class WebSocketConnection {
 
         // Push the new Analysis object to analysisData store
         analysisData.update((currentData) => [...currentData, analysisEntry]);
+
+        await tick();  // Wait for Svelte's reactivity to process changes
 
         console.log("Analysis Data Store:", get(analysisData));
 
