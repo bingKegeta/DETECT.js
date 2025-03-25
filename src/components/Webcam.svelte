@@ -106,6 +106,7 @@
 
   // Start webcam capture
   function startCapture() {
+    starttime = performance.now();
     if (!camera && faceMesh && videoEl) {
       camera = new Camera(videoEl, {
         onFrame: async () => {
@@ -184,7 +185,6 @@
   }
 
   onMount(() => {
-    starttime = performance.now();
     // Fetch user settings on component mount
     fetchUserSettings();
 
