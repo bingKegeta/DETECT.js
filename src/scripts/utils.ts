@@ -1,3 +1,4 @@
+
 export const LEFT_IRIS_CENTER = 468;
 export const LEFT_EYE_CORNER = 33;
 export const RIGHT_EYE_CORNER = 263;
@@ -46,7 +47,8 @@ export const getLandmarks = (landmarks: any[], indices: number[]): any[] => {
 export const getNormalizedIrisPosition = (
   faceLandmarks: any[],
   imgW: number,
-  imgH: number
+  imgH: number,
+  timestamp: number
 ): IrisPosition => {
   const leftIris = faceLandmarks[LEFT_IRIS_CENTER];
   const rightIris = faceLandmarks[RIGHT_IRIS_CENTER];
@@ -69,7 +71,6 @@ export const getNormalizedIrisPosition = (
 
   const normX = relX / interOcularDistance;
   const normY = relY / interOcularDistance;
-  const timestamp = performance.now();
 
   return { normX, normY, timestamp };
 };
