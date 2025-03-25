@@ -196,17 +196,17 @@
     <input
       type="range"
       class="w-full appearance-none h-2 bg-gray-300 rounded-lg slider-thumb"
-      min="0.75"
-      max="1.25"
+      min="0.50"
+      max="2.00"
       step="0.01"
       bind:value={$userSettings.sensitivity}
       on:input={(e) => updateSensitivity(e.target.value)}
       id="sensitivity-slider"
     />
     <div class="flex justify-between text-xs text-gray-400 mt-1">
-      <span>0.75</span>
+      <span>0.50</span>
       <span class="text-white font-bold">{$userSettings.sensitivity}</span>
-      <span>1.25</span>
+      <span>2.00</span>
     </div>
   </div>
 </label>
