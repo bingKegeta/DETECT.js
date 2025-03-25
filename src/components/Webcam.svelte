@@ -1,4 +1,3 @@
-
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import { writable } from "svelte/store";
@@ -6,8 +5,8 @@
   import { fetchUserSettings, userSettings } from "../scripts/settings";
 
   import {
-    applyAffineTransformation,
-    calculateAffineTransformation,
+      applyAffineTransformation,
+      calculateAffineTransformation,
   } from "../scripts/affineTransformation";
 
   import { Camera } from "@mediapipe/camera_utils";
@@ -17,13 +16,13 @@
   import { applySmoothing } from "../scripts/smoothing";
 
   import {
-    LEFT_EYE_CORNER,
-    LEFT_IRIS_CENTER,
-    NOSE_TIP,
-    RIGHT_EYE_CORNER,
-    RIGHT_IRIS_CENTER,
-    getLandmarks,
-    getNormalizedIrisPosition,
+      LEFT_EYE_CORNER,
+      LEFT_IRIS_CENTER,
+      NOSE_TIP,
+      RIGHT_EYE_CORNER,
+      RIGHT_IRIS_CENTER,
+      getLandmarks,
+      getNormalizedIrisPosition,
   } from "../scripts/utils";
 
   import { ProbabilityGraph } from "../scripts/graph";
@@ -65,6 +64,8 @@
   export const shouldShowGraph = writable(false);
 
   let affineTransformEnabled = writable(false);
+
+  let timestamp = 0;
 
   // Log the settings whenever they change
   userSettings.subscribe((settings: any) => {
@@ -150,50 +151,36 @@
   }
 
   // Finalize the session creation
-  async function endSession() {
-    try {
-        // Stop the camera and clear the canvas if they exist
-        if (camera && canvasEl) {
-            camera.stop();
-            camera = null;
-            const canvasCtx = canvasEl.getContext("2d");
-            if (canvasCtx) {
-                canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-            }
-        }
-
-        // Close WebSocket if it exists
-        if (ws) {
-            ws.close();
-            ws = null;
-            console.log("WebSocket closed before session creation.");
-        }
-
-        // Create session if it hasn't been created already
-        if (!sessionCreated) {
-            const sessionData = {
-                name: sessionName || "Session",
-                start_time: startTime,
-                end_time: new Date().toISOString(),
-                var_min: variance ?? 0,
-                var_max: variance ?? 0,
-                acc_min: acceleration ?? 0,
-                acc_max: acceleration ?? 0,
-            };
-
-            // Await the session creation process (assuming createSession is an async function)
-            await createSession(sessionData);
-            sessionCreated = true;
-        }
-        previousXValues = [];
-        previousYValues = [];
-
-        // Redirect to dashboard
-        window.location.href = "/dashboard";
-    } catch (error) {
-        console.error("Error during session end:", error);
+  function endSession() {
+    if (camera && canvasEl) {
+      camera.stop();
+      camera = null;
+      const canvasCtx = canvasEl.getContext("2d");
+      if (canvasCtx) {
+        canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      }
     }
-}
+
+    if (!sessionCreated) {
+      const sessionData = {
+        name: sessionName || "Session",
+        start_time: startTime,
+        end_time: new Date().toISOString(),
+        var_min: variance ?? 0,
+        var_max: variance ?? 0,
+        acc_min: acceleration ?? 0,
+        acc_max: acceleration ?? 0,
+      };
+      createSession(sessionData);
+      sessionCreated = true;
+
+    }
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 1000);
+
+    //console.log("here");
+  }
 
   onMount(() => {
     // Fetch user settings on component mount
@@ -251,11 +238,14 @@
             lineWidth: 1,
           });
 
+          timestamp = performance.now();
+
           // Smoothing iris positions
-          const { normX, normY, timestamp } = getNormalizedIrisPosition(
+          const { normX, normY } = getNormalizedIrisPosition(
             landmarks,
             canvasEl.width,
             canvasEl.height,
+            timestamp
           );
 
           // Apply smoothing to the iris position
@@ -381,43 +371,43 @@
 
   <!-- Modal for session name -->
   {#if $isModalVisible}
-  <div
-    class="fixed inset-0 flex justify-center items-center z-50"
-    style="background-color: black !important;"  
-  >
     <div
-      class="p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
-      style="background-color: #000000;" 
+      class="fixed inset-0 flex justify-center items-center z-50"
+      style="background-color: black !important;"
     >
-      <h2
-        class="font-mono font-semibold text-center text-2xl text-primary mb-4"
+      <div
+        class="p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+        style="background-color: #000000;"
       >
-        Save Session?
-      </h2>
+        <h2
+          class="font-mono font-semibold text-center text-2xl text-primary mb-4"
+        >
+          Save Session?
+        </h2>
 
-      <input
-        type="text"
-        bind:value={sessionName}
-        class="border border-accent p-2 rounded-md w-full mb-4
+        <input
+          type="text"
+          bind:value={sessionName}
+          class="border border-accent p-2 rounded-md w-full mb-4
                bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
-        placeholder="Session Name"
-      />
+          placeholder="Session Name"
+        />
 
-      <div class="flex justify-between">
-        <button
-          on:click={closeModal}
-          class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
-        >
-          Cancel
-        </button>
-        <button
-          on:click={onSubmitSessionName}
-          class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
-        >
-          Save
-        </button>
+        <div class="flex justify-between">
+          <button
+            on:click={closeModal}
+            class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
+          >
+            Cancel
+          </button>
+          <button
+            on:click={onSubmitSessionName}
+            class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-{/if}
+  {/if}
 </div>
