@@ -126,7 +126,6 @@
   }
 
   onMount(() => {
-    starttime = performance.now();
     // Initialize the probability graph
     // const graphCanvas = document.createElement("canvas");
     // graphCanvas.width = canvasWidth;
@@ -341,6 +340,7 @@
     const input = event.target as HTMLInputElement;
     const file = input.files ? input.files[0] : null;
     if (file) {
+      starttime = performance.now();
       const url = URL.createObjectURL(file);
       videoElement.src = url;
       // Start countdown once metadata is available (duration etc.)
@@ -358,35 +358,7 @@
       };
     }
   }
-
-  // Control handlers
-  function handlePlay() {
-    if (videoLoaded && videoElement.paused) {
-      isPlaying = true;
-      isProcessing = true;
-      videoElement.play();
-      processVideoFrame();
-    }
-  }
-
-  function handlePause() {
-    if (videoLoaded && !videoElement.paused) {
-      isPlaying = false;
-      // Immediately stop processing and cancel the next frame.
-      isProcessing = false;
-      videoElement.pause();
-      cancelAnimationFrame(animationFrameId);
-    }
-  }
-
-  function handleStop() {
-    if (!sessionCreated) {
-      isModalVisible.set(true);
-    } else {
-      endSession();
-    }
-  }
-
+  
   async function endSession() {
     try {
         // Close WebSocket if it exists
