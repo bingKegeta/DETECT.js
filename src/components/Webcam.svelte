@@ -65,6 +65,9 @@
 
   let affineTransformEnabled = writable(false);
 
+  let starttime = 0;
+  let timestamp = 0;
+
   // Log the settings whenever they change
   userSettings.subscribe((settings: any) => {
     console.log("User settings:", settings);
@@ -103,6 +106,7 @@
 
   // Start webcam capture
   function startCapture() {
+    starttime = performance.now();
     if (!camera && faceMesh && videoEl) {
       camera = new Camera(videoEl, {
         onFrame: async () => {
@@ -236,11 +240,14 @@
             lineWidth: 1,
           });
 
+          timestamp = performance.now() - starttime;
+
           // Smoothing iris positions
-          const { normX, normY, timestamp } = getNormalizedIrisPosition(
+          const { normX, normY } = getNormalizedIrisPosition(
             landmarks,
             canvasEl.width,
             canvasEl.height,
+            timestamp
           );
 
           // Apply smoothing to the iris position
