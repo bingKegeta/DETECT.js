@@ -70,6 +70,7 @@
 
    let affineTransformEnabled = writable(false);
 
+   let starttime = 0;
    let timestamp = 0;
 
    // Log the settings whenever they change
@@ -125,6 +126,7 @@
   }
 
   onMount(() => {
+    starttime = performance.now();
     // Initialize the probability graph
     // const graphCanvas = document.createElement("canvas");
     // graphCanvas.width = canvasWidth;
@@ -217,7 +219,7 @@
             });
           }
 
-          timestamp = performance.now();
+          timestamp = performance.now() - starttime;
 
           // Smoothing iris positions
           const { normX, normY } = getNormalizedIrisPosition(
