@@ -139,30 +139,9 @@
     >
     </div>
   </div>
-  <div class="my-5">
-    <button
-      id="google-login-btn"
-      class="w-full text-center py-3 my-3 border flex space-x-2 items-center justify-center bg-neutral rounded-lg text-neutral-content
-      hover:border-info hover:shadow transition duration-150"
-    >
-      <img
-        src="https://www.svgrepo.com/show/355037/google.svg"
-        class="w-6 h-6"
-        alt=""
-      />
-      <span>Login with Google</span>
-    </button>
-  </div>
 </div>
 
 <script>
-  const googleLoginBtn = document.getElementById("google-login-btn");
-  if (googleLoginBtn) {
-    googleLoginBtn.addEventListener("click", () => {
-      window.location.href = `${import.meta.env.PUBLIC_SERVER_ADDRESS}/auth/google`;
-    });
-  }
-
   // Helper function for email validation
   function isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
