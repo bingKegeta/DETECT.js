@@ -108,6 +108,7 @@
       closeExistingWebSocket(); // Close any previous connection
 
       ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+      console.log("WebSocket initialized:", WEBSOCKET_URL);
       ws.start();
 
       // Store the reference in sessionStorage
