@@ -36,7 +36,10 @@
   let faceMesh: FaceMesh | null = null;
   let ws: WebSocketConnection | null = null;
 
-  const userId = sessionStorage.getItem("userId");
+  let userId: string | null = null;
+  if (typeof window !== "undefined") {
+    userId = sessionStorage.getItem("userId");
+  }
   const WEBSOCKET_URL = `wss://boofoo.store/ws?user_id=${encodeURIComponent(userId || '')}`;
 
   let variance: number | null = null;
@@ -90,29 +93,33 @@
 
   // Function to close any existing WebSocket connection before opening a new one
   function closeExistingWebSocket() {
+    if (typeof window !== "undefined") {
       const existingWs = sessionStorage.getItem("activeWebSocket");
       if (existingWs) {
-          try {
-              const wsInstance = JSON.parse(existingWs);
-              if (wsInstance && wsInstance.readyState === WebSocket.OPEN) {
-                  wsInstance.close();
-              }
-          } catch (error) {
-              console.error("Error closing existing WebSocket:", error);
+        try {
+          const wsInstance = JSON.parse(existingWs);
+          if (wsInstance && wsInstance.readyState === WebSocket.OPEN) {
+            wsInstance.close();
           }
+        } catch (error) {
+          console.error("Error closing existing WebSocket:", error);
+        }
       }
+    }
   }
 
   // Function to initialize WebSocket
   function initializeWebSocket() {
-      closeExistingWebSocket(); // Close any previous connection
+    closeExistingWebSocket(); // Close any previous connection
 
-      ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
-      console.log("WebSocket initialized:", WEBSOCKET_URL);
-      ws.start();
+    ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+    console.log("WebSocket initialized:", WEBSOCKET_URL);
+    ws.start();
 
-      // Store the reference in sessionStorage
+    // Store the reference in sessionStorage if client-side
+    if (typeof window !== "undefined") {
       sessionStorage.setItem("activeWebSocket", JSON.stringify(ws));
+    }
   }
 
   // WebSocket message handler
@@ -212,6 +219,7 @@
   }
 
   onMount(() => {
+    
     // Fetch user settings on component mount
     fetchUserSettings();
 
@@ -337,7 +345,9 @@
     }
     if (ws) {
         ws.close();
-        sessionStorage.removeItem("activeWebSocket"); // Remove reference
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("activeWebSocket"); // Remove reference
+        }
     }
   });
 </script>
