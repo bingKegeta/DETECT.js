@@ -43,7 +43,8 @@
   const canvasWidth = 640;
   const canvasHeight = 480;
 
-  const WEBSOCKET_URL = import.meta.env.PUBLIC_WS_PORT;
+  const userId = sessionStorage.getItem("userId");
+  const WEBSOCKET_URL = `wss://boofoo.store/ws?user_id=${encodeURIComponent(userId || '')}`;
 
   let variance: number | null = null;
   let acceleration: number | null = null;
@@ -88,16 +89,14 @@
     ) {
       probability = data.probability;
       console.log("Probability:", probability);
-
-      // Update the probability graph with the new probability value
-      // if (probability !== null) {
-      //   probabilityGraph.updateProbability(probability);
-      // }
     }
   }
 
   function startWebSocket() {
-    if (ws) ws.close(); // Ensure no duplicate connections
+    if (ws) {
+        ws.close();// Ensure previous connection is closed
+        ws = null;
+    }
 
     ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
     ws.start();
@@ -304,6 +303,7 @@
     }
     if (ws) {
       ws.close();
+      ws = null;
     }
   });
 
