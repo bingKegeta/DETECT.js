@@ -43,7 +43,10 @@
   const canvasWidth = 640;
   const canvasHeight = 480;
 
-  const userId = sessionStorage.getItem("userId");
+  let userId: string | null = null;
+  if (typeof window !== "undefined") {
+    userId = sessionStorage.getItem("userId");
+  }
   const WEBSOCKET_URL = `wss://boofoo.store/ws?user_id=${encodeURIComponent(userId || '')}`;
 
   let variance: number | null = null;
