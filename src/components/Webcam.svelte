@@ -36,7 +36,9 @@
   let faceMesh: FaceMesh | null = null;
   let ws: WebSocketConnection | null = null;
 
-  const WEBSOCKET_URL = import.meta.env.PUBLIC_WS_PORT;
+  const userId = sessionStorage.getItem("userId");
+  const WEBSOCKET_URL = `wss://asdqwe.online/ws?user_id=${encodeURIComponent(userId || '')}`;
+
   let variance: number | null = null;
   let acceleration: number | null = null;
   let probability: number | null = null;
@@ -84,6 +86,32 @@
     } else {
       probabilityGraph = null;
     }
+  }
+
+  // Function to close any existing WebSocket connection before opening a new one
+  function closeExistingWebSocket() {
+      const existingWs = sessionStorage.getItem("activeWebSocket");
+      if (existingWs) {
+          try {
+              const wsInstance = JSON.parse(existingWs);
+              if (wsInstance && wsInstance.readyState === WebSocket.OPEN) {
+                  wsInstance.close();
+              }
+          } catch (error) {
+              console.error("Error closing existing WebSocket:", error);
+          }
+      }
+  }
+
+  // Function to initialize WebSocket
+  function initializeWebSocket() {
+      closeExistingWebSocket(); // Close any previous connection
+
+      ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+      ws.start();
+
+      // Store the reference in sessionStorage
+      sessionStorage.setItem("activeWebSocket", JSON.stringify(ws));
   }
 
   // WebSocket message handler
@@ -180,8 +208,6 @@
     setTimeout(() => {
       window.location.href = "/dashboard";
     }, 1000);
-
-    //console.log("here");
   }
 
   onMount(() => {
@@ -189,8 +215,7 @@
     fetchUserSettings();
 
     // Initialize WebSocket
-    ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
-    ws.start();
+    initializeWebSocket();
 
     // Initialize FaceMesh
     faceMesh = new FaceMesh({
@@ -310,7 +335,8 @@
       camera.stop();
     }
     if (ws) {
-      ws.close();
+        ws.close();
+        sessionStorage.removeItem("activeWebSocket"); // Remove reference
     }
   });
 </script>
