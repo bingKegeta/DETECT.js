@@ -99,6 +99,7 @@
     }
 
     ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+    console.log("WebSocket initialized:", WEBSOCKET_URL);
     ws.start();
   }
 
