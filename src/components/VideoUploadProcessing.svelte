@@ -91,7 +91,20 @@
    });
 
   
-  if (typeof window !== "undefined" && get(minMaxEnabled)) {
+  if (typeof window !== "undefined") {
+    if(get(minMaxEnabled)) {
+      // Get the values from sessionStorage if minMaxEnabled is true
+      const storedVariance = sessionStorage.getItem("variance");
+      const storedAcceleration = sessionStorage.getItem("acceleration");
+
+      if (storedVariance) {
+        varMaxValue = parseFloat(storedVariance);
+      }
+      if (storedAcceleration) {
+        accMaxValue = parseFloat(storedAcceleration);
+      }
+    }
+    
     const variance = sessionStorage.getItem("variance");
     const acceleration = sessionStorage.getItem("acceleration");
 
