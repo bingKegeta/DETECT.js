@@ -86,21 +86,18 @@
   });
 
   // Writable stores for tracking the largest variance and acceleration
-  export const varMax = writable<number>(
-    get(minMaxEnabled) 
-      ? (sessionStorage.getItem("variance") 
-          ? parseFloat(sessionStorage.getItem("variance")!) 
-          : 0.0013) // Default value if not set
-      : 0.0013 // Default if minMaxEnabled is false
+  export const varMax = writable<number | null>(
+  typeof window !== 'undefined' && sessionStorage.getItem("variance")
+    ? parseFloat(sessionStorage.getItem("variance")!)
+    : 0.0013  // Default value if not set or not in browser
   );
 
-  export const accMax = writable<number>(
-    get(minMaxEnabled)
-      ? (sessionStorage.getItem("acceleration") 
-          ? parseFloat(sessionStorage.getItem("acceleration")!) 
-          : 10.0) // Default value if not set
-      : 10.0 // Default if minMaxEnabled is false
+  export const accMax = writable<number | null>(
+    typeof window !== 'undefined' && sessionStorage.getItem("acceleration")
+      ? parseFloat(sessionStorage.getItem("acceleration")!)
+      : 10.0  // Default value if not set or not in browser
   );
+
 
   $: {
     $shouldShowGraph;
