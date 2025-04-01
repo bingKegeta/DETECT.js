@@ -47,7 +47,7 @@
   if (typeof window !== "undefined") {
     userId = sessionStorage.getItem("userId");
   }
-  const WEBSOCKET_URL = `wss://asdqwe.online/ws?user_id=${encodeURIComponent(userId || '')}`;
+  const WEBSOCKET_URL = `wss://boofoo.store/ws?user_id=${encodeURIComponent(userId || '')}`;
 
   let variance: number | null = null;
   let acceleration: number | null = null;
