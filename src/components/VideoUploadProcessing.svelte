@@ -79,27 +79,33 @@
    let starttime = 0;
    let timestamp = 0;
 
+   let varMaxValue: number | null = 0.0013;
+   let accMaxValue: number | null = 10.0;
+
    // Log the settings whenever they change
    userSettings.subscribe((settings: any) => {
        console.log("User settings:", settings);
        sensitivity = settings.sensitivity;
        affineTransformEnabled.set(settings.affine ?? false);
        minMaxEnabled.set(settings.min_max ?? false);
-     });
+   });
 
   
-  // Writable stores for tracking the largest variance and acceleration
-  export const varMax = writable<number | null>(
-  typeof window !== 'undefined' && sessionStorage.getItem("variance")
-    ? parseFloat(sessionStorage.getItem("variance")!)
-    : 0.0013  // Default value if not set or not in browser
-  );
+  if (typeof window !== "undefined" && get(minMaxEnabled)) {
+    const variance = sessionStorage.getItem("variance");
+    const acceleration = sessionStorage.getItem("acceleration");
 
-  export const accMax = writable<number | null>(
-    typeof window !== 'undefined' && sessionStorage.getItem("acceleration")
-      ? parseFloat(sessionStorage.getItem("acceleration")!)
-      : 10.0  // Default value if not set or not in browser
-  );
+    if (variance) {
+      varMaxValue = parseFloat(variance);
+    }
+    if (acceleration) {
+      accMaxValue = parseFloat(acceleration);
+    }
+  }
+
+  // Create writable stores with the final values
+  export const varMax = writable<number | null>(varMaxValue);
+  export const accMax = writable<number | null>(accMaxValue);
 
   function handleWebSocketMessage(data: any) {
     if (
