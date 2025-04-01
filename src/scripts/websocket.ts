@@ -1,27 +1,38 @@
 import { writable } from "svelte/store";
-import { get } from 'svelte/store';
+import { get } from "svelte/store";
+
+// Writable stores for tracking the largest variance and acceleration
+export const variance = writable<number | null>(
+  typeof window !== "undefined" && sessionStorage.getItem("variance")
+    ? parseFloat(sessionStorage.getItem("variance")!)
+    : 0.0013
+);
+
+export const acceleration = writable<number | null>(
+  typeof window !== "undefined" && sessionStorage.getItem("acceleration")
+    ? parseFloat(sessionStorage.getItem("acceleration")!)
+    : 10.0
+);
+
 
 // Writable store for storing AnalysisData
 export const analysisData = writable<Analysis[]>([]);
 
 // Define the Analysis type
 type Analysis = {
-  session_id: number;  // Session ID (to be used when creating a session)
-  timestamp: number;   // Timestamp when the data was captured (in seconds)
-  x: number;           // X coordinate
-  y: number;           // Y coordinate
-  prob: number;        // Probability value
+  session_id: number;  
+  timestamp: number;   
+  x: number;           
+  y: number;           
+  prob: number;        
 };
 
 export const wsStore = writable<WebSocket | null>(null);
-export const variance = writable<number | null>(null);
-export const acceleration = writable<number | null>(null);
 
 let timestamp = 0;
 let x_coord = 0;
 let y_coord = 0;
 let prob = 0;
-
 
 // Initialize WebSocket connection with reconnection logic
 export class WebSocketConnection {
@@ -47,6 +58,11 @@ export class WebSocketConnection {
 
     this.ws.onclose = (event) => {
       console.log("❌ WebSocket disconnected", event);
+
+      // Save variance and acceleration to sessionStorage on close
+      sessionStorage.setItem("variance", get(variance)?.toString() || "0.0013");
+      sessionStorage.setItem("acceleration", get(acceleration)?.toString() || "10.0");
+
       setTimeout(() => {
         console.log("🔄 Reconnecting WebSocket...");
         this.start();
@@ -63,8 +79,19 @@ export class WebSocketConnection {
       try {
         const data = JSON.parse(event.data);
 
-        // Extract relevant data
+        const newVariance = data.variance;
+        const newAcceleration = data.acceleration;
         prob = data.probability;
+
+        // Update variance only if new value is higher
+        variance.update((currentVariance) =>
+          currentVariance === null || newVariance > currentVariance ? newVariance : currentVariance
+        );
+
+        // Update acceleration only if new value is higher
+        acceleration.update((currentAcceleration) =>
+          currentAcceleration === null || newAcceleration > currentAcceleration ? newAcceleration : currentAcceleration
+        );
 
         const analysisEntry: Analysis = {
           session_id: 0,
@@ -77,11 +104,12 @@ export class WebSocketConnection {
         // Push the new Analysis object to analysisData store
         analysisData.update((currentData) => [...currentData, analysisEntry]);
 
+        console.log("Updated Variance:", get(variance));
+        console.log("Updated Acceleration:", get(acceleration));
         console.log("Analysis Data Store:", get(analysisData));
 
         // Call the message callback, if needed
         this.onMessageCallback(data);
-
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
       }
@@ -89,10 +117,8 @@ export class WebSocketConnection {
   }
 
   public sendMessage(message: object) {
-    // Assuming message includes normX, normY, and timestampInSeconds
     if (message) {
       const { x, y, time } = message as { x: number; y: number; time: number; sensitivity: number };
-      // Store values in respective writable variables
       x_coord = x;
       y_coord = y;
       timestamp = time;
@@ -106,6 +132,10 @@ export class WebSocketConnection {
 
   public close() {
     if (this.ws) {
+      // Save values before closing
+      sessionStorage.setItem("variance", get(variance)?.toString() || "0.0013");
+      sessionStorage.setItem("acceleration", get(acceleration)?.toString() || "10.0");
+
       this.ws.close();
     }
   }
