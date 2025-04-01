@@ -88,18 +88,20 @@
     minMaxEnabled.set(settings.min_max ?? false);
   });
 
-  if (typeof window !== "undefined" && get(minMaxEnabled)) {
-    const variance = sessionStorage.getItem("variance");
-    const acceleration = sessionStorage.getItem("acceleration");
+  if (typeof window !== "undefined") {
+    if(get(minMaxEnabled)) {
+      // Get the values from sessionStorage if minMaxEnabled is true
+      const storedVariance = sessionStorage.getItem("variance");
+      const storedAcceleration = sessionStorage.getItem("acceleration");
 
-    if (variance) {
-      varMaxValue = parseFloat(variance);
-    }
-    if (acceleration) {
-      accMaxValue = parseFloat(acceleration);
+      if (storedVariance) {
+        varMaxValue = parseFloat(storedVariance);
+      }
+      if (storedAcceleration) {
+        accMaxValue = parseFloat(storedAcceleration);
+      }
     }
   }
-
   // Create writable stores with the final values
   export const varMax = writable<number | null>(varMaxValue);
   export const accMax = writable<number | null>(accMaxValue);
