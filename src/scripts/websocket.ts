@@ -3,16 +3,17 @@ import { get } from "svelte/store";
 
 // Writable stores for tracking the largest variance and acceleration
 export const variance = writable<number | null>(
-  sessionStorage.getItem("variance") 
+  typeof window !== "undefined" && sessionStorage.getItem("variance")
     ? parseFloat(sessionStorage.getItem("variance")!)
-    : 0.0013  // Default value if not set
+    : 0.0013
 );
 
 export const acceleration = writable<number | null>(
-  sessionStorage.getItem("acceleration")
+  typeof window !== "undefined" && sessionStorage.getItem("acceleration")
     ? parseFloat(sessionStorage.getItem("acceleration")!)
-    : 10.0  // Default value if not set
+    : 10.0
 );
+
 
 // Writable store for storing AnalysisData
 export const analysisData = writable<Analysis[]>([]);
