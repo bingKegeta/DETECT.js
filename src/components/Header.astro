@@ -259,7 +259,7 @@ import Modal from "./Modal.tsx";
             sessionStorage.removeItem("clickedID");
           }
           if (!error && data.success) {
-            window.location.href = "/";
+            window.location.href = "/login";
           } else {
             console.error("Logout failed:", error || data.message);
           }
