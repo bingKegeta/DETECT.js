@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { writable } from "svelte/store";
+  import { writable, get } from "svelte/store";
   import { createSession } from "../scripts/session";
   import { fetchUserSettings, userSettings } from "../scripts/settings";
 
@@ -40,10 +40,11 @@
   if (typeof window !== "undefined") {
     userId = sessionStorage.getItem("userId");
   }
-  const WEBSOCKET_URL = `wss://boofoo.store/ws?user_id=${encodeURIComponent(userId || '')}`;
+  const WEBSOCKET_URL = `wss://asdqwe.online/ws?user_id=${encodeURIComponent(userId || '')}`;
 
-  let variance: number | null = null;
-  let acceleration: number | null = null;
+  let variance: number = 0.0;
+  let acceleration: number = 0.0;
+
   let probability: number | null = null;
   let startTime = new Date().toISOString(); // Capture the start time
 
@@ -70,6 +71,8 @@
 
   let affineTransformEnabled = writable(false);
 
+  export const minMaxEnabled = writable<boolean>(false);
+
   let starttime = 0;
   let timestamp = 0;
 
@@ -79,7 +82,25 @@
     sensitivity = settings.sensitivity;
     shouldShowGraph.set(settings.plotting ?? false);
     affineTransformEnabled.set(settings.affine ?? false);
+    minMaxEnabled.set(settings.min_max ?? false);
   });
+
+  // Writable stores for tracking the largest variance and acceleration
+  export const varMax = writable<number>(
+    get(minMaxEnabled) 
+      ? (sessionStorage.getItem("variance") 
+          ? parseFloat(sessionStorage.getItem("variance")!) 
+          : 0.0013) // Default value if not set
+      : 0.0013 // Default if minMaxEnabled is false
+  );
+
+  export const accMax = writable<number>(
+    get(minMaxEnabled)
+      ? (sessionStorage.getItem("acceleration") 
+          ? parseFloat(sessionStorage.getItem("acceleration")!) 
+          : 10.0) // Default value if not set
+      : 10.0 // Default if minMaxEnabled is false
+  );
 
   $: {
     $shouldShowGraph;
@@ -320,6 +341,8 @@
             y: smoothedNormY,
             time: timestampInSeconds,
             sensitivity: sensitivity ?? 1.0,
+            acceleration: get(accMax),
+            variance: get(varMax)
           };
 
           if (ws) {
