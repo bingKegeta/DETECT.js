@@ -3,7 +3,7 @@
   import { drawLandmarks } from "@mediapipe/drawing_utils";
   import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { onDestroy, onMount } from "svelte";
-  import { writable } from "svelte/store";
+  import { writable, get } from "svelte/store";
   import { createSession } from "../scripts/session";
   import { userSettings } from '../scripts/settings';
 
@@ -47,7 +47,7 @@
   if (typeof window !== "undefined") {
     userId = sessionStorage.getItem("userId");
   }
-  const WEBSOCKET_URL = `wss://boofoo.store/ws?user_id=${encodeURIComponent(userId || '')}`;
+  const WEBSOCKET_URL = `wss://asdqwe.online/ws?user_id=${encodeURIComponent(userId || '')}`;
 
   let variance: number | null = null;
   let acceleration: number | null = null;
@@ -72,6 +72,8 @@
 
    export const shouldShowGraph = writable(false);
 
+   export const minMaxEnabled = writable<boolean>(false);
+
    let affineTransformEnabled = writable(false);
 
    let starttime = 0;
@@ -82,7 +84,25 @@
        console.log("User settings:", settings);
        sensitivity = settings.sensitivity;
        affineTransformEnabled.set(settings.affine ?? false);
+       minMaxEnabled.set(settings.min_max ?? false);
      });
+
+     // Writable stores for tracking the largest variance and acceleration
+  export const varMax = writable<number>(
+    get(minMaxEnabled) 
+      ? (sessionStorage.getItem("variance") 
+          ? parseFloat(sessionStorage.getItem("variance")!) 
+          : 0.0013) // Default value if not set
+      : 0.0013 // Default if minMaxEnabled is false
+  );
+
+  export const accMax = writable<number>(
+    get(minMaxEnabled)
+      ? (sessionStorage.getItem("acceleration") 
+          ? parseFloat(sessionStorage.getItem("acceleration")!) 
+          : 10.0) // Default value if not set
+      : 10.0 // Default if minMaxEnabled is false
+  );
 
   function handleWebSocketMessage(data: any) {
     if (
@@ -267,7 +287,9 @@
             x: smoothedNormX,
             y: smoothedNormY,
             time: timestampInSeconds,
-            sensitivity: sensitivity ?? 1.0
+            sensitivity: sensitivity ?? 1.0,
+            acceleration: get(accMax),
+            variance: get(varMax)
           };
 
           if (ws) {
