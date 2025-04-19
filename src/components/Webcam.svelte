@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { writable } from "svelte/store";
+  import { writable, get } from "svelte/store";
   import { createSession } from "../scripts/session";
   import { fetchUserSettings, userSettings } from "../scripts/settings";
 
   import {
-    applyAffineTransformation,
-    calculateAffineTransformation,
+      applyAffineTransformation,
+      calculateAffineTransformation,
   } from "../scripts/affineTransformation";
 
   import { Camera } from "@mediapipe/camera_utils";
@@ -16,13 +16,13 @@
   import { applySmoothing } from "../scripts/smoothing";
 
   import {
-    LEFT_EYE_CORNER,
-    LEFT_IRIS_CENTER,
-    NOSE_TIP,
-    RIGHT_EYE_CORNER,
-    RIGHT_IRIS_CENTER,
-    getLandmarks,
-    getNormalizedIrisPosition,
+      LEFT_EYE_CORNER,
+      LEFT_IRIS_CENTER,
+      NOSE_TIP,
+      RIGHT_EYE_CORNER,
+      RIGHT_IRIS_CENTER,
+      getLandmarks,
+      getNormalizedIrisPosition,
   } from "../scripts/utils";
 
   import { ProbabilityGraph } from "../scripts/graph";
@@ -36,9 +36,15 @@
   let faceMesh: FaceMesh | null = null;
   let ws: WebSocketConnection | null = null;
 
-  const WEBSOCKET_URL = import.meta.env.PUBLIC_WS_PORT;
-  let variance: number | null = null;
-  let acceleration: number | null = null;
+  let userId: string | null = null;
+  if (typeof window !== "undefined") {
+    userId = sessionStorage.getItem("userId");
+  }
+  const WEBSOCKET_URL = `wss://asdqwe.online/ws?user_id=${encodeURIComponent(userId || '')}`;
+
+  let variance: number = 0.0;
+  let acceleration: number = 0.0;
+
   let probability: number | null = null;
   let startTime = new Date().toISOString(); // Capture the start time
 
@@ -65,13 +71,40 @@
 
   let affineTransformEnabled = writable(false);
 
+  export const minMaxEnabled = writable<boolean>(false);
+
+  let starttime = 0;
+  let timestamp = 0;
+
+  let varMaxValue: number | null = 0.0013;
+  let accMaxValue: number | null = 10.0;
+
   // Log the settings whenever they change
   userSettings.subscribe((settings: any) => {
     console.log("User settings:", settings);
     sensitivity = settings.sensitivity;
     shouldShowGraph.set(settings.plotting ?? false);
     affineTransformEnabled.set(settings.affine ?? false);
+    minMaxEnabled.set(settings.min_max ?? false);
   });
+
+  if (typeof window !== "undefined") {
+    if(get(minMaxEnabled)) {
+      // Get the values from sessionStorage if minMaxEnabled is true
+      const storedVariance = sessionStorage.getItem("variance");
+      const storedAcceleration = sessionStorage.getItem("acceleration");
+
+      if (storedVariance) {
+        varMaxValue = parseFloat(storedVariance);
+      }
+      if (storedAcceleration) {
+        accMaxValue = parseFloat(storedAcceleration);
+      }
+    }
+  }
+  // Create writable stores with the final values
+  export const varMax = writable<number | null>(varMaxValue);
+  export const accMax = writable<number | null>(accMaxValue);
 
   $: {
     $shouldShowGraph;
@@ -80,6 +113,37 @@
       probabilityGraph = new ProbabilityGraph(graphCanvasEl);
     } else {
       probabilityGraph = null;
+    }
+  }
+
+  // Function to close any existing WebSocket connection before opening a new one
+  function closeExistingWebSocket() {
+    if (typeof window !== "undefined") {
+      const existingWs = sessionStorage.getItem("activeWebSocket");
+      if (existingWs) {
+        try {
+          const wsInstance = JSON.parse(existingWs);
+          if (wsInstance && wsInstance.readyState === WebSocket.OPEN) {
+            wsInstance.close();
+          }
+        } catch (error) {
+          console.error("Error closing existing WebSocket:", error);
+        }
+      }
+    }
+  }
+
+  // Function to initialize WebSocket
+  function initializeWebSocket() {
+    closeExistingWebSocket(); // Close any previous connection
+
+    ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+    console.log("WebSocket initialized:", WEBSOCKET_URL);
+    ws.start();
+
+    // Store the reference in sessionStorage if client-side
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("activeWebSocket", JSON.stringify(ws));
     }
   }
 
@@ -103,6 +167,7 @@
 
   // Start webcam capture
   function startCapture() {
+    starttime = performance.now();
     if (!camera && faceMesh && videoEl) {
       camera = new Camera(videoEl, {
         onFrame: async () => {
@@ -171,18 +236,20 @@
       };
       createSession(sessionData);
       sessionCreated = true;
+
     }
-    window.location.href = "/dashboard";
-    //console.log("here");
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 1000);
   }
 
   onMount(() => {
+    
     // Fetch user settings on component mount
     fetchUserSettings();
 
     // Initialize WebSocket
-    ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
-    ws.start();
+    initializeWebSocket();
 
     // Initialize FaceMesh
     faceMesh = new FaceMesh({
@@ -232,11 +299,14 @@
             lineWidth: 1,
           });
 
+          timestamp = performance.now() - starttime;
+
           // Smoothing iris positions
-          const { normX, normY, timestamp } = getNormalizedIrisPosition(
+          const { normX, normY } = getNormalizedIrisPosition(
             landmarks,
             canvasEl.width,
             canvasEl.height,
+            timestamp
           );
 
           // Apply smoothing to the iris position
@@ -275,6 +345,8 @@
             y: smoothedNormY,
             time: timestampInSeconds,
             sensitivity: sensitivity ?? 1.0,
+            acceleration: get(accMax),
+            variance: get(varMax)
           };
 
           if (ws) {
@@ -299,7 +371,10 @@
       camera.stop();
     }
     if (ws) {
-      ws.close();
+        ws.close();
+        if (typeof window !== "undefined") {
+          sessionStorage.removeItem("activeWebSocket"); // Remove reference
+        }
     }
   });
 </script>
@@ -363,23 +438,27 @@
   <!-- Modal for session name -->
   {#if $isModalVisible}
     <div
-      class="fixed inset-0 bg-base-200 flex justify-center items-center z-10"
+      class="fixed inset-0 flex justify-center items-center z-50"
+      style="background-color: black !important;"
     >
       <div
-        class="bg-base-300 p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+        class="p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+        style="background-color: #000000;"
       >
         <h2
           class="font-mono font-semibold text-center text-2xl text-primary mb-4"
         >
           Save Session?
         </h2>
+
         <input
           type="text"
           bind:value={sessionName}
           class="border border-accent p-2 rounded-md w-full mb-4
-                 bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
+               bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
           placeholder="Session Name"
         />
+
         <div class="flex justify-between">
           <button
             on:click={closeModal}

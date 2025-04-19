@@ -1,23 +1,24 @@
+
 <script lang="ts">
   import { drawLandmarks } from "@mediapipe/drawing_utils";
   import { FaceMesh, type Results } from "@mediapipe/face_mesh";
   import { onDestroy, onMount } from "svelte";
-  import { writable } from "svelte/store";
+  import { writable, get } from "svelte/store";
   import { createSession } from "../scripts/session";
-  import { fetchUserSettings, userSettings } from '../scripts/settings'; 
+  import { userSettings } from '../scripts/settings';
 
   import {
-    applyAffineTransformation,
-    calculateAffineTransformation,
+      applyAffineTransformation,
+      calculateAffineTransformation,
   } from "../scripts/affineTransformation";
   import {
-    LEFT_EYE_CORNER,
-    LEFT_IRIS_CENTER,
-    NOSE_TIP,
-    RIGHT_EYE_CORNER,
-    RIGHT_IRIS_CENTER,
-    getLandmarks,
-    getNormalizedIrisPosition,
+      LEFT_EYE_CORNER,
+      LEFT_IRIS_CENTER,
+      NOSE_TIP,
+      RIGHT_EYE_CORNER,
+      RIGHT_IRIS_CENTER,
+      getLandmarks,
+      getNormalizedIrisPosition,
   } from "../scripts/utils";
 
   import type { Coordinates } from "../scripts/affineTransformation";
@@ -42,7 +43,11 @@
   const canvasWidth = 640;
   const canvasHeight = 480;
 
-  const WEBSOCKET_URL = import.meta.env.PUBLIC_WS_PORT;
+  let userId: string | null = null;
+  if (typeof window !== "undefined") {
+    userId = sessionStorage.getItem("userId");
+  }
+  const WEBSOCKET_URL = `wss://asdqwe.online/ws?user_id=${encodeURIComponent(userId || '')}`;
 
   let variance: number | null = null;
   let acceleration: number | null = null;
@@ -64,17 +69,56 @@
   let countdownTimer: number;
 
   let sensitivity: number | null = null;
- 
+
    export const shouldShowGraph = writable(false);
- 
+
+   export const minMaxEnabled = writable<boolean>(false);
+
    let affineTransformEnabled = writable(false);
- 
+
+   let starttime = 0;
+   let timestamp = 0;
+
+   let varMaxValue: number | null = 0.0013;
+   let accMaxValue: number | null = 10.0;
+
    // Log the settings whenever they change
    userSettings.subscribe((settings: any) => {
        console.log("User settings:", settings);
        sensitivity = settings.sensitivity;
        affineTransformEnabled.set(settings.affine ?? false);
-     });
+       minMaxEnabled.set(settings.min_max ?? false);
+   });
+
+  
+  if (typeof window !== "undefined") {
+    if(get(minMaxEnabled)) {
+      // Get the values from sessionStorage if minMaxEnabled is true
+      const storedVariance = sessionStorage.getItem("variance");
+      const storedAcceleration = sessionStorage.getItem("acceleration");
+
+      if (storedVariance) {
+        varMaxValue = parseFloat(storedVariance);
+      }
+      if (storedAcceleration) {
+        accMaxValue = parseFloat(storedAcceleration);
+      }
+    }
+    
+    const variance = sessionStorage.getItem("variance");
+    const acceleration = sessionStorage.getItem("acceleration");
+
+    if (variance) {
+      varMaxValue = parseFloat(variance);
+    }
+    if (acceleration) {
+      accMaxValue = parseFloat(acceleration);
+    }
+  }
+
+  // Create writable stores with the final values
+  export const varMax = writable<number | null>(varMaxValue);
+  export const accMax = writable<number | null>(accMaxValue);
 
   function handleWebSocketMessage(data: any) {
     if (
@@ -84,18 +128,17 @@
     ) {
       probability = data.probability;
       console.log("Probability:", probability);
-
-      // Update the probability graph with the new probability value
-      // if (probability !== null) {
-      //   probabilityGraph.updateProbability(probability);
-      // }
     }
   }
 
   function startWebSocket() {
-    if (ws) ws.close(); // Ensure no duplicate connections
+    if (ws) {
+        ws.close();// Ensure previous connection is closed
+        ws = null;
+    }
 
     ws = new WebSocketConnection(WEBSOCKET_URL, handleWebSocketMessage);
+    console.log("WebSocket initialized:", WEBSOCKET_URL);
     ws.start();
   }
 
@@ -214,11 +257,14 @@
             });
           }
 
+          timestamp = performance.now() - starttime;
+
           // Smoothing iris positions
-          const { normX, normY, timestamp } = getNormalizedIrisPosition(
+          const { normX, normY } = getNormalizedIrisPosition(
             landmarks,
             processingCanvas.width,
             processingCanvas.height,
+            timestamp
           );
 
           // Apply smoothing to the iris position
@@ -257,7 +303,9 @@
             x: smoothedNormX,
             y: smoothedNormY,
             time: timestampInSeconds,
-            sensitivity: sensitivity ?? 1.0
+            sensitivity: sensitivity ?? 1.0,
+            acceleration: get(accMax),
+            variance: get(varMax)
           };
 
           if (ws) {
@@ -297,6 +345,7 @@
     }
     if (ws) {
       ws.close();
+      ws = null;
     }
   });
 
@@ -333,6 +382,7 @@
     const input = event.target as HTMLInputElement;
     const file = input.files ? input.files[0] : null;
     if (file) {
+      starttime = performance.now();
       const url = URL.createObjectURL(file);
       videoElement.src = url;
       // Start countdown once metadata is available (duration etc.)
@@ -350,62 +400,53 @@
       };
     }
   }
+  
+  async function endSession() {
+    try {
+        // Close WebSocket if it exists
+        if (ws) {
+            ws.close();
+            ws = null;
+            console.log("WebSocket closed before session creation.");
+        }
 
-  // Control handlers
-  function handlePlay() {
-    if (videoLoaded && videoElement.paused) {
-      isPlaying = true;
-      isProcessing = true;
-      videoElement.play();
-      processVideoFrame();
-    }
-  }
+        // Only create session if it hasn't been created already
+        if (!sessionCreated) {
+            const sessionData = {
+                name: sessionName || "Session", // Default name if none provided
+                start_time: startTime,
+                end_time: new Date().toISOString(),
+                var_min: variance ?? 0,
+                var_max: variance ?? 0,
+                acc_min: acceleration ?? 0,
+                acc_max: acceleration ?? 0,
+            };
 
-  function handlePause() {
-    if (videoLoaded && !videoElement.paused) {
-      isPlaying = false;
-      // Immediately stop processing and cancel the next frame.
-      isProcessing = false;
-      videoElement.pause();
-      cancelAnimationFrame(animationFrameId);
-    }
-  }
+            // Await the session creation process (assuming createSession is an async function)
+            await createSession(sessionData);
+            sessionCreated = true;
+            isModalVisible.set(false);
+        }
 
-  function handleStop() {
-    if (!sessionCreated) {
-      isModalVisible.set(true);
-    } else {
-      endSession();
-    }
-  }
+        // Stop video and reset if video is loaded
+        if (videoLoaded) {
+            isPlaying = false;
+            videoLoaded = false;
+            videoElement.pause();
+            videoElement.currentTime = 0;
+            if (offscreenCtx) {
+                offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+            }
+        }
+        previousXValues = [];
+        previousYValues = [];
 
-  function endSession() {
-    if (!sessionCreated) {
-      const sessionData = {
-        name: sessionName || "Session", // Default name if none provided
-        start_time: startTime,
-        end_time: new Date().toISOString(),
-        var_min: variance ?? 0,
-        var_max: variance ?? 0,
-        acc_min: acceleration ?? 0,
-        acc_max: acceleration ?? 0,
-      };
-
-      createSession(sessionData);
-      sessionCreated = false;
-      isModalVisible.set(false);
+        // After everything completes, redirect to the dashboard
+        window.location.href = "/dashboard";
+    } catch (error) {
+        console.error("Error during session end:", error);
     }
-    if (videoLoaded) {
-      isPlaying = false;
-      videoLoaded = false;
-      videoElement.pause();
-      videoElement.currentTime = 0;
-      if (offscreenCtx) {
-        offscreenCtx.clearRect(0, 0, canvasWidth, canvasHeight);
-      }
-    }
-    window.location.href = "/dashboard";
-  }
+}
 </script>
 
 <!--
@@ -462,41 +503,47 @@
   <!-- Session Name Modal -->
   <!-- Session Name Modal -->
   {#if $isModalVisible}
+  <div
+    class="fixed inset-0 flex justify-center items-center z-50"
+    style="background-color: black !important;"
+  >
     <div
-      class="fixed inset-0 bg-base-200 flex justify-center items-center z-10"
+      class="p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+      style="background-color: #000000;"
     >
-      <div
-        class="bg-base-300 p-6 rounded-lg border-4 border-secondary shadow-glow w-96"
+      <h2
+        class="font-mono font-semibold text-center text-2xl text-primary mb-4"
       >
-        <h2
-          class="font-mono font-semibold text-center text-2xl text-primary mb-4"
+        Enter Session Name
+      </h2>
+      <p class="text-center text-base-content mb-4">
+        Please name your session to save the results.
+      </p>
+      <input
+        type="text"
+        bind:value={sessionName}
+        class="border border-accent p-2 rounded-md w-full mb-4
+               bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
+        placeholder="Session Name"
+      />
+      <div class="flex justify-between">
+        <button
+          on:click={() => isModalVisible.set(false)}
+          class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
         >
-          Enter Session Name
-        </h2>
-        <input
-          type="text"
-          bind:value={sessionName}
-          class="border border-accent p-2 rounded-md w-full mb-4
-                 bg-base-200 text-base-content focus:border-info focus:bg-neutral focus:outline-none ease-in-out duration-150"
-          placeholder="Session Name"
-        />
-        <div class="flex justify-between">
-          <button
-            on:click={() => isModalVisible.set(false)}
-            class="bg-neutral border border-warning hover:border-error hover:bg-error p-2 rounded-lg transition-colors duration-150 hover:text-error-content"
-          >
-            Cancel
-          </button>
-          <button
-            on:click={endSession}
-            class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
-          >
-            Submit
-          </button>
-        </div>
+          Cancel
+        </button>
+        <button
+          on:click={endSession}
+          class="bg-neutral border border-info hover:border-success hover:bg-success p-2 rounded-lg transition-colors duration-150 hover:text-success-content"
+        >
+          Submit
+        </button>
       </div>
     </div>
-  {/if}
+  </div>
+{/if}
+
 </div>
 
 <style>
